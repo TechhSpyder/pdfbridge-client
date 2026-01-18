@@ -1,0 +1,43 @@
+import React from "react";
+
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: "primary" | "secondary" | "outline";
+  size?: "sm" | "md" | "lg";
+}
+
+const Button: React.FC<ButtonProps> = ({
+  variant = "primary",
+  size = "md",
+  className = "",
+  children,
+  ...props
+}) => {
+  const baseStyles =
+    "px-4 py-2 rounded-md font-medium transition-all text-sm cursor-pointer duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2";
+
+  const variants = {
+    primary:
+      "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:shadow-md",
+    secondary:
+      "bg-transparent border border-slate-700 text-white hover:bg-slate-800",
+    outline:
+      "bg-transparent border border-blue-600 text-blue-600 hover:bg-blue-50",
+  };
+
+  const sizes = {
+    sm: "h-8 px-3 text-xs",
+    md: "h-10 px-4 py-2",
+    lg: "h-12 px-6 text-lg",
+  };
+
+  return (
+    <button
+      className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+};
+
+export default Button;
