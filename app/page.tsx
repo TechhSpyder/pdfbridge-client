@@ -18,7 +18,7 @@ export default function Home() {
       <WhyPdfBridge />
       <HowItWorks />
       <BuiltForDevelopers />
-      <Pricing />
+      {/* <Pricing /> */}
       <FAQ />
       <CTA />
       <Footer />

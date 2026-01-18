@@ -13,22 +13,37 @@ export function FAQ() {
     {
       question: "Is my data safe?",
       answer:
-        "Yes. We use transient browser instances and never store your rendered content beyond the retention period you specify. All data is encrypted in transit and at rest.",
+        "Yes. PDFs are generated in isolated, transient browser instances, and your content is never retained longer than necessary. All data is encrypted in transit and at rest.",
     },
     {
       question: "Do you support JavaScript-heavy pages?",
       answer:
-        "Absolutely. We wait for networkidle0 to ensure all React/Vue/Svelte components are fully hydrated before printing. This ensures your dynamic content renders perfectly.",
+        "Absolutely. We fully render modern JavaScript frameworks like React, Vue, and Svelte before generating your PDF, so dynamic content appears exactly as expected.",
     },
     {
-      question: "Can I use my own S3 bucket?",
+      question: "How many PDFs can I generate per month?",
       answer:
-        "Pro and Business plans support custom storage destinations. You maintain full control over where your PDFs are stored.",
+        "Usage depends on your plan. Each plan includes a monthly conversion allowance, with higher limits available as you scale.",
     },
     {
-      question: "What about rate limiting?",
+      question: "What happens if I hit my monthly limit?",
       answer:
-        "Free tier has standard rate limits. Pro and Business tiers have much higher limits and can be customized. Contact our team for enterprise-level requirements.",
+        "You can upgrade at any time to increase your limit. We’ll never block requests without clearly notifying you first.",
+    },
+    {
+      question: "Can I control where my PDFs are stored?",
+      answer:
+        "Yes. Paid plans support custom storage destinations, so you stay in full control of where your generated PDFs live.",
+    },
+    {
+      question: "Are there rate limits?",
+      answer:
+        "All plans include sensible rate limits to ensure platform stability. Pro and Business plans offer significantly higher limits and custom tuning.",
+    },
+    {
+      question: "Do you offer refunds?",
+      answer:
+        "If something doesn’t work as expected, reach out and we’ll make it right. We’re focused on long-term developer trust.",
     },
   ];
 
