@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowRight, Sparkles, ShieldCheck, Zap } from "lucide-react";
-import Button from "../../app/button";
+import { Button } from "../../app/button";
 import { useScrollAnimation } from "../../hooks/use-scroll-animation";
 import TransformationAnimation from "./index/TransformationAnimation";
 import { motion } from "framer-motion";

@@ -1,8 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import Button from "./button";
-import Logo from "@/assets/pdfbridge_logo.svg";
+import { Button } from "./button";
 import { useNavStore } from "../stores";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -11,6 +9,7 @@ import { useActiveSection } from "../hooks/use-active-section";
 import { cn } from "@/utils";
 import Link from "next/link";
 import { ScrollProgressBar } from "./scroll-progress";
+import Image from "next/image";
 
 type ScrollNavItem = {
   label: string;
@@ -69,9 +68,13 @@ export function Navbar() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-16 items-center justify-between">
         {/* Logo */}
         <div className="flex items-center gap-2">
-          <div className="w-12 h-12">
-            <Logo />
-          </div>
+          <Image
+            src="/pdfbridge_logo.svg"
+            alt="PDFBridge"
+            width={48}
+            height={48}
+          />
+
           <span className="hidden sm:inline font-semibold text-lg">
             PDFBridge
           </span>
