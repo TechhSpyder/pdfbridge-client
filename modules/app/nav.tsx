@@ -27,7 +27,7 @@ type NavItem = ScrollNavItem | LinkNavItem;
 
 const NAV_ITEMS: NavItem[] = [
   { label: "Features", id: "features", type: "scroll" },
-  { label: "Pricing", id: "pricing", type: "scroll" },
+  // { label: "Pricing", id: "pricing", type: "scroll" },
   { label: "FAQ", id: "faq", type: "scroll" },
   { label: "Docs", href: "/docs", type: "link" },
 ];
