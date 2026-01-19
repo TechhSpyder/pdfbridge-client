@@ -9,6 +9,7 @@ import {
   Settings,
   HelpCircle,
   FileText,
+  Banknote,
 } from "lucide-react";
 import { cn } from "@/utils";
 import Link from "next/link";
@@ -20,6 +21,7 @@ const NAV_LINKS = [
   { href: "/dashboard/api-keys", label: "API Keys", icon: Key },
   { href: "/dashboard/usage", label: "Usage", icon: FileText },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
+  { href: "/dashboard/billing", label: "Billing", icon: Banknote },
 ];
 
 export function Sidebar() {

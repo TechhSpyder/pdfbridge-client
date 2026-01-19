@@ -10,6 +10,7 @@ type GlowCardProps = {
   sub?: string;
   content?: React.ReactNode;
   titleClass?: string;
+  className?: string;
 };
 
 export function GlowCard({
@@ -19,6 +20,7 @@ export function GlowCard({
   sub,
   content,
   titleClass,
+  className,
 }: GlowCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -37,7 +39,10 @@ export function GlowCard({
     <div
       ref={cardRef}
       onMouseMove={handleMouseMove}
-      className="group relative overflow-hidden h-full rounded-2xl border border-border bg-background p-6 transition-shadow hover:shadow-lg"
+      className={cn(
+        "group relative overflow-hidden h-full rounded-2xl border border-border bg-background p-6 transition-shadow hover:shadow-lg",
+        className,
+      )}
       style={{
         background: "rgba(15,23,42,0.7)",
         backdropFilter: "blur(12px)",

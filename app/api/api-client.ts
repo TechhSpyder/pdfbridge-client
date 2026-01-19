@@ -8,10 +8,19 @@ export const useApiClient = () => {
 
   const request = async (path: string, options: RequestInit = {}) => {
     const token = await getToken();
+    // Get region hint from browser timezone
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const offset = new Date().getTimezoneOffset(); // -60 for UTC+1
+    const regionHint =
+      tz.includes("Lagos") || tz.includes("Africa/") || offset === -60
+        ? "NG"
+        : "US";
+
     const headers: HeadersInit = {
       ...options.headers,
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
+      "X-Client-Region": regionHint,
     };
 
     const response = await fetch(`${baseUrl}${path}`, {
