@@ -5,9 +5,11 @@ import { Button } from "../../app/button";
 import { useScrollAnimation } from "../../hooks/use-scroll-animation";
 import TransformationAnimation from "./index/TransformationAnimation";
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 export function Hero() {
   const { ref: contentRef, isVisible: contentVisible } = useScrollAnimation();
+  const router = useRouter();
 
   return (
     <section
@@ -62,6 +64,7 @@ export function Hero() {
               <Button
                 type="button"
                 size="lg"
+                onClick={() => router.push("/sign-up")}
                 className="bg-blue-600 hover:bg-blue-700 text-sm text-white px-5 h-14 flex items-center justify-center rounded-2xl shadow-xl shadow-blue-500/20 group"
               >
                 Start Building Free

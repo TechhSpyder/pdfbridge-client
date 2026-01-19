@@ -31,6 +31,16 @@ const nextConfig: NextConfig = {
     return config;
   },
   turbopack: {},
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "img.clerk.com",
+        port: "",
+        pathname: "/**",
+      },
+    ],
+  },
 };
 
 export default nextConfig;
