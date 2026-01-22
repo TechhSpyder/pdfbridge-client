@@ -159,7 +159,7 @@ export function BillingPage() {
           </p>
         </div>
 
-        <div className="flex flex-col gap-1 items-center md:items-end">
+        <div className="flex flex-col gap-1 items-end">
           <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
             Current Billing Region
           </span>
@@ -237,7 +237,7 @@ export function BillingPage() {
                   <ul className="space-y-4">
                     {plan.features.map((feature) => (
                       <li key={feature} className="flex items-start gap-3">
-                        <div className="mt-1 flex-shrink-0 w-4 h-4 rounded-full bg-slate-800 flex items-center justify-center border border-white/5">
+                        <div className="mt-1 shrink-0 w-4 h-4 rounded-full bg-slate-800 flex items-center justify-center border border-white/5">
                           <Check className="h-3 w-3 text-emerald-500" />
                         </div>
                         <span className="text-sm text-slate-400">
@@ -286,7 +286,7 @@ export function BillingPage() {
 
       {/* FAQ / Trust Bar */}
       <div className="grid gap-8 lg:grid-cols-2">
-        <div className="p-8 rounded-3xl border border-white/5 bg-slate-900/40 space-y-6">
+        <div className="p-8 rounded-3xl border border-muted bg-slate-900/40 space-y-6">
           <div className="flex bg-blue-500/10 w-fit p-3 rounded-2xl">
             <ShieldCheck className="h-6 w-6 text-blue-500" />
           </div>
@@ -318,7 +318,7 @@ export function BillingPage() {
           </div>
         </div>
 
-        <div className="p-8 rounded-3xl border border-white/5 bg-slate-900/40 space-y-6 flex flex-col justify-center">
+        <div className="p-8 rounded-3xl border border-muted bg-slate-900/40 space-y-6 flex flex-col justify-center">
           <div className="flex items-center gap-4 p-4 rounded-2xl bg-black/40 border border-white/5 group cursor-help transition-all hover:border-blue-500/30">
             <HelpCircle className="h-6 w-6 text-slate-500 group-hover:text-blue-400 transition-colors" />
             <div className="flex-1">

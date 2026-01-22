@@ -22,6 +22,15 @@ import { useMe } from "../hooks/queries";
 export function DashboardPage() {
   const { user: clerkUser, isLoaded: clerkLoaded } = useUser();
   const { data: userData, isLoading: beLoading, error } = useMe();
+
+  // Check if new user (created within last minute of sign in)
+  const isNewUser =
+    clerkUser?.createdAt && clerkUser?.lastSignInAt
+      ? Math.abs(
+          clerkUser.createdAt.getTime() - clerkUser.lastSignInAt.getTime(),
+        ) < 60000
+      : false;
+
   const [copied, setCopied] = useState(false);
 
   const copyToClipboard = (text: string) => {
@@ -82,8 +91,8 @@ export function DashboardPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
-            Welcome back,{" "}
+          <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+            {isNewUser ? "Welcome, " : "Welcome back, "}
             <span className="text-blue-500">
               {clerkUser?.firstName || "Developer"}
             </span>
@@ -95,7 +104,10 @@ export function DashboardPage() {
         </div>
         <div className="flex gap-3">
           <Link href="/docs" target="_blank">
-            <Button variant="outline" className="gap-2">
+            <Button
+              variant="outline"
+              className="gap-2 flex items-center justify-center"
+            >
               <FileText className="h-4 w-4" />
               API Docs
             </Button>
@@ -113,7 +125,7 @@ export function DashboardPage() {
             <div className="mt-4 space-y-3">
               <div className="h-2.5 w-full overflow-hidden rounded-full bg-white/5">
                 <div
-                  className="h-full bg-gradient-to-r from-blue-600 to-blue-400 transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(37,99,235,0.5)]"
+                  className="h-full bg-linear-to-r from-blue-600 to-blue-400 transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(37,99,235,0.5)]"
                   style={{ width: `${usagePercentage}%` }}
                 ></div>
               </div>

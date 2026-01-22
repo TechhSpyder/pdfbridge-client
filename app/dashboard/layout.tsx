@@ -1,6 +1,4 @@
-import { Sidebar } from "@/modules/dashboard";
-import { UserButton } from "@clerk/nextjs";
-import Link from "next/link";
+import { Breadcrumbs, MobileTopBar, Sidebar } from "@/modules/dashboard";
 
 export default function DashboardLayout({
   children,
@@ -13,7 +11,11 @@ export default function DashboardLayout({
 
       <Sidebar />
 
-      <main className="w-full px-4 py-8 sm:px-6 lg:px-8">{children}</main>
+      <main className="w-full">
+        <MobileTopBar />
+        <Breadcrumbs />
+        <div className="px-4 sm:px-6 lg:px-8 w-full py-6 z-50">{children}</div>
+      </main>
     </div>
   );
 }

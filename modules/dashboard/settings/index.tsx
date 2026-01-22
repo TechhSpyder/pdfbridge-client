@@ -36,6 +36,7 @@ export function SettingsPage() {
             title="Subscription Plan"
             sub="Current Billing Cycle"
             icon={<CreditCard className="h-5 w-5 text-blue-500" />}
+            className="h-fit"
             content={
               <div className="mt-6 space-y-6">
                 <div className="flex items-center justify-between p-4 rounded-xl bg-blue-600/5 border border-blue-500/10">
