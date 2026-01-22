@@ -29,16 +29,6 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  // useEffect(() => {
-  //   const provider = new URLSearchParams(window.location.search).get(
-  //     "provider",
-  //   );
-
-  //   if (provider === "google") {
-  //     handleSocialSignIn("oauth_google");
-  //   }
-  // }, []);
-
   const isSignIn = type === "sign-in";
 
   const handleSocialSignIn = async (
@@ -245,7 +235,7 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
           </Button>
         </form>
 
-        <p className="text-center text-sm text-slate-500">
+        <p className="text-center text-sm text-slate-500 pb-6">
           {isSignIn ? "New to PDFBridge? " : "Already have an account? "}
           <Link
             href={isSignIn ? "/sign-up" : "/sign-in"}

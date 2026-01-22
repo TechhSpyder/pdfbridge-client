@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   Zap,
   ArrowLeft,
+  Trash,
 } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
@@ -48,12 +49,6 @@ export function ApiKeysPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="flex items-center gap-4">
-        <Link
-          href="/dashboard"
-          className="p-2 hover:bg-white/5 rounded-full transition text-slate-500 hover:text-white"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </Link>
         <div>
           <h1 className="text-3xl font-bold text-white flex items-center gap-3">
             <Key className="h-8 w-8 text-emerald-500" />
@@ -73,12 +68,12 @@ export function ApiKeysPage() {
           content={
             <div className="mt-6 space-y-6">
               <div className="flex flex-col gap-4">
-                <div className="p-4 rounded-xl bg-black/40 border border-white/5 flex items-center justify-between group/key">
+                <div className="p-4 rounded-xl max-sm:flex-col gap-3 bg-black/40 border border-white/5 flex sm:items-center justify-between group/key">
                   <div className="flex flex-col">
                     <span className="text-[10px] uppercase tracking-wider text-slate-500 font-bold mb-1">
                       Current Active Key
                     </span>
-                    <code className="text-sm font-mono text-slate-400">
+                    <code className="text-sm font-mono text-slate-400 max-sm:max-w-56 max-sm:truncate">
                       {keyHint}
                     </code>
                   </div>
@@ -90,6 +85,14 @@ export function ApiKeysPage() {
                     >
                       <RefreshCw className="h-3.5 w-3.5 mr-2" />
                       Rotate Key
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      onClick={() => setShowConfirm(true)}
+                      className="text-xs h-9 border-red-500/20 text-red-400 hover:bg-red-500/10 hover:border-red-500/40"
+                    >
+                      <Trash className="h-3.5 w-3.5 mr-2" />
+                      Delete Key
                     </Button>
                   </div>
                 </div>

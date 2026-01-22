@@ -188,6 +188,7 @@ export function BillingPage() {
             provider === "paystack"
               ? `₦${plan.priceNgn.toLocaleString()}`
               : `$${plan.priceUsd}`;
+          console.log(isCurrent);
 
           return (
             <GlowCard
@@ -301,7 +302,7 @@ export function BillingPage() {
               Nigeria.
             </p>
           </div>
-          <div className="flex gap-4 pt-4 grayscale opacity-50">
+          <div className="flex gap-4 pt-4 grayscale opacity-50 flex-wrap">
             {/* Simple placeholders for payment methods */}
             <div className="px-3 py-1 rounded border border-white/10 text-[10px] font-bold text-slate-500">
               VISA

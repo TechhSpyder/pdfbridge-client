@@ -46,7 +46,7 @@ export function DashboardPage() {
           <div className="absolute inset-0 blur-2xl bg-blue-500/20 rounded-full animate-pulse" />
           <Loader2 className="h-10 w-10 animate-spin text-blue-500 relative z-10" />
         </div>
-        <p className="text-slate-400 font-medium animate-pulse">
+        <p className="text-slate-400 font-medium animate-pulse text-center">
           Synchronizing your developer workspace...
         </p>
       </div>
@@ -198,7 +198,7 @@ export function DashboardPage() {
 
       <div className="grid gap-8 lg:grid-cols-5">
         {/* Quick Start Section */}
-        <div className="lg:col-span-3 space-y-6">
+        <div className="lg:col-span-3 space-y-6 hidden md:block">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-slate-800/50">
               <Terminal className="h-5 w-5 text-blue-400" />
@@ -206,7 +206,7 @@ export function DashboardPage() {
             <h2 className="text-xl font-bold text-white">Quick Start Guide</h2>
           </div>
 
-          <div className="rounded-2xl border border-white/5 bg-slate-900/50 backdrop-blur-sm overflow-hidden">
+          <div className="rounded-2xl border  border-white/5 bg-slate-900/50 backdrop-blur-sm overflow-hidden">
             <div className="flex border-b border-white/5 bg-black/20">
               <button className="px-6 py-3 text-sm font-medium text-blue-400 border-b-2 border-blue-500">
                 cURL
