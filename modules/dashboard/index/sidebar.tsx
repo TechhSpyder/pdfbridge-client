@@ -38,7 +38,6 @@ const linkVariants: Variants = {
   visible: { x: 0, opacity: 1 },
 };
 
-// Footer items stagger
 const footerVariants: Variants = {
   hidden: { y: 20, opacity: 0 },
   visible: { y: 0, opacity: 1 },
