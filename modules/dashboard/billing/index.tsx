@@ -19,7 +19,7 @@ import { toast } from "sonner";
 
 const PLANS = [
   {
-    id: "09a2da27-46fb-4fed-ab7b-14a072e286aa",
+    id: "5f93a15a-3ec0-4bdf-a506-dd8bd802ce17",
     name: "Free",
     priceUsd: 0,
     priceNgn: 0,
@@ -33,7 +33,7 @@ const PLANS = [
     color: "slate",
   },
   {
-    id: "c014c152-804f-4b16-a043-b7952fe3e453",
+    id: "5529788d-8b5d-411c-93ac-9d126cc3d59f",
     name: "Starter",
     priceUsd: 10,
     priceNgn: 10000, // Matching DB values: 1000 cents/kobo? The DB show priceUsd 1000 (cents) and priceNgn 1000000 (kobo)
@@ -49,7 +49,7 @@ const PLANS = [
     recommended: true,
   },
   {
-    id: "65d08f45-6313-4f45-808d-0533c5402112",
+    id: "a6957b5c-8862-4593-8dee-68f54498357d",
     name: "Pro",
     priceUsd: 30,
     priceNgn: 45000,
