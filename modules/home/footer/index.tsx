@@ -31,6 +31,19 @@ export function Footer() {
                   Security
                 </a>
               </li>
+              <li>
+                <a href="/docs/changelog" className="hover:text-foreground">
+                  Changelog
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/docs/migration-guides"
+                  className="hover:text-foreground"
+                >
+                  Migration Guides
+                </a>
+              </li>
             </ul>
           </div>
 
@@ -81,10 +94,14 @@ export function Footer() {
           {/* Status */}
           <div>
             <h4 className="text-sm font-semibold">Status</h4>
-            <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
+            <a
+              href="https://status.pdfbridge.xyz"
+              target="_blank"
+              className="mt-4 flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
               <Circle className="h-3 w-3 fill-green-500 text-green-500" />
               All systems operational
-            </div>
+            </a>
           </div>
         </div>
 

@@ -11,11 +11,25 @@ import {
   ChevronRight,
   Zap,
   Check,
+  Bell,
+  Mail,
 } from "lucide-react";
 import Link from "next/link";
+import { useUpdateSettings } from "@/modules/hooks/queries";
+import { toast } from "sonner";
 
 export function SettingsPage() {
   const { data: userData } = useMe();
+  const updateSettingsMutation = useUpdateSettings();
+
+  const handleToggle = async (key: string, value: boolean) => {
+    try {
+      await updateSettingsMutation.mutateAsync({ [key]: value });
+      toast.success("Preferences updated");
+    } catch (e: any) {
+      toast.error(e.message);
+    }
+  };
 
   return (
     <div className="max-w-5xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
@@ -93,6 +107,76 @@ export function SettingsPage() {
             }
           />
 
+          {/* Communication Preferences */}
+          <div className="space-y-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-slate-800/50">
+                <Bell className="h-5 w-5 text-slate-400" />
+              </div>
+              <h3 className="text-xl font-bold text-white font-display">
+                Communication Preferences
+              </h3>
+            </div>
+
+            <GlowCard
+              title="Email Notifications"
+              sub="Manage how we contact you regarding your usage and account."
+              icon={<Mail className="h-5 w-5 text-blue-400" />}
+              content={
+                <div className="mt-6 space-y-6 pt-2 border-t border-white/5">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h5 className="text-sm font-bold text-white">
+                        Usage Alerts
+                      </h5>
+                      <p className="text-xs text-slate-500">
+                        Get notified when you reach 80% and 100% of your limits.
+                      </p>
+                    </div>
+                    <button
+                      onClick={() =>
+                        handleToggle(
+                          "notificationUsageAlerts",
+                          !userData?.settings?.notificationUsageAlerts,
+                        )
+                      }
+                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${userData?.settings?.notificationUsageAlerts ? "bg-blue-600" : "bg-slate-700"}`}
+                    >
+                      <span
+                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${userData?.settings?.notificationUsageAlerts ? "translate-x-5" : "translate-x-0"}`}
+                      />
+                    </button>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h5 className="text-sm font-bold text-white">
+                        Billing & Renewals
+                      </h5>
+                      <p className="text-xs text-slate-500">
+                        Important updates regarding your subscription status and
+                        invoices.
+                      </p>
+                    </div>
+                    <button
+                      onClick={() =>
+                        handleToggle(
+                          "notificationBillingUpdates",
+                          !userData?.settings?.notificationBillingUpdates,
+                        )
+                      }
+                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${userData?.settings?.notificationBillingUpdates ? "bg-blue-600" : "bg-slate-700"}`}
+                    >
+                      <span
+                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${userData?.settings?.notificationBillingUpdates ? "translate-x-5" : "translate-x-0"}`}
+                      />
+                    </button>
+                  </div>
+                </div>
+              }
+            />
+          </div>
+
           {/* Personal Info via Clerk */}
           <div className="space-y-6">
             <div className="flex items-center gap-3">
@@ -146,11 +230,19 @@ export function SettingsPage() {
               industry best practices for data protection and privacy.
             </p>
             <div className="pt-4 flex flex-col gap-3">
-              <button className="text-left text-xs text-blue-400 hover:text-blue-300 flex items-center justify-between group">
+              <button
+                onClick={() =>
+                  toast.info("Detailed Security Docs arriving in V1.1")
+                }
+                className="text-left text-xs text-blue-400 hover:text-blue-300 flex items-center justify-between group cursor-pointer"
+              >
                 Security Documentation
                 <ChevronRight className="h-3 w-3 group-hover:translate-x-1 transition-transform" />
               </button>
-              <button className="text-left text-xs text-blue-400 hover:text-blue-300 flex items-center justify-between group">
+              <button
+                onClick={() => toast.info("Privacy Policy portal coming soon")}
+                className="text-left text-xs text-blue-400 hover:text-blue-300 flex items-center justify-between group cursor-pointer"
+              >
                 Privacy Policy
                 <ChevronRight className="h-3 w-3 group-hover:translate-x-1 transition-transform" />
               </button>
@@ -164,8 +256,16 @@ export function SettingsPage() {
               conversions and delete all your API keys permanently.
             </p>
             <Button
+              onClick={() =>
+                toast.error(
+                  "Account deactivation requires manual verification",
+                  {
+                    description: "Please email support@pdfbridge.xyz",
+                  },
+                )
+              }
               variant="outline"
-              className="w-full text-xs h-9 border-red-500/20 text-red-500 hover:bg-red-500/10 hover:border-red-500/40 transition-colors"
+              className="w-full text-xs h-9 border-red-500/20 text-red-500 hover:bg-red-500/10 hover:border-red-500/40 transition-colors cursor-pointer"
             >
               Deactivate Account
             </Button>

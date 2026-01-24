@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApiClient } from "@/app/api/api-client";
 
 export const useMe = () => {
@@ -43,5 +43,42 @@ export const useVerifyPayment = () => {
   return useMutation({
     mutationFn: (reference: string) =>
       api.get(`/api/v1/billing/verify/${reference}`),
+  });
+};
+
+export const useBillingInfo = () => {
+  const api = useApiClient();
+  return useQuery({
+    queryKey: ["billing-info"],
+    queryFn: () => api.get("/api/v1/billing/info"),
+  });
+};
+
+export const useCancelSubscription = () => {
+  const api = useApiClient();
+  return useMutation({
+    mutationFn: () => api.post("/api/v1/billing/cancel", {}),
+  });
+};
+
+export const usePlans = () => {
+  const api = useApiClient();
+  return useQuery({
+    queryKey: ["plans"],
+    queryFn: () => api.get("/api/v1/billing/plans"),
+  });
+};
+
+export const useUpdateSettings = () => {
+  const api = useApiClient();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: {
+      notificationUsageAlerts?: boolean;
+      notificationBillingUpdates?: boolean;
+    }) => api.patch("/api/v1/user/me/settings", data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["me"] });
+    },
   });
 };

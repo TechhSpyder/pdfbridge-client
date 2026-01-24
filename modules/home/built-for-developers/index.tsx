@@ -120,7 +120,7 @@ export function BuiltForDevelopers() {
               <button
                 key={tab.label}
                 onClick={() => setActiveTab(idx)}
-                className={`px-4 py-2 font-medium transition-colors duration-200 ${
+                className={`px-4 py-2 font-medium transition-colors duration-200 cursor-pointer ${
                   activeTab === idx
                     ? "border-b-2 border-primary text-primary"
                     : "text-muted-foreground hover:text-foreground"

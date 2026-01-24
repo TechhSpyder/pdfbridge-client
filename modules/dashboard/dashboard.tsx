@@ -14,10 +14,15 @@ import {
   Check,
   Terminal,
   ExternalLink,
+  Code2,
+  FileText,
 } from "lucide-react";
+import { motion } from "framer-motion";
 import { useState } from "react";
 import Link from "next/link";
-import { useMe } from "../hooks/queries";
+import { useMe, useConversions } from "../hooks/queries";
+import { useApiClient } from "@/app/api/api-client";
+import { toast } from "sonner";
 
 export function DashboardPage() {
   const { user: clerkUser, isLoaded: clerkLoaded } = useUser();
@@ -82,9 +87,7 @@ export function DashboardPage() {
   const usageLimit = userData?.plan?.limit || 5;
   const usagePercentage = Math.min((usageCount / usageLimit) * 100, 100);
 
-  const keyHint = userData?.id
-    ? `${btoa(userData.id)}.••••••••`
-    : "sk_loading_••••••••";
+  const keyHint = userData?.id ? `pk_live_••••••••` : "sk_loading_••••••••";
 
   return (
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-1000">
@@ -106,13 +109,37 @@ export function DashboardPage() {
           <Link href="/docs" target="_blank">
             <Button
               variant="outline"
-              className="gap-2 flex items-center justify-center"
+              className="gap-2 flex items-center justify-center border-white/5 hover:bg-white/5"
             >
               <FileText className="h-4 w-4" />
               API Docs
             </Button>
           </Link>
         </div>
+      </div>
+
+      {/* Usage Analytics Graph */}
+      <div className="rounded-3xl border border-white/5 bg-slate-900/30 p-8 backdrop-blur-sm">
+        <div className="flex items-center justify-between mb-8">
+          <div className="space-y-1">
+            <h2 className="text-xl font-bold text-white">Conversion Trends</h2>
+            <p className="text-sm text-slate-500">
+              Daily conversion volume for this billing cycle
+            </p>
+          </div>
+          <div className="flex bg-black/40 rounded-lg p-1 border border-white/5">
+            <button className="px-3 py-1 text-[10px] font-bold text-white bg-blue-600 rounded-md shadow-lg cursor-pointer transition-all active:scale-95">
+              7 Days
+            </button>
+            <button
+              onClick={() => toast.info("30-day analytics unlocking in V1.1")}
+              className="px-3 py-1 text-[10px] font-bold text-slate-500 hover:text-slate-300 cursor-pointer transition-all active:scale-95"
+            >
+              30 Days
+            </button>
+          </div>
+        </div>
+        <UsageGraph />
       </div>
 
       {/* Primary Stats Grid */}
@@ -152,9 +179,13 @@ export function DashboardPage() {
                   {keyHint}
                 </code>
                 <button
-                  onClick={() => copyToClipboard(keyHint)}
-                  title="Copy hint"
-                  className="p-1.5 hover:bg-white/10 rounded-md transition text-slate-500 hover:text-white"
+                  onClick={() => {
+                    copyToClipboard(keyHint);
+                    toast.info(
+                      "This is just a hint. View API Keys for the full secret.",
+                    );
+                  }}
+                  className="p-1.5 hover:bg-white/10 rounded-md transition text-slate-500 hover:text-white cursor-pointer"
                 >
                   {copied ? (
                     <Check className="h-3.5 w-3.5 text-emerald-500" />
@@ -176,19 +207,21 @@ export function DashboardPage() {
         />
 
         <GlowCard
-          title="Infrastructure Plan"
+          title="Current Plan"
           sub={userData?.plan?.name || "Standard Free"}
           icon={<Zap className="h-5 w-5 text-amber-500" />}
           content={
             <div className="mt-4 space-y-4">
-              <div className="flex items-center gap-2">
-                <span className="inline-flex items-center rounded-full bg-amber-500/10 px-2.5 py-0.5 text-xs font-semibold text-amber-500 border border-amber-500/20">
-                  Active Subscription
-                </span>
+              <div className="flex items-center gap-2 text-xs text-slate-400">
+                <Check className="h-3.5 w-3.5 text-emerald-500" />
+                {userData?.plan?.limit.toLocaleString()} conversions / mo
               </div>
-              <Link href="/dashboard/settings" className="block">
-                <Button className="w-full text-xs h-9 bg-blue-600 hover:bg-blue-500 shadow-lg shadow-blue-500/20">
-                  Upgrade to Pro
+              <Link href="/dashboard/billing" className="block">
+                <Button
+                  variant="outline"
+                  className="w-full text-xs h-9 border-blue-500/20 text-blue-400 hover:bg-blue-500/10"
+                >
+                  View Details & Billing
                 </Button>
               </Link>
             </div>
@@ -196,109 +229,364 @@ export function DashboardPage() {
         />
       </div>
 
+      {/* Upgrade Prompts */}
+      <UsageAlert usagePercentage={usagePercentage} />
+
       <div className="grid gap-8 lg:grid-cols-5">
-        {/* Quick Start Section */}
-        <div className="lg:col-span-3 space-y-6 hidden md:block">
+        {/* API Playground Section */}
+        <div className="lg:col-span-3 space-y-6">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-slate-800/50">
               <Terminal className="h-5 w-5 text-blue-400" />
             </div>
-            <h2 className="text-xl font-bold text-white">Quick Start Guide</h2>
+            <h2 className="text-xl font-bold text-white">API Playground</h2>
           </div>
 
-          <div className="rounded-2xl border  border-white/5 bg-slate-900/50 backdrop-blur-sm overflow-hidden">
-            <div className="flex border-b border-white/5 bg-black/20">
-              <button className="px-6 py-3 text-sm font-medium text-blue-400 border-b-2 border-blue-500">
-                cURL
-              </button>
-              <button className="px-6 py-3 text-sm font-medium text-slate-500 hover:text-slate-300">
-                Node.js
-              </button>
-              <button className="px-6 py-3 text-sm font-medium text-slate-500 hover:text-slate-300">
-                Python
-              </button>
+          <ApiPlayground />
+
+          <div className="flex items-center gap-3 pt-6">
+            <div className="p-2 rounded-lg bg-orange-800/20">
+              <Code2 className="h-5 w-5 text-orange-400" />
             </div>
-            <div className="p-6 bg-black/40 relative group">
-              <pre className="text-sm font-mono text-slate-300 overflow-x-auto whitespace-pre-wrap leading-relaxed">
-                {`curl -X POST http://localhost:3001/api/v1/convert \\
-  -H "X-API-Key: ${keyHint.replace("••••••••", "secret_key")}" \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "url": "https://google.com",
-    "options": { "format": "A4" }
-  }'`}
-              </pre>
-              <button
-                onClick={() =>
-                  copyToClipboard(
-                    "curl -X POST https://api.pdfbridge.io/v1/convert ...",
-                  )
-                }
-                className="absolute top-4 right-4 p-2 bg-slate-800 rounded-lg opacity-0 group-hover:opacity-100 transition shadow-xl"
-              >
-                <Copy className="h-4 w-4 text-slate-300" />
-              </button>
-            </div>
+            <h2 className="text-xl font-bold text-white">
+              Integration Snippets
+            </h2>
           </div>
+          <IntegrationSnippets />
         </div>
 
-        {/* Console / Log Placeholder */}
+        {/* Recent Activity List */}
         <div className="lg:col-span-2 space-y-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-emerald-800/20">
                 <Activity className="h-5 w-5 text-emerald-400" />
               </div>
-              <h2 className="text-xl font-bold text-white">Recent Activity</h2>
+              <h2 className="text-xl font-bold text-white">
+                Recent Conversions
+              </h2>
             </div>
-            <Link
-              href="/dashboard/usage"
-              className="text-xs font-semibold text-blue-400 hover:underline"
-            >
-              View All
-            </Link>
+            <div className="flex items-center gap-4">
+              <span className="hidden md:inline text-[10px] text-slate-500 font-medium">
+                Updates automatically as jobs complete
+              </span>
+              <Link
+                href="/dashboard/usage"
+                className="text-xs font-semibold text-blue-400 hover:underline"
+              >
+                View All
+              </Link>
+            </div>
           </div>
 
-          <div className="rounded-2xl border border-white/5 bg-slate-900/50 backdrop-blur-sm p-6 text-center min-h-[300px] flex flex-col items-center justify-center">
-            <div className="h-16 w-16 bg-white/5 rounded-full flex items-center justify-center mb-4 text-slate-600">
-              <Activity className="h-8 w-8" />
-            </div>
-            <p className="text-slate-500 text-sm max-w-[200px] mx-auto leading-relaxed">
-              No conversion attempts recorded in this billing cycle.
-            </p>
-            <Button
-              variant="outline"
-              className="mt-6 text-xs h-9 border-white/10 hover:bg-white/5"
-            >
-              Run Test Conversion
-            </Button>
-          </div>
+          <RecentConversionsList />
         </div>
       </div>
     </div>
   );
 }
 
-// Helper icons that were missing
-function FileText({ className }: { className?: string }) {
+function RecentConversionsList() {
+  const { data, isLoading } = useConversions(1, 5);
+  const conversions = data?.conversions || [];
+
+  if (isLoading) {
+    return (
+      <div className="h-40 flex items-center justify-center border border-dashed border-white/10 rounded-2xl">
+        <Loader2 className="h-5 w-5 animate-spin text-slate-500" />
+      </div>
+    );
+  }
+
+  if (conversions.length === 0) {
+    return (
+      <div className="rounded-2xl border border-white/5 bg-slate-900/50 backdrop-blur-sm p-6 text-center min-h-[300px] flex flex-col items-center justify-center">
+        <div className="h-16 w-16 bg-white/5 rounded-full flex items-center justify-center mb-4 text-slate-600">
+          <Activity className="h-8 w-8" />
+        </div>
+        <p className="text-slate-500 text-sm max-w-[200px] mx-auto leading-relaxed">
+          No conversion attempts recorded in this billing cycle.
+        </p>
+      </div>
+    );
+  }
+
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
-      <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
-      <path d="M14 2v4a2 2 0 0 0 2 2h4" />
-      <path d="M10 9H8" />
-      <path d="M16 13H8" />
-      <path d="M16 17H8" />
-    </svg>
+    <div className="space-y-3">
+      {conversions.map((conv: any) => (
+        <div
+          key={conv.id}
+          className="p-4 rounded-xl bg-black/20 border border-white/5 flex items-center justify-between group hover:border-blue-500/20 transition-all"
+        >
+          <div className="flex flex-col min-w-0">
+            <span className="text-xs font-bold text-white truncate max-w-[150px]">
+              {conv.url && conv.url.startsWith("http")
+                ? new URL(conv.url).hostname
+                : "HTML Payload"}
+            </span>
+            <span className="text-[10px] text-slate-500">
+              {new Date(conv.createdAt).toLocaleString()}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span
+              className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                conv.success
+                  ? "bg-emerald-500/10 text-emerald-500"
+                  : "bg-red-500/10 text-red-500"
+              }`}
+            >
+              {conv.success ? "Ready" : "Failed"}
+            </span>
+            {conv.success && (
+              <div className="flex items-center gap-1">
+                <Link
+                  href={conv.url}
+                  target="_blank"
+                  download
+                  title="Download PDF"
+                  className="p-1.5 hover:bg-white/10 rounded-md transition text-slate-400 hover:text-white"
+                >
+                  <FileText className="h-3.5 w-3.5" />
+                </Link>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(conv.url);
+                    toast.success("URL copied to clipboard");
+                  }}
+                  title="Copy URL"
+                  className="p-1.5 hover:bg-white/10 rounded-md transition text-slate-400 hover:text-white cursor-pointer"
+                >
+                  <Copy className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }
+
+function ApiPlayground() {
+  const [url, setUrl] = useState("https://example.com");
+  const [loading, setLoading] = useState(false);
+  const api = useApiClient();
+
+  const handleTest = async () => {
+    setLoading(true);
+    const tId = toast.loading("Initiating test conversion...", {
+      description: "Asynchronous worker is spinning up...",
+    });
+    try {
+      await api.post("/api/v1/convert", { url });
+      toast.success("Conversion queued successfully!", {
+        id: tId,
+        description: "PDF will appear in Recent Activity within seconds.",
+      });
+    } catch (e: any) {
+      toast.error(e.message, { id: tId });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="rounded-2xl border border-white/5 bg-slate-900/50 backdrop-blur-sm overflow-hidden">
+      <div className="p-6 space-y-4">
+        <div className="space-y-2">
+          <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">
+            Source URL
+          </label>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              className="flex-1 bg-black/40 border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors"
+              placeholder="https://your-website.com"
+            />
+            <Button
+              onClick={handleTest}
+              disabled={loading}
+              className="bg-blue-600 hover:bg-blue-500"
+            >
+              {loading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                "Run Test"
+              )}
+            </Button>
+          </div>
+        </div>
+
+        <div className="p-4 rounded-xl bg-black/60 border border-white/5">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-[10px] font-bold text-slate-500 uppercase">
+              Request Payload
+            </span>
+          </div>
+          <pre className="text-xs font-mono text-blue-400 overflow-x-auto">
+            {JSON.stringify({ url, options: { format: "A4" } }, null, 2)}
+          </pre>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function UsageGraph() {
+  // Mock data for now, ideally derived from recent conversions aggregation
+  const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  const counts = [12, 18, 5, 25, 40, 15, 30];
+  const max = Math.max(...counts);
+
+  return (
+    <div className="h-48 flex items-end justify-between gap-2 px-2">
+      {counts.map((c, i) => (
+        <div key={i} className="flex-1 flex flex-col items-center gap-4 group">
+          <div className="relative w-full flex flex-col items-center">
+            <motion.div
+              initial={{ height: 0 }}
+              animate={{ height: `${(c / max) * 100}%` }}
+              transition={{ duration: 1, delay: i * 0.1 }}
+              className="w-full max-w-[40px] bg-linear-to-t from-blue-600/20 to-blue-500 rounded-t-lg group-hover:from-blue-500 group-hover:to-blue-400 transition-all shadow-[0_0_20px_rgba(59,130,246,0.1)] group-hover:shadow-[0_0_20px_rgba(59,130,246,0.3)]"
+            />
+            <div className="absolute -top-8 opacity-0 group-hover:opacity-100 transition-opacity bg-black border border-white/5 px-2 py-1 rounded text-[10px] font-bold text-white">
+              {c}
+            </div>
+          </div>
+          <span className="text-[10px] font-bold text-slate-600 group-hover:text-slate-400 transition-colors">
+            {days[i]}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function IntegrationSnippets() {
+  const [lang, setLang] = useState("javascript");
+  const { data: userData } = useMe();
+  const key = "pk_live_YOUR_SECRET_KEY"; // Placeholder as we don't want to expose secret here
+
+  const snippets: any = {
+    javascript: `const res = await fetch("https://api.pdfbridge.io/v1/convert", {
+  method: "POST",
+  headers: {
+    "X-API-Key": "${key}",
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    url: "https://google.com"
+  })
+});`,
+    python: `import requests
+
+res = requests.post(
+    "https://api.pdfbridge.io/v1/convert",
+    headers={"X-API-Key": "${key}"},
+    json={"url": "https://google.com"}
+)`,
+    php: `$ch = curl_init("https://api.pdfbridge.io/v1/convert");
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    "X-API-Key: ${key}",
+    "Content-Type: application/json"
+]);
+curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
+    "url" => "https://google.com"
+]));
+$res = curl_exec($ch);`,
+    curl: `curl -X POST https://api.pdfbridge.io/v1/convert \\
+  -H "X-API-Key: ${key}" \\
+  -H "Content-Type: application/json" \\
+  -d '{"url": "https://google.com"}'`,
+  };
+
+  return (
+    <div className="rounded-2xl border border-white/5 bg-slate-900/50 backdrop-blur-sm overflow-hidden">
+      <div className="flex bg-black/40 border-b border-white/5 p-1">
+        {Object.keys(snippets).map((l) => (
+          <button
+            key={l}
+            onClick={() => setLang(l)}
+            className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-md transition-all cursor-pointer ${
+              lang === l
+                ? "bg-blue-600/10 text-blue-400 border border-blue-500/20 shadow-[0_0_10px_rgba(37,99,235,0.1)]"
+                : "text-slate-500 hover:text-slate-300"
+            }`}
+          >
+            {l}
+          </button>
+        ))}
+      </div>
+      <div className="p-6 bg-black/40 relative group">
+        <pre className="text-xs font-mono text-slate-300 overflow-x-auto whitespace-pre leading-relaxed pr-10">
+          {snippets[lang]}
+        </pre>
+        <button
+          onClick={() => {
+            navigator.clipboard.writeText(snippets[lang]);
+            toast.success("Snippet copied to clipboard!");
+          }}
+          className="absolute top-4 right-4 p-2 bg-slate-800 rounded-lg opacity-0 group-hover:opacity-100 transition shadow-xl hover:bg-slate-700"
+        >
+          <Copy className="h-4 w-4 text-slate-300" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function UsageAlert({ usagePercentage }: { usagePercentage: number }) {
+  if (usagePercentage < 80) return null;
+
+  const isFull = usagePercentage >= 100;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className={`rounded-2xl border p-6 flex flex-col md:flex-row items-center justify-between gap-6 backdrop-blur-md ${
+        isFull
+          ? "bg-red-500/10 border-red-500/20"
+          : "bg-amber-500/10 border-amber-500/20"
+      }`}
+    >
+      <div className="flex items-center gap-4">
+        <div
+          className={`p-3 rounded-full ${isFull ? "bg-red-500/20" : "bg-amber-500/20"}`}
+        >
+          <AlertCircle
+            className={`h-6 w-6 ${isFull ? "text-red-500" : "text-amber-500"}`}
+          />
+        </div>
+        <div className="space-y-1 text-center md:text-left">
+          <h4 className="text-lg font-bold text-white">
+            {isFull
+              ? "Conversion Limit Reached"
+              : "Approaching API Usage Limit"}
+          </h4>
+          <p className="text-sm text-slate-400 max-w-lg">
+            {isFull
+              ? "You have used 100% of your monthly conversion limit. API requests may fail until your next billing cycle."
+              : `You have consumed ${Math.round(usagePercentage)}% of your monthly API limits. Upgrade your plan to ensure uninterrupted service.`}
+          </p>
+        </div>
+      </div>
+      <Link href="/dashboard/billing" className="w-full md:w-auto">
+        <Button
+          className={`w-full md:w-auto font-bold px-8 ${
+            isFull
+              ? "bg-red-600 hover:bg-blue-500 shadow-red-600/20"
+              : "bg-blue-600 hover:bg-blue-500 shadow-blue-600/20"
+          }`}
+        >
+          {isFull ? "Upgrade Now" : "Manage Subscription"}
+        </Button>
+      </Link>
+    </motion.div>
+  );
+}
+
+// End of DashboardPage component
