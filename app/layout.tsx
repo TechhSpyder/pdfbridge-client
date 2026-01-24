@@ -4,6 +4,7 @@ import "./globals.css";
 import { Navbar } from "@/modules/app/nav";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Providers } from "@/modules/app/provider";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -25,6 +26,7 @@ export default function RootLayout({
         <body className={`${inter.variable} antialiased`}>
           <Navbar />
           <Providers>{children}</Providers>
+          <SpeedInsights />
         </body>
       </html>
     </ClerkProvider>
