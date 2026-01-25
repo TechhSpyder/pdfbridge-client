@@ -388,8 +388,8 @@ export function BillingPage() {
           </div>
           <h2 className="text-xl font-bold text-white">Billing History</h2>
         </div>
-        <div className="rounded-2xl border border-white/5 bg-slate-900/40 p-1 overflow-hidden">
-          <table className="w-full text-left text-sm">
+        <div className="rounded-2xl border border-white/5 bg-slate-900/40 p-1 overflow-x-auto scrollbar-hide">
+          <table className="w-full text-left text-sm min-w-[600px]">
             <thead className="bg-white/5 text-slate-500 text-[10px] font-bold uppercase tracking-widest">
               <tr>
                 <th className="px-6 py-3">Date</th>
@@ -402,8 +402,11 @@ export function BillingPage() {
               {userData?.plan?.priceUsd > 0 || userData?.plan?.priceNgn > 0 ? (
                 <tr>
                   <td className="px-6 py-4 text-slate-400">
-                    {new Date().toLocaleDateString("en-US", {
+                    {new Date(
+                      userData?.planStartedAt || userData?.createdAt,
+                    ).toLocaleDateString("en-US", {
                       month: "short",
+                      day: "numeric",
                       year: "numeric",
                     })}
                   </td>

@@ -86,14 +86,6 @@ export function ApiKeysPage() {
                       <RefreshCw className="h-3.5 w-3.5 mr-2" />
                       Rotate Key
                     </Button>
-                    <Button
-                      variant="destructive"
-                      onClick={() => setShowConfirm(true)}
-                      className="text-xs h-9 border-red-500/20 text-red-400 hover:bg-red-500/10 hover:border-red-500/40"
-                    >
-                      <Trash className="h-3.5 w-3.5 mr-2" />
-                      Delete Key
-                    </Button>
                   </div>
                 </div>
 
@@ -135,12 +127,12 @@ export function ApiKeysPage() {
                 </code>
                 <Button
                   onClick={() => copyToClipboard(newKey)}
-                  className="shrink-0 bg-emerald-600 hover:bg-emerald-500 h-10 w-10 p-0 shadow-lg shadow-emerald-600/20"
+                  className="shrink-0 bg-emerald-600 hover:bg-emerald-500 h-10 w-10 min-w-10 p-0 shadow-lg shadow-emerald-600/20"
                 >
                   {copied ? (
-                    <Check className="h-5 w-5" />
+                    <Check className="h-5 w-5 min-w-5" />
                   ) : (
-                    <Copy className="h-5 w-5" />
+                    <Copy className="h-5 w-5 min-w-5" />
                   )}
                 </Button>
               </div>
@@ -148,7 +140,7 @@ export function ApiKeysPage() {
               <Button
                 variant="outline"
                 onClick={() => setNewKey(null)}
-                className="w-full h-11 border-white/5 hover:bg-white/5 transition-all"
+                className="w-full h-11 border-white/5 text-white hover:bg-white/5 transition-all"
               >
                 I have saved this key safely
               </Button>

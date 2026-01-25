@@ -18,11 +18,16 @@ export const useRotateKey = () => {
   });
 };
 
-export const useConversions = (page = 1, limit = 10) => {
+export const useConversions = (
+  page = 1,
+  limit = 10,
+  refetchInterval?: number,
+) => {
   const api = useApiClient();
   return useQuery({
     queryKey: ["conversions", page, limit],
     queryFn: () => api.get(`/api/v1/conversions?page=${page}&limit=${limit}`),
+    refetchInterval,
   });
 };
 

@@ -16,9 +16,10 @@ import {
   ExternalLink,
   Code2,
   FileText,
+  Download,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useMe, useConversions } from "../hooks/queries";
 import { useApiClient } from "@/app/api/api-client";
@@ -87,6 +88,27 @@ export function DashboardPage() {
   const usageLimit = userData?.plan?.limit || 5;
   const usagePercentage = Math.min((usageCount / usageLimit) * 100, 100);
 
+  const getDaysUntilReset = () => {
+    const anchorDate = userData?.planStartedAt || userData?.createdAt;
+    if (!anchorDate) return 0;
+
+    const now = new Date();
+    const joined = new Date(anchorDate);
+    const day = joined.getDate();
+
+    // Target date in current month
+    let target = new Date(now.getFullYear(), now.getMonth(), day);
+
+    // If target has passed, move to next month
+    if (now.getDate() >= day) {
+      target = new Date(now.getFullYear(), now.getMonth() + 1, day);
+    }
+
+    const diffTime = target.getTime() - now.getTime();
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  };
+
+  const daysUntilReset = getDaysUntilReset();
   const keyHint = userData?.id ? `pk_live_••••••••` : "sk_loading_••••••••";
 
   return (
@@ -158,7 +180,8 @@ export function DashboardPage() {
               </div>
               <div className="flex justify-between items-center text-xs">
                 <span className="text-slate-500 font-medium">
-                  Reset in 12 days
+                  Reset in {daysUntilReset}{" "}
+                  {daysUntilReset === 1 ? "day" : "days"}
                 </span>
                 <span className="text-blue-400 font-bold">
                   {Math.round(usagePercentage)}% utilized
@@ -256,20 +279,23 @@ export function DashboardPage() {
         </div>
 
         {/* Recent Activity List */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 bg-slate-900/50 backdrop-blur-sm space-y-6 border border-muted p-4 rounded-lg">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-emerald-800/20">
-                <Activity className="h-5 w-5 text-emerald-400" />
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-emerald-800/20">
+                  <Activity className="h-5 w-5 text-emerald-400" />
+                </div>
+                <h2 className="text-xl font-bold text-white">
+                  Recent Conversions
+                </h2>
               </div>
-              <h2 className="text-xl font-bold text-white">
-                Recent Conversions
-              </h2>
-            </div>
-            <div className="flex items-center gap-4">
+
               <span className="hidden md:inline text-[10px] text-slate-500 font-medium">
                 Updates automatically as jobs complete
               </span>
+            </div>
+            <div className="flex items-center gap-4">
               <Link
                 href="/dashboard/usage"
                 className="text-xs font-semibold text-blue-400 hover:underline"
@@ -279,7 +305,9 @@ export function DashboardPage() {
             </div>
           </div>
 
-          <RecentConversionsList />
+          <div className="overflow-x-auto scrollbar-hide">
+            <RecentConversionsList />
+          </div>
         </div>
       </div>
     </div>
@@ -287,8 +315,19 @@ export function DashboardPage() {
 }
 
 function RecentConversionsList() {
-  const { data, isLoading } = useConversions(1, 5);
+  const [pollInterval, setPollInterval] = useState<number | undefined>(30000);
+  const { data, isLoading } = useConversions(1, 5, pollInterval);
   const conversions = data?.conversions || [];
+
+  const hasPending = conversions.some((c: any) => c.status === "PENDING");
+
+  useEffect(() => {
+    if (hasPending) {
+      setPollInterval(3000); // Fast poll when things are happening
+    } else {
+      setPollInterval(30000); // Slow poll otherwise
+    }
+  }, [hasPending]);
 
   if (isLoading) {
     return (
@@ -329,15 +368,21 @@ function RecentConversionsList() {
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <span
-              className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                conv.success
-                  ? "bg-emerald-500/10 text-emerald-500"
-                  : "bg-red-500/10 text-red-500"
-              }`}
-            >
-              {conv.success ? "Ready" : "Failed"}
-            </span>
+            {conv.status === "PENDING" ? (
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/10 text-blue-500 flex items-center gap-1.5 animate-pulse">
+                <Loader2 className="h-2.5 w-2.5 animate-spin" />
+                Pending
+              </span>
+            ) : conv.status === "FAILED" || !conv.success ? (
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-500/10 text-red-500">
+                Failed
+              </span>
+            ) : (
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-500">
+                Ready
+              </span>
+            )}
+
             {conv.success && (
               <div className="flex items-center gap-1">
                 <Link
@@ -347,7 +392,7 @@ function RecentConversionsList() {
                   title="Download PDF"
                   className="p-1.5 hover:bg-white/10 rounded-md transition text-slate-400 hover:text-white"
                 >
-                  <FileText className="h-3.5 w-3.5" />
+                  <Download className="h-3.5 w-3.5" />
                 </Link>
                 <button
                   onClick={() => {
@@ -392,7 +437,7 @@ function ApiPlayground() {
   };
 
   return (
-    <div className="rounded-2xl border border-white/5 bg-slate-900/50 backdrop-blur-sm overflow-hidden">
+    <div className="rounded-2xl border border-muted bg-slate-900/50 backdrop-blur-sm overflow-hidden">
       <div className="p-6 space-y-4">
         <div className="space-y-2">
           <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">
@@ -468,7 +513,7 @@ function UsageGraph() {
 function IntegrationSnippets() {
   const [lang, setLang] = useState("javascript");
   const { data: userData } = useMe();
-  const key = "pk_live_YOUR_SECRET_KEY"; // Placeholder as we don't want to expose secret here
+  const key = "pk_live_YOUR_SECRET_KEY";
 
   const snippets: any = {
     javascript: `const res = await fetch("https://api.pdfbridge.io/v1/convert", {
@@ -504,8 +549,8 @@ $res = curl_exec($ch);`,
   };
 
   return (
-    <div className="rounded-2xl border border-white/5 bg-slate-900/50 backdrop-blur-sm overflow-hidden">
-      <div className="flex bg-black/40 border-b border-white/5 p-1">
+    <div className="rounded-2xl border border-muted bg-slate-900/50 backdrop-blur-sm overflow-hidden">
+      <div className="flex bg-black/40 border-b border-muted p-2">
         {Object.keys(snippets).map((l) => (
           <button
             key={l}
@@ -588,5 +633,3 @@ function UsageAlert({ usagePercentage }: { usagePercentage: number }) {
     </motion.div>
   );
 }
-
-// End of DashboardPage component
