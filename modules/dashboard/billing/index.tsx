@@ -37,28 +37,9 @@ export function BillingPage() {
   const { data: billingInfo } = useBillingInfo();
   const cancelMutation = useCancelSubscription();
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
-  const [overrideProvider, setOverrideProvider] = useState<string | null>(null);
   const verifyingRef = useRef(false);
 
   const Loaders = userLoading || plansLoading;
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setOverrideProvider(localStorage.getItem("billing-provider-override"));
-    }
-  }, []);
-
-  const handleToggleProvider = (prov: string | null) => {
-    setOverrideProvider(prov);
-    if (prov) {
-      localStorage.setItem("billing-provider-override", prov);
-      toast.success(
-        `Switched to ${prov === "paystack" ? "Paystack" : "Lemon Squeezy"} for testing.`,
-      );
-    } else {
-      localStorage.removeItem("billing-provider-override");
-      toast.info("Reset to default billing region.");
-    }
-  };
 
   useEffect(() => {
     const reference = searchParams.get("reference");
@@ -95,9 +76,7 @@ export function BillingPage() {
     }
   }, [searchParams, verifyMutation, refetch]);
 
-  const provider =
-    overrideProvider ||
-    (userData?.region === "NG" ? "paystack" : "lemonsqueezy");
+  const provider = userData?.region === "NG" ? "paystack" : "lemonsqueezy";
 
   if (plansError) {
     return (
@@ -184,33 +163,17 @@ export function BillingPage() {
             Automatic Billing Region
           </span>
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900 border border-white/5 text-xs font-medium text-slate-300">
-            <button
-              onClick={() =>
-                handleToggleProvider(
-                  provider === "paystack" ? "lemonsqueezy" : "paystack",
-                )
-              }
-              className="flex items-center gap-2 hover:text-white transition-colors"
-            >
-              {provider === "paystack" ? (
-                <>
-                  <CreditCard className="h-3 w-3 text-emerald-500" />
-                  Nigeria (NGN)
-                </>
-              ) : (
-                <>
-                  <Globe className="h-3 w-3 text-blue-500" />
-                  International (USD)
-                </>
-              )}
-            </button>
-            <div className="w-[1px] h-3 bg-white/10 mx-1" />
-            <button
-              onClick={() => handleToggleProvider(null)}
-              className="text-[10px] text-slate-500 hover:text-slate-300"
-            >
-              Reset
-            </button>
+            {provider === "paystack" ? (
+              <>
+                <CreditCard className="h-3 w-3 text-emerald-500" />
+                Nigeria (NGN)
+              </>
+            ) : (
+              <>
+                <Globe className="h-3 w-3 text-blue-500" />
+                International (USD)
+              </>
+            )}
           </div>
         </div>
       </div>
