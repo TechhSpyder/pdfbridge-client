@@ -12,7 +12,11 @@ export const useApiClient = () => {
       ...options.headers,
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
-    } as HeadersInit;
+      "X-Billing-Provider":
+        typeof window !== "undefined"
+          ? localStorage.getItem("billing-provider-override") || ""
+          : "",
+    } as any;
 
     const response = await fetch(`${baseUrl}${path}`, {
       ...options,

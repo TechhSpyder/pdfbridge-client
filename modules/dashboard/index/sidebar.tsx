@@ -91,10 +91,10 @@ export function Sidebar() {
             "z-50 w-64 bg-sidebar border-r border-muted flex flex-col",
             "fixed md:sticky md:top-0 h-screen",
           )}
-          initial="hidden"
-          animate="visible"
-          exit="exit"
-          variants={sidebarVariants}
+          // initial="hidden"
+          // animate="visible"
+          // exit="exit"
+          // variants={sidebarVariants}
         >
           {/* Logo */}
           <div className="p-6 border-b border-muted h-20 flex items-center justify-between">

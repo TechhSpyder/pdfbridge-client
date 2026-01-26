@@ -164,3 +164,17 @@ body {
   font-family: var(--font-inter);
   overflow-x: hidden;
 }
+
+.skeleton-el {
+  @apply bg-accent/20 rounded-lg w-full min-h-[20px] p-1.5 text-sm;
+  background-size: 30px 100%;
+  background-repeat: no-repeat;
+  background-position: left -40px top 0;
+  animation: shine 1.2s cubic-bezier(0.39, 0.575, 0.565, 1) infinite;
+}
+
+@keyframes shine {
+  to {
+    background-position: right -40px top 0;
+  }
+}

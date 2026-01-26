@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useEffect, useRef } from "react";
 import {
   useMe,
@@ -9,16 +8,12 @@ import {
   useCancelSubscription,
   usePlans,
 } from "@/modules/hooks/queries";
-import { GlowCard } from "@/modules/app/glow-card";
 import { Button } from "@/modules/app/button";
 import {
-  Check,
-  Zap,
   ShieldCheck,
   Globe,
   CreditCard,
   ChevronRight,
-  Loader2,
   HelpCircle,
   ExternalLink as ExternalLinkIcon,
   Receipt,
@@ -27,39 +22,7 @@ import {
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import Link from "next/link";
-
-const PLAN_METADATA: any = {
-  Free: {
-    features: [
-      "5 Conversions / month",
-      "Standard Latency",
-      "Public CDN Storage",
-      "Community Support",
-    ],
-    color: "slate",
-  },
-  Starter: {
-    features: [
-      "2,000 Conversions / month",
-      "Priority Queueing",
-      "Secure Private Storage",
-      "99.9% Uptime SLA",
-      "Email Support",
-    ],
-    color: "blue",
-    recommended: true,
-  },
-  Pro: {
-    features: [
-      "20,000 Conversions / month",
-      "Ultra-Low Latency",
-      "Custom Webhooks",
-      "Enhanced Security (MFA)",
-      "24/7 Priority Support",
-    ],
-    color: "emerald",
-  },
-};
+import { PlanCard, PlanCardSkeleton } from "../index/plan-card";
 
 export function BillingPage() {
   const { data: userData, isLoading: userLoading, refetch } = useMe();
@@ -74,7 +37,28 @@ export function BillingPage() {
   const { data: billingInfo } = useBillingInfo();
   const cancelMutation = useCancelSubscription();
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
+  const [overrideProvider, setOverrideProvider] = useState<string | null>(null);
   const verifyingRef = useRef(false);
+
+  const Loaders = userLoading || plansLoading;
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setOverrideProvider(localStorage.getItem("billing-provider-override"));
+    }
+  }, []);
+
+  const handleToggleProvider = (prov: string | null) => {
+    setOverrideProvider(prov);
+    if (prov) {
+      localStorage.setItem("billing-provider-override", prov);
+      toast.success(
+        `Switched to ${prov === "paystack" ? "Paystack" : "Lemon Squeezy"} for testing.`,
+      );
+    } else {
+      localStorage.removeItem("billing-provider-override");
+      toast.info("Reset to default billing region.");
+    }
+  };
 
   useEffect(() => {
     const reference = searchParams.get("reference");
@@ -111,18 +95,9 @@ export function BillingPage() {
     }
   }, [searchParams, verifyMutation, refetch]);
 
-  const provider = userData?.region === "NG" ? "paystack" : "lemonsqueezy";
-
-  if (userLoading || plansLoading) {
-    return (
-      <div className="flex h-[60vh] flex-col items-center justify-center space-y-4">
-        <Loader2 className="h-10 w-10 animate-spin text-blue-500" />
-        <p className="text-slate-400 font-medium animate-pulse">
-          Loading billing environment...
-        </p>
-      </div>
-    );
-  }
+  const provider =
+    overrideProvider ||
+    (userData?.region === "NG" ? "paystack" : "lemonsqueezy");
 
   if (plansError) {
     return (
@@ -137,12 +112,20 @@ export function BillingPage() {
     );
   }
 
-  const handleCheckout = async (planId: string) => {
+  const handleCheckout = async (
+    planId: string,
+    intervalArg: "month" | "year",
+  ) => {
     setSelectedPlanId(planId);
+    const tId = toast.loading("Redirecting to payment gateway...", {
+      description: "Preparing your secure checkout session.",
+    });
+
     try {
       const response: any = await checkoutMutation.mutateAsync({
         planId,
         provider,
+        interval: intervalArg,
         redirectUrl: `${window.location.origin}/dashboard/billing?success=true`,
         callbackUrl: `${window.location.origin}/dashboard/billing?success=true`,
       });
@@ -151,12 +134,14 @@ export function BillingPage() {
       if (checkoutUrl) {
         window.location.href = checkoutUrl;
       } else if (response.success) {
-        toast.success(response.message || "Plan updated successfully");
+        toast.success(response.message || "Account upgraded successfully!", {
+          id: tId,
+        });
         refetch();
       }
     } catch (error: any) {
       console.error("Checkout failed:", error);
-      toast.error(error.message || "Failed to initiate checkout");
+      toast.error(error.message || "Failed to initiate checkout", { id: tId });
     } finally {
       setSelectedPlanId(null);
     }
@@ -194,190 +179,111 @@ export function BillingPage() {
           </p>
         </div>
 
-        <div className="flex flex-col gap-1 items-end">
+        <div className="flex flex-col gap-4 items-end">
           <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-            Current Billing Region
+            Automatic Billing Region
           </span>
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900 border border-white/5 text-xs font-medium text-slate-300">
-            {provider === "paystack" ? (
-              <>
-                <CreditCard className="h-3 w-3 text-emerald-500" />
-                Nigeria (NGN)
-              </>
-            ) : (
-              <>
-                <Globe className="h-3 w-3 text-blue-500" />
-                International (USD)
-              </>
-            )}
+            <button
+              onClick={() =>
+                handleToggleProvider(
+                  provider === "paystack" ? "lemonsqueezy" : "paystack",
+                )
+              }
+              className="flex items-center gap-2 hover:text-white transition-colors"
+            >
+              {provider === "paystack" ? (
+                <>
+                  <CreditCard className="h-3 w-3 text-emerald-500" />
+                  Nigeria (NGN)
+                </>
+              ) : (
+                <>
+                  <Globe className="h-3 w-3 text-blue-500" />
+                  International (USD)
+                </>
+              )}
+            </button>
+            <div className="w-[1px] h-3 bg-white/10 mx-1" />
+            <button
+              onClick={() => handleToggleProvider(null)}
+              className="text-[10px] text-slate-500 hover:text-slate-300"
+            >
+              Reset
+            </button>
           </div>
         </div>
       </div>
 
       {/* Active Subscription Management */}
-      {(userData?.plan?.priceUsd > 0 || userData?.plan?.priceNgn > 0) && (
-        <div className="rounded-3xl border border-blue-500/20 bg-blue-500/5 p-8 backdrop-blur-md">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="flex gap-4 items-center">
-              <div className="p-3 rounded-2xl bg-blue-500/10">
-                <ShieldCheck className="h-6 w-6 text-blue-500" />
+
+      <div className="rounded-3xl border border-blue-500/20 bg-blue-500/5 p-8 backdrop-blur-md">
+        {Loaders ? (
+          <ActiveSubSkeleton />
+        ) : (
+          (userData?.plan?.priceUsd > 0 || userData?.plan?.priceNgn > 0) && (
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div className="flex gap-4 items-center">
+                <div className="p-3 rounded-2xl bg-blue-500/10">
+                  <ShieldCheck className="h-6 w-6 text-blue-500" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-white">
+                    Active {userData.plan.name} Subscription
+                  </h2>
+                  <p className="text-sm text-slate-400">
+                    You are currently on the {userData.plan.name} plan. Managed
+                    via {billingInfo?.provider || "our secure gateway"}.
+                  </p>
+                </div>
               </div>
-              <div>
-                <h2 className="text-xl font-bold text-white">
-                  Active {userData.plan.name} Subscription
-                </h2>
-                <p className="text-sm text-slate-400">
-                  You are currently on the {userData.plan.name} plan. Managed
-                  via {billingInfo?.provider || "our secure gateway"}.
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-3">
-              {billingInfo?.portalUrl ? (
-                <Link href={billingInfo.portalUrl} target="_blank">
+              <div className="flex gap-3">
+                {billingInfo?.portalUrl ? (
+                  <Link href={billingInfo.portalUrl} target="_blank">
+                    <Button
+                      variant="outline"
+                      className="gap-2 border-white/5 hover:bg-white/5"
+                    >
+                      <ExternalLinkIcon className="h-4 w-4" />
+                      Manage Billing Portal
+                    </Button>
+                  </Link>
+                ) : (
                   <Button
                     variant="outline"
-                    className="gap-2 border-white/5 hover:bg-white/5"
+                    onClick={handleCancel}
+                    disabled={cancelMutation.isPending}
+                    className="gap-2 border-red-500/20 text-red-500 hover:bg-red-500/10 hover:border-red-500/40"
                   >
-                    <ExternalLinkIcon className="h-4 w-4" />
-                    Manage Billing Portal
+                    <XCircle className="h-4 w-4" />
+                    {cancelMutation.isPending
+                      ? "Cancelling..."
+                      : "Cancel Subscription"}
                   </Button>
-                </Link>
-              ) : (
-                <Button
-                  variant="outline"
-                  onClick={handleCancel}
-                  disabled={cancelMutation.isPending}
-                  className="gap-2 border-red-500/20 text-red-500 hover:bg-red-500/10 hover:border-red-500/40"
-                >
-                  <XCircle className="h-4 w-4" />
-                  {cancelMutation.isPending
-                    ? "Cancelling..."
-                    : "Cancel Subscription"}
-                </Button>
-              )}
+                )}
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          )
+        )}
+      </div>
 
       {/* Pricing Grid */}
       <div className="grid gap-8 md:grid-cols-3">
-        {plans.map((plan: any) => {
-          const isCurrent = userData?.plan?.id === plan.id;
-          const isFree = plan.priceUsd === 0 && plan.priceNgn === 0;
-          const metadata = PLAN_METADATA[plan.name] || {};
-
-          let price =
-            provider === "paystack"
-              ? `₦${(plan.priceNgn / 100).toLocaleString()}`
-              : `$${(plan.priceUsd / 100).toLocaleString()}`;
-
-          if (isFree) price = provider === "paystack" ? "₦0" : "$0";
-
-          return (
-            <GlowCard
-              key={plan.id}
-              title={plan.name}
-              sub={isFree ? "Default Plan" : "High Performance"}
-              className={`${metadata.recommended ? "border-blue-500/30" : ""}`}
-              icon={
-                <div
-                  className={`p-2 rounded-lg ${
-                    metadata.color === "blue"
-                      ? "bg-blue-500/10"
-                      : metadata.color === "emerald"
-                        ? "bg-emerald-500/10"
-                        : "bg-slate-500/10"
-                  }`}
-                >
-                  <Zap
-                    className={`h-5 w-5 ${
-                      metadata.color === "blue"
-                        ? "text-blue-500"
-                        : metadata.color === "emerald"
-                          ? "text-emerald-500"
-                          : "text-slate-500"
-                    }`}
-                  />
-                </div>
-              }
-              content={
-                <div className="mt-4 space-y-8">
-                  <div className="space-y-1">
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-4xl font-black text-white">
-                        {price}
-                      </span>
-                      <span className="text-slate-500 text-sm font-medium">
-                        /month
-                      </span>
-                    </div>
-                    {metadata.recommended && (
-                      <span className="inline-flex items-center rounded-full bg-blue-500/10 px-2.5 py-0.5 text-[10px] font-bold text-blue-500 border border-blue-500/20 uppercase tracking-tighter">
-                        Best Value
-                      </span>
-                    )}
-                  </div>
-
-                  <ul className="space-y-4">
-                    {(metadata.features || []).map((feature: string) => (
-                      <li key={feature} className="flex items-start gap-3">
-                        <div className="mt-1 shrink-0 w-4 h-4 rounded-full bg-slate-800 flex items-center justify-center border border-white/5">
-                          <Check className="h-3 w-3 text-emerald-500" />
-                        </div>
-                        <span className="text-sm text-slate-400">
-                          {feature}
-                        </span>
-                      </li>
-                    ))}
-                    {!metadata.features && (
-                      <li className="flex items-start gap-3">
-                        <div className="mt-1 shrink-0 w-4 h-4 rounded-full bg-slate-800 flex items-center justify-center border border-white/5">
-                          <Check className="h-3 w-3 text-emerald-500" />
-                        </div>
-                        <span className="text-sm text-slate-400">
-                          {plan.limit.toLocaleString()} Conversions / month
-                        </span>
-                      </li>
-                    )}
-                  </ul>
-
-                  <div className="pt-4">
-                    {isCurrent ? (
-                      <div className="w-full py-2.5 px-4 rounded-xl bg-slate-800 text-slate-400 text-center text-sm font-bold border border-white/5">
-                        Current Plan
-                      </div>
-                    ) : (
-                      <Button
-                        onClick={() => handleCheckout(plan.id)}
-                        disabled={
-                          checkoutMutation.isPending && selectedPlanId !== null
-                        }
-                        className={`w-full h-12 shadow-2xl active:scale-95 transition-all text-sm font-black ${
-                          metadata.color === "blue"
-                            ? "bg-blue-600 hover:bg-blue-500 shadow-blue-500/20"
-                            : metadata.color === "emerald"
-                              ? "bg-emerald-600 hover:bg-emerald-500 shadow-emerald-500/20"
-                              : "bg-slate-700 hover:bg-slate-600"
-                        }`}
-                      >
-                        {checkoutMutation.isPending &&
-                        selectedPlanId === plan.id ? (
-                          <Loader2 className="h-5 w-5 animate-spin mx-auto" />
-                        ) : isFree ? (
-                          "Downgrade to Free"
-                        ) : (
-                          `Choose ${plan.name}`
-                        )}
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              }
-            />
-          );
-        })}
+        {Loaders
+          ? Array.from({ length: 3 }).map((_, index) => (
+              <PlanCardSkeleton key={index} />
+            ))
+          : plans.map((plan: any) => (
+              <PlanCard
+                key={plan.id}
+                plan={plan}
+                userData={userData}
+                provider={provider}
+                onCheckout={handleCheckout}
+                isCheckoutPending={checkoutMutation.isPending}
+                selectedPlanId={selectedPlanId}
+              />
+            ))}
       </div>
 
       {/* Billing History */}
@@ -516,6 +422,23 @@ export function BillingPage() {
             <ChevronRight className="h-4 w-4 text-slate-600 group-hover:translate-x-1 transition-transform" />
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function ActiveSubSkeleton() {
+  return (
+    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 w-full animate-pulse">
+      <div className="flex gap-4 items-center w-full">
+        <div className="p-3 rounded-2xl h-10 w-10! skeleton-el" />
+        <div className="w-full flex flex-col gap-2">
+          <div className="text-xl font-bold text-white h-6 w-[40%]! skeleton-el" />
+          <div className="text-sm text-slate-400 h-4 w-[50%]! skeleton-el" />
+        </div>
+      </div>
+      <div className="flex gap-3  w-[30%]!">
+        <div className="h-10 skeleton-el w-full!" />
       </div>
     </div>
   );

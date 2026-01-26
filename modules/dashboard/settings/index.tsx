@@ -19,7 +19,7 @@ import { useUpdateSettings } from "@/modules/hooks/queries";
 import { toast } from "sonner";
 
 export function SettingsPage() {
-  const { data: userData } = useMe();
+  const { data: userData, isLoading: userLoading } = useMe();
   const updateSettingsMutation = useUpdateSettings();
 
   const handleToggle = async (key: string, value: boolean) => {
@@ -58,14 +58,21 @@ export function SettingsPage() {
                     <div className="h-12 w-12 rounded-lg bg-blue-600/10 flex items-center justify-center text-blue-500 shadow-[0_0_15px_rgba(37,99,235,0.2)]">
                       <Zap className="h-6 w-6" />
                     </div>
-                    <div>
-                      <h4 className="font-bold text-white text-lg">
-                        {userData?.plan?.name || "Standard Free"}
-                      </h4>
-                      <p className="text-xs text-slate-400">
-                        Up to {userData?.plan?.limit || 5} conversions / month
-                      </p>
-                    </div>
+                    {userLoading ? (
+                      <div className="flex flex-col gap-2 animate-pulse">
+                        <div className="h-6 w-12! rounded-full skeleton-el" />
+                        <div className="h-5 w-28! rounded-full skeleton-el" />
+                      </div>
+                    ) : (
+                      <div>
+                        <h4 className="font-bold text-white text-lg">
+                          {userData?.plan?.name || "Standard Free"}
+                        </h4>
+                        <p className="text-xs text-slate-400">
+                          Up to {userData?.plan?.limit || 5} conversions / month
+                        </p>
+                      </div>
+                    )}
                   </div>
                   <div className="text-right">
                     <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-bold text-emerald-500 border border-emerald-500/20 shadow-[0_0_10px_rgba(16,185,129,0.1)]">

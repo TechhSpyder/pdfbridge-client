@@ -32,14 +32,19 @@ export const useConversions = (
 };
 
 export const useCheckout = () => {
+  const queryClient = useQueryClient();
   const api = useApiClient();
   return useMutation({
     mutationFn: (data: {
       planId: string;
       provider: string;
+      interval?: string;
       redirectUrl?: string;
       callbackUrl?: string;
     }) => api.post("/api/v1/billing/checkout", data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["billing-info"] });
+    },
   });
 };
 
