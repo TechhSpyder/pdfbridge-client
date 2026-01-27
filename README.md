@@ -1,36 +1,58 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PDFBridge Frontend
 
-## Getting Started
+The premium developer portal and management console for the PDFBridge API. A high-fidelity, high-performance web application built with **Next.js 15**, **React**, and **Tailwind CSS**.
 
-First, run the development server:
+![Status: Production Ready](https://img.shields.io/badge/Status-Production%20Ready-green)
+![Design: Premium Dark Mode](https://img.shields.io/badge/Design-Premium%20Dark%20Mode-blueviolet)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## ✨ Key Features
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **Live Dashboard Analytics**: Real-time business intelligence with conversion trends and volume tracking.
+- **Interactive API Docs**: Hands-on documentation with integrated API key support and interactive snippets.
+- **Dual-Key Management**: Securely manage and rotate `Test` and `Live` API keys.
+- **Premium Aesthetic**: Sophisticated dark-mode design with glassmorphism, glowing accents, and smooth Framer Motion animations.
+- **SEO Hardened**: Optimized for search engines with dynamic sitemaps, robots.txt, and comprehensive OpenGraph metadata.
+- **Tiered Billing**: Integrated Stripe/Lemon Squeezy pricing and usage-based tracking.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🛠️ Tech Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Core**: [Next.js 15 (App Router)](https://nextjs.org/)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS / Vanilla CSS
+- **Animations**: Framer Motion
+- **Auth**: Clerk (Custom Integration)
+- **State/Data**: React Query (TanStack Query) & Zustand
 
-## Learn More
+## 📂 Project Structure
 
-To learn more about Next.js, take a look at the following resources:
+- `/app`: Next.js App Router pages and layouts.
+- `/modules`: Feature-specific logic (Dashboard, Docs, Auth, Landing).
+- `/assets`: Brand assets and styling tokens.
+- `/public`: Static SEO configuration and OG images.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🚀 Getting Started
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1.  **Install Dependencies**:
 
-## Deploy on Vercel
+    ```bash
+    pnpm install
+    ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+2.  **Environment Setup**:
+    Create a `.env.local` with:
+    - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
+    - `CLERK_SECRET_KEY`
+    - `NEXT_PUBLIC_API_URL`
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+3.  **Run Development Server**:
+    ```bash
+    pnpm dev
+    ```
+
+## 🔍 SEO & Brand Discovery
+
+PDFBridge is configured for maximum discoverability. All metadata is managed dynamically in `app/layout.tsx` and specific page components. Branded assets for social media are located in `public/og-image.png`.
+
+---
+
+Built by the [PDFBridge Team](https://pdfbridge.xyz)

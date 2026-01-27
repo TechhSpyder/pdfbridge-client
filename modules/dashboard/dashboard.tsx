@@ -15,7 +15,7 @@ import {
   Terminal,
   ExternalLink,
   Code2,
-  FileText,
+  BookOpen,
 } from "lucide-react";
 import Link from "next/link";
 import { useMe } from "../hooks/queries";
@@ -124,12 +124,12 @@ export function DashboardPage() {
           </p>
         </div>
         <div className="flex gap-3">
-          <Link href="/docs" target="_blank">
+          <Link href="/dashboard/docs">
             <Button
               variant="outline"
-              className="gap-2 flex items-center justify-center border-white/5 hover:bg-white/5"
+              className="gap-2 flex items-center justify-center border-white/5 hover:bg-white/5 font-bold"
             >
-              <FileText className="h-4 w-4" />
+              <BookOpen className="h-4 w-4" />
               API Docs
             </Button>
           </Link>

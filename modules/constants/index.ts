@@ -4,12 +4,14 @@ import {
   Settings,
   FileText,
   Banknote,
+  BookOpen,
 } from "lucide-react";
 
 export const NAV_LINKS = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/dashboard/api-keys", label: "API Keys", icon: Key },
   { href: "/dashboard/usage", label: "Usage", icon: FileText },
+  { href: "/dashboard/docs", label: "Documentation", icon: BookOpen },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
   { href: "/dashboard/billing", label: "Billing", icon: Banknote },
 ];
