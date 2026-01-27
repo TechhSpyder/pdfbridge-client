@@ -38,6 +38,9 @@ export function PlanCard({
 
   if (isFree) price = provider === "paystack" ? "₦0" : "$0";
 
+  const isEnterprise = plan.name === "Enterprise";
+  if (isEnterprise) price = "Contact Sales";
+
   return (
     <GlowCard>
       <div className="relative z-10">
@@ -57,7 +60,7 @@ export function PlanCard({
               })}
             />
           </div>
-          {!isFree && (
+          {!isFree && !isEnterprise && (
             <div className="flex items-center gap-1 p-1 rounded-lg bg-slate-900 border border-white/5 w-fit">
               {(["month", "year"] as const).map((item) => (
                 <button
@@ -92,10 +95,19 @@ export function PlanCard({
           <div className="space-y-4">
             <div className="space-y-1">
               <div className="flex items-baseline gap-2">
-                <span className="text-4xl font-black text-white">{price}</span>
-                <span className="text-slate-500 text-sm font-medium">
-                  /{isAnnual ? "year" : "month"}
+                <span
+                  className={cn("font-black text-white", {
+                    "text-4xl": !isEnterprise,
+                    "text-2xl": isEnterprise,
+                  })}
+                >
+                  {price}
                 </span>
+                {!isEnterprise && (
+                  <span className="text-slate-500 text-sm font-medium">
+                    /{isAnnual ? "year" : "month"}
+                  </span>
+                )}
               </div>
 
               {isAnnual && !isFree && (
@@ -141,7 +153,13 @@ export function PlanCard({
               </div>
             ) : (
               <Button
-                onClick={() => onCheckout(plan.id, interval)}
+                onClick={() => {
+                  if (isEnterprise) {
+                    window.location.href = "mailto:support@pdfbridge.xyz";
+                    return;
+                  }
+                  onCheckout(plan.id, interval);
+                }}
                 disabled={isCheckoutPending && selectedPlanId !== null}
                 className={`w-full h-12 shadow-2xl active:scale-95 transition-all text-sm font-black ${
                   metadata.color === "blue"
@@ -153,6 +171,8 @@ export function PlanCard({
               >
                 {isCheckoutPending && selectedPlanId === plan.id ? (
                   <Loader2 className="h-5 w-5 animate-spin mx-auto" />
+                ) : isEnterprise ? (
+                  "Contact Support"
                 ) : isFree ? (
                   "Downgrade to Free"
                 ) : (

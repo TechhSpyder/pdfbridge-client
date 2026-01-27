@@ -15,7 +15,7 @@ export const NAV_LINKS = [
 ];
 
 export const PLAN_METADATA: any = {
-  Test: {
+  "Test Mode": {
     features: [
       "Unlimited Conversions",
       "Mandatory Watermark",
@@ -47,17 +47,20 @@ export const PLAN_METADATA: any = {
     features: [
       "20,000 Conversions / month",
       "50MB File Limit",
-      "Custom Headers/Footers",
       "Unlimited Retention",
+      "Custom Headers/Footers",
+      "Webhooks Included",
     ],
     color: "emerald",
   },
   Enterprise: {
     features: [
-      "Custom High Volume",
+      "Unlimited Conversions",
       "100MB+ File Limit",
+      "Custom Headers/Footers",
       "Dedicated Infrastructure",
       "Priority SLA Support",
+      "Webhooks Included",
     ],
     color: "blue",
   },

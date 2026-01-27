@@ -142,7 +142,12 @@ export function BillingPage() {
     }
   };
 
-  const plans = plansData || [];
+  const planOrder = ["Free", "Starter", "Pro", "Enterprise"];
+  const plans = (plansData || [])
+    .filter((p: any) => p.name !== "Test" && p.name !== "Test Mode")
+    .sort(
+      (a: any, b: any) => planOrder.indexOf(a.name) - planOrder.indexOf(b.name),
+    );
 
   return (
     <div className="max-w-6xl mx-auto space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-1000 pb-20">
