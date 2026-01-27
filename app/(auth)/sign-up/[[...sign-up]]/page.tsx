@@ -1,4 +1,11 @@
 import { AuthCard } from "@/modules/auth/auth-card";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Create an Account",
+  description:
+    "Get started with PDFBridge. Create an account to generate high-quality PDFs from HTML and URLs using our modern API.",
+};
 
 export default function SignUpPage() {
   return (

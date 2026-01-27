@@ -1,4 +1,11 @@
 import { AuthCard } from "@/modules/auth/auth-card";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Sign In",
+  description:
+    "Sign in to your PDFBridge account to manage your API keys, view usage, and configure your conversions.",
+};
 
 export default function SignInPage() {
   return (

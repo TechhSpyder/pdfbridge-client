@@ -1,4 +1,11 @@
 import { Documentation } from "@/modules/docs";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "API Documentation",
+  description:
+    "Learn how to integrate PDFBridge into your application with our interactive API reference, snippets, and step-by-step guides.",
+};
 
 export default function DocsPage() {
   return (

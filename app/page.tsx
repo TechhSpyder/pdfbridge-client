@@ -9,6 +9,13 @@ import {
   CTA,
   Footer,
 } from "@/modules/home";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Modern PDF Generation API for Developers",
+  description:
+    "Generate high-fidelity PDFs from HTML, URLs, and React components. 99.9% Uptime, lightning-fast rendering, and developer-first documentation.",
+};
 
 export default function Home() {
   return (
