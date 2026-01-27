@@ -15,22 +15,30 @@ export const NAV_LINKS = [
 ];
 
 export const PLAN_METADATA: any = {
+  Test: {
+    features: [
+      "Unlimited Conversions",
+      "Mandatory Watermark",
+      "Development Only",
+      "24h Retention",
+    ],
+    color: "amber",
+  },
   Free: {
     features: [
       "5 Conversions / month",
-      "Standard Latency",
-      "Public CDN Storage",
-      "Community Support",
+      "10MB File Limit",
+      "7 Days Retention",
+      "No Webhooks",
     ],
     color: "slate",
   },
   Starter: {
     features: [
       "2,000 Conversions / month",
-      "Priority Queueing",
-      "Secure Private Storage",
-      "99.9% Uptime SLA",
-      "Email Support",
+      "25MB File Limit",
+      "30 Days Retention",
+      "Webhooks Included",
     ],
     color: "blue",
     recommended: true,
@@ -38,11 +46,19 @@ export const PLAN_METADATA: any = {
   Pro: {
     features: [
       "20,000 Conversions / month",
-      "Ultra-Low Latency",
-      "Custom Webhooks",
-      "Enhanced Security (MFA)",
-      "24/7 Priority Support",
+      "50MB File Limit",
+      "Custom Headers/Footers",
+      "Unlimited Retention",
     ],
     color: "emerald",
+  },
+  Enterprise: {
+    features: [
+      "Custom High Volume",
+      "100MB+ File Limit",
+      "Dedicated Infrastructure",
+      "Priority SLA Support",
+    ],
+    color: "blue",
   },
 };

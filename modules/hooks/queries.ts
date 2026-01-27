@@ -14,7 +14,8 @@ export const useMe = () => {
 export const useRotateKey = () => {
   const api = useApiClient();
   return useMutation({
-    mutationFn: () => api.post("/api/v1/keys/rotate", {}),
+    mutationFn: (type: "test" | "live" = "live") =>
+      api.post("/api/v1/keys/rotate", { type }),
   });
 };
 
@@ -27,6 +28,15 @@ export const useConversions = (
   return useQuery({
     queryKey: ["conversions", page, limit],
     queryFn: () => api.get(`/api/v1/conversions?page=${page}&limit=${limit}`),
+    refetchInterval,
+  });
+};
+
+export const useConversionStats = (refetchInterval?: number) => {
+  const api = useApiClient();
+  return useQuery({
+    queryKey: ["conversion-stats"],
+    queryFn: () => api.get("/api/v1/stats/conversions"),
     refetchInterval,
   });
 };

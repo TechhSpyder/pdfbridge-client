@@ -14,6 +14,7 @@ import {
   Filter,
   Download,
   Loader2,
+  Calendar,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -22,6 +23,7 @@ export function UsagePage() {
   const [statusFilter, setStatusFilter] = useState<
     "all" | "success" | "failed"
   >("all");
+  const [dateFilter, setDateFilter] = useState<"all" | "7d" | "30d">("all");
   const [pollInterval, setPollInterval] = useState<number | undefined>(30000);
   const { data, isLoading, error } = useConversions(page, 10, pollInterval);
 
@@ -37,8 +39,23 @@ export function UsagePage() {
 
   const allConversions = data?.conversions || [];
   const conversions = allConversions.filter((c: any) => {
-    if (statusFilter === "all") return true;
-    return statusFilter === "success" ? c.success : !c.success;
+    // 1. Status Filter
+    const matchesStatus =
+      statusFilter === "all" ||
+      (statusFilter === "success" ? c.success : !c.success);
+
+    // 2. Date Filter
+    let matchesDate = true;
+    if (dateFilter !== "all") {
+      const convDate = new Date(c.createdAt);
+      const now = new Date();
+      const diffDays =
+        (now.getTime() - convDate.getTime()) / (1000 * 3600 * 24);
+      const limit = dateFilter === "7d" ? 7 : 30;
+      matchesDate = diffDays <= limit;
+    }
+
+    return matchesStatus && matchesDate;
   });
   const pagination = data?.pagination;
 
@@ -56,15 +73,22 @@ export function UsagePage() {
 
   const exportToCSV = () => {
     if (!conversions.length) return;
-    const headers = ["ID", "URL", "Status", "Duration (ms)", "Date"];
+    const headers = [
+      "ID",
+      "URL",
+      "Environment",
+      "Status",
+      "Duration (ms)",
+      "Date",
+    ];
     const rows = conversions.map((c: any) => [
       c.id,
       c.url || "HTML Payload",
+      c.isTestMode ? "TEST" : "LIVE",
       c.success ? "SUCCESS" : "FAILED",
       c.duration,
       new Date(c.createdAt).toISOString(),
     ]);
-
     const csvContent = [headers, ...rows].map((e) => e.join(",")).join("\n");
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
@@ -106,6 +130,22 @@ export function UsagePage() {
 
         <div className="flex flex-wrap gap-2">
           <div className="flex bg-slate-900/80 border border-white/5 p-1 rounded-xl">
+            {(["all", "7d", "30d"] as const).map((f) => (
+              <button
+                key={f}
+                onClick={() => setDateFilter(f)}
+                className={`px-3 py-1 rounded-lg text-[10px] font-bold cursor-pointer uppercase transition-all ${
+                  dateFilter === f
+                    ? "bg-slate-700 text-white shadow-lg"
+                    : "text-slate-500 hover:text-slate-300"
+                }`}
+              >
+                {f === "all" ? "All Time" : f}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex bg-slate-900/80 border border-white/5 p-1 rounded-xl">
             {(["all", "success", "failed"] as const).map((f) => (
               <button
                 key={f}
@@ -141,6 +181,9 @@ export function UsagePage() {
                   Resource / URL
                 </th>
                 <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-wider">
+                  Environment
+                </th>
+                <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-wider">
                   Status
                 </th>
                 <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-wider">
@@ -170,6 +213,17 @@ export function UsagePage() {
                           {job.id}
                         </span>
                       </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span
+                        className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                          job.isTestMode
+                            ? "bg-orange-500/10 text-orange-500 border-orange-500/20"
+                            : "bg-blue-500/10 text-blue-500 border-blue-500/20"
+                        }`}
+                      >
+                        {job.isTestMode ? "TEST" : "LIVE"}
+                      </span>
                     </td>
                     <td className="px-6 py-4">
                       {job.status === "PENDING" ? (
@@ -223,7 +277,7 @@ export function UsagePage() {
               ) : (
                 <tr>
                   <td
-                    colSpan={5}
+                    colSpan={6}
                     className="px-6 py-24 text-center text-slate-500"
                   >
                     <div className="h-16 w-16 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-6 border border-white/5 shadow-inner">
