@@ -84,7 +84,7 @@ export function Hero() {
               </Link>
             </div>
 
-            <div className="flex flex-wrap gap-6 text-sm text-slate-500 pt-8 border-t border-slate-800/50">
+            {/* <div className="flex flex-wrap gap-6 text-sm text-slate-500 pt-8 border-t border-slate-800/50">
               <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
                 <li>
                   <button
@@ -117,7 +117,7 @@ export function Hero() {
                   </button>
                 </li>
               </ul>
-            </div>
+            </div> */}
           </motion.div>
 
           <motion.div

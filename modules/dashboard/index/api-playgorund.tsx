@@ -1,4 +1,5 @@
 import { Button } from "@/modules/app/button";
+import { cn } from "@/utils";
 import { useApiClient } from "@/utils/api-client";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
@@ -72,7 +73,10 @@ export function ApiPlayground() {
           <Button
             onClick={handleTest}
             disabled={loading}
-            className={`${mode === "test" ? "bg-orange-600 hover:bg-orange-500" : "bg-blue-600 hover:bg-blue-500 shadow-blue-500/20"}`}
+            className={cn("max-sm:text-xs", {
+              "bg-linear-to-r from-orange-500 to-orange-600! hover:bg-orange-500":
+                mode === "test",
+            })}
           >
             {loading ? (
               <Loader2 className="h-4 w-4 animate-spin" />

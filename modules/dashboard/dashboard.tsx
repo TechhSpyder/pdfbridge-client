@@ -137,15 +137,15 @@ export function DashboardPage() {
       </div>
 
       {/* Usage Analytics Graph */}
-      <div className="rounded-3xl border border-white/5 bg-slate-900/30 p-8 backdrop-blur-sm">
-        <div className="flex items-center justify-between mb-8">
+      <div className="rounded-3xl border border-white/5 bg-slate-900/30 p-4 md:p-8 backdrop-blur-sm">
+        <div className="flex md:items-center justify-between mb-8 max-sm:flex-col gap-3">
           <div className="space-y-1">
             <h2 className="text-xl font-bold text-white">Conversion Trends</h2>
             <p className="text-sm text-slate-500">
               Daily conversion volume for this billing cycle
             </p>
           </div>
-          <div className="flex bg-black/40 rounded-lg p-1 border border-white/5">
+          <div className="flex bg-black/40 rounded-lg p-1 border border-white/5 justify-end">
             <button className="px-3 py-1 text-[10px] font-bold text-white bg-blue-600 rounded-md shadow-lg cursor-pointer transition-all active:scale-95">
               7 Days
             </button>
@@ -288,16 +288,17 @@ export function DashboardPage() {
           </div>
 
           <ApiPlayground />
-
-          <div className="flex items-center gap-3 pt-6">
-            <div className="p-2 rounded-lg bg-orange-800/20">
-              <Code2 className="h-5 w-5 text-orange-400" />
+          <div className="hidden sm:block">
+            <div className="flex items-center gap-3 pt-6">
+              <div className="p-2 rounded-lg bg-orange-800/20">
+                <Code2 className="h-5 w-5 text-orange-400" />
+              </div>
+              <h2 className="text-xl font-bold text-white">
+                Integration Snippets
+              </h2>
             </div>
-            <h2 className="text-xl font-bold text-white">
-              Integration Snippets
-            </h2>
+            <IntegrationSnippets />
           </div>
-          <IntegrationSnippets />
         </div>
 
         {/* Recent Activity List */}
