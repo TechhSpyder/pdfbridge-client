@@ -1,6 +1,7 @@
 "use client";
 
 import { Circle } from "lucide-react";
+import Link from "next/link";
 
 export function Footer() {
   return (
@@ -110,6 +111,18 @@ export function Footer() {
           <span>
             © {new Date().getFullYear()} PDFBridge. All rights reserved.
           </span>
+          <div>
+            <p>Owned and operated by Francis Bello</p>
+            <p>
+              Contact:{" "}
+              <Link
+                className="hover:text-foreground font-semibold"
+                href="mailto:info@pdfbridge.xyz"
+              >
+                info@pdfbridge.xyz
+              </Link>
+            </p>
+          </div>
           <span>Built for developers.</span>
         </div>
       </div>

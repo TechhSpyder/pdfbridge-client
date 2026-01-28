@@ -15,7 +15,7 @@ const snippets: CodeSnippet[] = [
   {
     label: "JavaScript",
     lang: "javascript",
-    code: `const res = await fetch('https://api.pdfbridge.io/v1/convert', {
+    code: `const res = await fetch('https://api.pdfbridge.xyz/v1/convert', {
   method: 'POST',
   headers: { 'x-api-key': 'your_key', 'Content-Type': 'application/json' },
   body: JSON.stringify({
@@ -36,7 +36,7 @@ data = {
     "url": "https://example.com",
     "options": {"format": "A4", "printBackground": True}
 }
-res = requests.post('https://api.pdfbridge.io/v1/convert', 
+res = requests.post('https://api.pdfbridge.xyz/v1/convert', 
 headers=headers, json=data)
 status_url = res.json()['statusUrl']`,
   },
@@ -60,7 +60,7 @@ func main() {
     "printBackground": true},
   }
   body, _ := json.Marshal(payload)
-  req, _ := http.NewRequest("POST", "https://api.pdfbridge.io/v1/convert", 
+  req, _ := http.NewRequest("POST", "https://api.pdfbridge.xyz/v1/convert", 
   bytes.NewBuffer(body))
   req.Header.Set("x-api-key", "your_key")
   req.Header.Set("Content-Type", "application/json")
@@ -75,7 +75,7 @@ func main() {
     label: "PHP",
     lang: "php",
     code: `<?php
-$ch = curl_init('https://api.pdfbridge.io/v1/convert');
+$ch = curl_init('https://api.pdfbridge.xyz/v1/convert');
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
   'x-api-key: your_key',
   'Content-Type: application/json'

@@ -1,5 +1,6 @@
 import { AuthCard } from "@/modules/auth/auth-card";
 import { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Create an Account",
@@ -19,8 +20,22 @@ export default function SignUpPage() {
       </div>
 
       {/* Footer link for branding */}
-      <div className="absolute bottom-8 text-slate-500 text-xs text-center w-full">
-        By continuing, you agree to our Terms of Service and Privacy Policy.
+      <div className="absolute bottom-8 text-slate-500 text-xs text-center w-full px-4">
+        By creating an account, you agree to our{" "}
+        <Link
+          href="/terms"
+          className="text-blue-500 hover:text-blue-400 transition underline underline-offset-4"
+        >
+          Terms of Service
+        </Link>{" "}
+        and{" "}
+        <Link
+          href="/privacy"
+          className="text-blue-500 hover:text-blue-400 transition underline underline-offset-4"
+        >
+          Privacy Policy
+        </Link>
+        .
       </div>
     </div>
   );
