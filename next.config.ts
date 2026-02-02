@@ -35,7 +35,7 @@ const nextConfig: NextConfig = {
           {
             key: "Content-Security-Policy",
             value:
-              "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://*.clerk.accounts.dev https://*.pdfbridge.xyz https://*.vercel-scripts.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https://*.clerk.com https://images.unsplash.com https://res.cloudinary.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://*.clerk.accounts.dev https://*.pdfbridge.xyz https://pdfbridge-api-1.onrender.com https://vitals.vercel-insights.com; frame-src 'self' https://checkout.paystack.com https://*.pdfbridge.xyz https://pdfbridge.lemonsqueezy.com;",
+              "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' blob: https://*.clerk.accounts.dev https://*.pdfbridge.xyz https://*.vercel-scripts.com https://challenges.cloudflare.com https://*.hcaptcha.com https://hcaptcha.com; worker-src 'self' blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.hcaptcha.com https://hcaptcha.com; img-src 'self' data: https://*.clerk.com https://images.unsplash.com https://res.cloudinary.com https://*.hcaptcha.com https://hcaptcha.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://*.clerk.accounts.dev https://*.pdfbridge.xyz https://pdfbridge-api-1.onrender.com https://vitals.vercel-insights.com https://*.hcaptcha.com https://hcaptcha.com; frame-src 'self' https://checkout.paystack.com https://*.pdfbridge.xyz https://pdfbridge.lemonsqueezy.com https://challenges.cloudflare.com https://*.hcaptcha.com https://hcaptcha.com;",
           },
         ],
       },
