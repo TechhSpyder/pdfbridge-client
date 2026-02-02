@@ -33,6 +33,8 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [pendingVerification, setPendingVerification] = useState(false);
+  const [code, setCode] = useState("");
   const router = useRouter();
 
   const isSignIn = type === "sign-in";
@@ -57,6 +59,32 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
       setError(err.errors?.[0]?.message || "An error occurred");
       setLoadingGoogle(false);
       setLoadingGithub(false);
+    }
+  };
+
+  const onVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!signUpLoaded) return;
+    setLoading(true);
+    setError("");
+
+    try {
+      const result = await signUp.attemptEmailAddressVerification({
+        code,
+      });
+
+      if (result.status === "complete") {
+        await setSignUpActive({ session: result.createdSessionId });
+        router.push("/dashboard");
+      } else {
+        setError("Invalid verification code. Please check your email.");
+      }
+    } catch (err: any) {
+      setError(
+        err.errors?.[0]?.message || "An error occurred during verification",
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -123,8 +151,10 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
           await setSignUpActive({ session: result.createdSessionId });
           router.push("/dashboard");
         } else if (result.status === "missing_requirements") {
-          // Handle email verification etc.
-          setError("Email verification required. Please check your inbox.");
+          await signUp.prepareEmailAddressVerification({
+            strategy: "email_code",
+          });
+          setPendingVerification(true);
         }
       }
     } catch (err: any) {
@@ -133,6 +163,63 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
       setLoading(false);
     }
   };
+
+  if (pendingVerification) {
+    return (
+      <div className="w-full max-w-md space-y-8 animate-in fade-in zoom-in duration-500">
+        <div className="text-center">
+          <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+            Verify Email
+          </h2>
+          <p className="mt-4 text-slate-400">
+            We've sent a verification code to {email}.
+          </p>
+        </div>
+
+        <form onSubmit={onVerify} className="mt-8 space-y-6">
+          <div className="space-y-4">
+            <div>
+              <label
+                className="block text-sm font-medium text-slate-300"
+                htmlFor="code"
+              >
+                Verification Code
+              </label>
+              <div className="mt-1">
+                <input
+                  id="code"
+                  type="text"
+                  required
+                  className="block w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder-slate-500 transition focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 sm:text-sm text-center tracking-[0.5em] font-mono text-2xl uppercase"
+                  placeholder="000000"
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                />
+              </div>
+            </div>
+
+            {error && <p className="text-sm text-red-500">{error}</p>}
+
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full py-4 text-base font-bold shadow-xl shadow-blue-500/10 flex items-center justify-center"
+            >
+              {loading ? "Verifying..." : "Verify Email"}
+            </Button>
+
+            <button
+              type="button"
+              onClick={() => setPendingVerification(false)}
+              className="w-full text-sm text-slate-500 hover:text-white transition"
+            >
+              Back to Sign Up
+            </button>
+          </div>
+        </form>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-md space-y-8 animate-in fade-in zoom-in duration-500">
@@ -309,7 +396,6 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
               />
             </div>
           )}
-          {!isSignIn && <div id="clerk-captcha" />}
           <Button
             type="submit"
             disabled={loading}
