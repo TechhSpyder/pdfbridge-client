@@ -7,7 +7,7 @@ import { FileText, Link, Globe, CheckCircle } from "lucide-react";
 export default function TransformationAnimation() {
   const [stage, setStage] = useState(0); // 0: URL, 1: Loading, 2: Webpage, 3: PDF Ready
   const [displayText, setDisplayText] = useState("");
-  const targetUrl = "https://pdfbridge.io/docs";
+  const targetUrl = "https://pdfbridge.xyz/docs";
 
   useEffect(() => {
     const runAnimation = () => {

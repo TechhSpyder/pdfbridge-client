@@ -9,7 +9,9 @@ import { useActiveSection } from "../hooks/use-active-section";
 import { cn } from "@/utils";
 import Link from "next/link";
 import { ScrollProgressBar } from "./scroll-progress";
+import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 
 type ScrollNavItem = {
   label: string;
@@ -27,14 +29,21 @@ type NavItem = ScrollNavItem | LinkNavItem;
 
 const NAV_ITEMS: NavItem[] = [
   { label: "Features", id: "features", type: "scroll" },
-  // { label: "Pricing", id: "pricing", type: "scroll" },
+  { label: "Pricing", id: "pricing", type: "scroll" },
   { label: "FAQ", id: "faq", type: "scroll" },
   { label: "Docs", href: "/docs", type: "link" },
+  { label: "Insights", href: "/insights", type: "link" },
 ];
 
 export function Navbar() {
   const { open, setOpen } = useNavStore();
   const lenis = useLenis();
+  const pathname = usePathname();
+
+  const isHidden =
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/sign-in") ||
+    pathname.startsWith("/sign-up");
 
   const activeSection = useActiveSection(
     NAV_ITEMS.filter((i) => i.type === "scroll").map((i) => i.id),
@@ -47,6 +56,8 @@ export function Navbar() {
     });
     setOpen(false);
   };
+
+  if (isHidden) return null;
 
   // Animation variants for the mobile menu
   const menuVariants = {
@@ -64,10 +75,10 @@ export function Navbar() {
   };
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur shadow-sm">
+    <nav className="sticky top-0 z-100 border-b border-border bg-background/95 backdrop-blur shadow-sm">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-16 items-center justify-between">
         {/* Logo */}
-        <div className="flex items-center gap-2">
+        <Link href="/" className="flex items-center gap-2">
           <Image
             src="/pdfbridge_logo.svg"
             alt="PDFBridge"
@@ -78,7 +89,7 @@ export function Navbar() {
           <span className="hidden sm:inline font-semibold text-lg">
             PDFBridge
           </span>
-        </div>
+        </Link>
 
         {/* Desktop Nav */}
         <div className="hidden md:flex items-center gap-8">
@@ -88,7 +99,7 @@ export function Navbar() {
                 key={item.id}
                 onClick={() => scrollTo(item.id)}
                 className={cn(
-                  "relative text-sm transition-colors",
+                  "relative text-sm transition-colors cursor-pointer",
                   activeSection === item.id
                     ? "text-foreground"
                     : "text-muted-foreground hover:text-foreground",
@@ -116,15 +127,29 @@ export function Navbar() {
 
         {/* CTA + Mobile */}
         <div className="flex items-center gap-3">
-          <Button variant="outline" size="sm" className="hidden sm:flex">
-            Sign In
-          </Button>
-          <Button
-            size="sm"
-            className="bg-blue-600 hover:bg-blue-700 text-white"
-          >
-            Get Started Free
-          </Button>
+          <SignedOut>
+            <Link href="/sign-in">
+              <Button variant="outline" size="sm" className="hidden sm:flex">
+                Sign In
+              </Button>
+            </Link>
+            <Link href="/sign-up">
+              <Button
+                size="sm"
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                Get Started Free
+              </Button>
+            </Link>
+          </SignedOut>
+          <SignedIn>
+            <Link href="/dashboard">
+              <Button variant="outline" size="sm" className="hidden sm:flex">
+                Dashboard
+              </Button>
+            </Link>
+            <UserButton afterSignOutUrl="/" />
+          </SignedIn>
 
           <button
             onClick={() => setOpen(!open)}
@@ -171,9 +196,25 @@ export function Navbar() {
                   </Link>
                 ),
               )}
-              <Button variant="outline" size="sm">
-                Sign In
-              </Button>
+              <SignedOut>
+                <Link href="/sign-in" onClick={() => setOpen(false)}>
+                  <Button variant="outline" size="sm">
+                    Sign In
+                  </Button>
+                </Link>
+                <Link href="/sign-up" onClick={() => setOpen(false)}>
+                  <Button size="sm" className="bg-blue-600 text-white">
+                    Get Started Free
+                  </Button>
+                </Link>
+              </SignedOut>
+              <SignedIn>
+                <Link href="/dashboard" onClick={() => setOpen(false)}>
+                  <Button variant="outline" size="sm">
+                    Dashboard
+                  </Button>
+                </Link>
+              </SignedIn>
             </div>
           </motion.div>
         )}

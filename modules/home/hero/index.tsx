@@ -5,9 +5,13 @@ import { Button } from "../../app/button";
 import { useScrollAnimation } from "../../hooks/use-scroll-animation";
 import TransformationAnimation from "./index/TransformationAnimation";
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { toast } from "sonner";
 
 export function Hero() {
   const { ref: contentRef, isVisible: contentVisible } = useScrollAnimation();
+  const router = useRouter();
 
   return (
     <section
@@ -62,34 +66,58 @@ export function Hero() {
               <Button
                 type="button"
                 size="lg"
+                onClick={() => router.push("/sign-up")}
                 className="bg-blue-600 hover:bg-blue-700 text-sm text-white px-5 h-14 flex items-center justify-center rounded-2xl shadow-xl shadow-blue-500/20 group"
               >
                 Start Building Free
                 <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform duration-200 ease-out" />
               </Button>
-              <Button
-                type="button"
-                size="lg"
-                variant="secondary"
-                className="h-14 px-8 rounded-2xl border-slate-800 hover:bg-slate-900"
-              >
-                Read Docs
-              </Button>
+              <Link href="/docs" className="block">
+                <Button
+                  type="button"
+                  size="lg"
+                  variant="secondary"
+                  className="h-14 px-8 rounded-2xl border-slate-800 hover:bg-slate-900 cursor-pointer w-full sm:w-auto"
+                >
+                  Read Docs
+                </Button>
+              </Link>
             </div>
 
-            <div className="flex flex-wrap gap-6 text-sm text-slate-500 pt-8 border-t border-slate-800/50">
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-emerald-500" />
-                <span>Enterprise Grade Security</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Zap className="w-4 h-4 text-amber-500" />
-                <span>
-                  <span className="text-slate-200 font-semibold">100ms</span>{" "}
-                  Avg Render Time
-                </span>
-              </div>
-            </div>
+            {/* <div className="flex flex-wrap gap-6 text-sm text-slate-500 pt-8 border-t border-slate-800/50">
+              <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
+                <li>
+                  <button
+                    onClick={() =>
+                      toast.info("Feature highlight scrolling coming in V1.1")
+                    }
+                    className="hover:text-foreground cursor-pointer text-left transition-colors"
+                  >
+                    Features
+                  </button>
+                </li>
+                <li>
+                  <Link href="/#pricing" className="hover:text-foreground">
+                    Pricing
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/docs" className="hover:text-foreground">
+                    API
+                  </Link>
+                </li>
+                <li>
+                  <button
+                    onClick={() =>
+                      toast.info("Security compliance portal coming soon")
+                    }
+                    className="hover:text-foreground cursor-pointer text-left transition-colors"
+                  >
+                    Security
+                  </button>
+                </li>
+              </ul>
+            </div> */}
           </motion.div>
 
           <motion.div

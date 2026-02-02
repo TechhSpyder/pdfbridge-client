@@ -1,6 +1,7 @@
 "use client";
 
 import { Circle } from "lucide-react";
+import Link from "next/link";
 
 export function Footer() {
   return (
@@ -29,6 +30,19 @@ export function Footer() {
               <li>
                 <a href="/security" className="hover:text-foreground">
                   Security
+                </a>
+              </li>
+              <li>
+                <a href="/docs/changelog" className="hover:text-foreground">
+                  Changelog
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/docs/migration-guides"
+                  className="hover:text-foreground"
+                >
+                  Migration Guides
                 </a>
               </li>
             </ul>
@@ -81,10 +95,14 @@ export function Footer() {
           {/* Status */}
           <div>
             <h4 className="text-sm font-semibold">Status</h4>
-            <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
+            <a
+              href="https://status.pdfbridge.xyz"
+              target="_blank"
+              className="mt-4 flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
               <Circle className="h-3 w-3 fill-green-500 text-green-500" />
               All systems operational
-            </div>
+            </a>
           </div>
         </div>
 
@@ -93,6 +111,18 @@ export function Footer() {
           <span>
             © {new Date().getFullYear()} PDFBridge. All rights reserved.
           </span>
+          <div>
+            <p>Owned and operated by Francis Bello</p>
+            <p>
+              Contact:{" "}
+              <Link
+                className="hover:text-foreground font-semibold"
+                href="mailto:info@pdfbridge.xyz"
+              >
+                info@pdfbridge.xyz
+              </Link>
+            </p>
+          </div>
           <span>Built for developers.</span>
         </div>
       </div>

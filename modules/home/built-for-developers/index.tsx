@@ -15,7 +15,7 @@ const snippets: CodeSnippet[] = [
   {
     label: "JavaScript",
     lang: "javascript",
-    code: `const res = await fetch('https://api.pdfbridge.io/v1/convert', {
+    code: `const res = await fetch('https://api.pdfbridge.xyz/v1/convert', {
   method: 'POST',
   headers: { 'x-api-key': 'your_key', 'Content-Type': 'application/json' },
   body: JSON.stringify({
@@ -36,7 +36,8 @@ data = {
     "url": "https://example.com",
     "options": {"format": "A4", "printBackground": True}
 }
-res = requests.post('https://api.pdfbridge.io/v1/convert', headers=headers, json=data)
+res = requests.post('https://api.pdfbridge.xyz/v1/convert', 
+headers=headers, json=data)
 status_url = res.json()['statusUrl']`,
   },
   {
@@ -55,10 +56,12 @@ import (
 func main() {
   payload := map[string]interface{}{
     "url": "https://example.com",
-    "options": map[string]interface{}{"format": "A4", "printBackground": true},
+    "options": map[string]interface{}{"format": "A4", 
+    "printBackground": true},
   }
   body, _ := json.Marshal(payload)
-  req, _ := http.NewRequest("POST", "https://api.pdfbridge.io/v1/convert", bytes.NewBuffer(body))
+  req, _ := http.NewRequest("POST", "https://api.pdfbridge.xyz/v1/convert", 
+  bytes.NewBuffer(body))
   req.Header.Set("x-api-key", "your_key")
   req.Header.Set("Content-Type", "application/json")
   client := &http.Client{}
@@ -72,7 +75,7 @@ func main() {
     label: "PHP",
     lang: "php",
     code: `<?php
-$ch = curl_init('https://api.pdfbridge.io/v1/convert');
+$ch = curl_init('https://api.pdfbridge.xyz/v1/convert');
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
   'x-api-key: your_key',
   'Content-Type: application/json'
@@ -120,7 +123,7 @@ export function BuiltForDevelopers() {
               <button
                 key={tab.label}
                 onClick={() => setActiveTab(idx)}
-                className={`px-4 py-2 font-medium transition-colors duration-200 ${
+                className={`px-4 py-2 font-medium transition-colors duration-200 cursor-pointer ${
                   activeTab === idx
                     ? "border-b-2 border-primary text-primary"
                     : "text-muted-foreground hover:text-foreground"
@@ -159,7 +162,7 @@ export function BuiltForDevelopers() {
           </div> */}
           {/* Code Block */}
           <div
-            className={`relative mt-6 max-w-full rounded-xl border border-border bg-muted overflow-hidden transition-all duration-700 ${
+            className={`relative mt-6 max-w-3xl rounded-xl border border-border bg-muted overflow-hidden transition-all duration-700 ${
               isVisible
                 ? "translate-y-0 opacity-100"
                 : "translate-y-8 opacity-0"
