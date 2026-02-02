@@ -76,7 +76,24 @@ function SidebarContent({ isSmallScreen, setSidebarOpen }: any) {
       </div>
 
       <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-        {NAV_LINKS.map((link) => {
+        {NAV_LINKS.filter((link) => {
+          if (link.label === "Blog Journal") {
+            const userRole =
+              (user?.publicMetadata?.role as string) ||
+              (user?.publicMetadata?.userRole as string) ||
+              "";
+            const primaryEmail = user?.primaryEmailAddress?.emailAddress || "";
+            const allowedEmails = [
+              "admin@pdfbridge.xyz",
+              "bellofrancis87@gmail.com",
+            ]; // Fallback or sync with actions
+            return (
+              userRole === "platform-owner" ||
+              allowedEmails.includes(primaryEmail.toLowerCase())
+            );
+          }
+          return true;
+        }).map((link) => {
           const Icon = link.icon;
           const isActive = pathname === link.href;
 

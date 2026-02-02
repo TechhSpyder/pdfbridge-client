@@ -29,9 +29,10 @@ type NavItem = ScrollNavItem | LinkNavItem;
 
 const NAV_ITEMS: NavItem[] = [
   { label: "Features", id: "features", type: "scroll" },
-  // { label: "Pricing", id: "pricing", type: "scroll" },
+  { label: "Pricing", id: "pricing", type: "scroll" },
   { label: "FAQ", id: "faq", type: "scroll" },
   { label: "Docs", href: "/docs", type: "link" },
+  { label: "Insights", href: "/insights", type: "link" },
 ];
 
 export function Navbar() {
@@ -98,7 +99,7 @@ export function Navbar() {
                 key={item.id}
                 onClick={() => scrollTo(item.id)}
                 className={cn(
-                  "relative text-sm transition-colors",
+                  "relative text-sm transition-colors cursor-pointer",
                   activeSection === item.id
                     ? "text-foreground"
                     : "text-muted-foreground hover:text-foreground",
