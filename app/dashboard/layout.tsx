@@ -2,8 +2,10 @@
 
 import { Breadcrumbs, MobileTopBar, Sidebar } from "@/modules/dashboard";
 import { useUser } from "@clerk/nextjs";
-import { MailWarning, ShieldCheck } from "lucide-react";
+import { MailWarning } from "lucide-react";
 import { Button } from "@/modules/app/button";
+
+export const dynamic = "force-dynamic";
 
 export default function DashboardLayout({
   children,
