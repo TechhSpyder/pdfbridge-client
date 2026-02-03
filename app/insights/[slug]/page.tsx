@@ -24,7 +24,6 @@ export default async function InsightArticlePage({ params }: PostPageProps) {
   const { slug } = await params;
   const post = await getPostBySlug(slug);
   const recentPosts = await getRecentPosts(2);
-  console.log(post, "postss");
 
   if (!post) {
     notFound();

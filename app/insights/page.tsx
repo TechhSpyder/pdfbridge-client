@@ -7,7 +7,6 @@ export const revalidate = 3600; // Revalidate every hour
 
 export default async function InsightsPage() {
   const posts = await getPublishedPosts();
-  console.log(posts);
 
   return (
     <div className="min-h-screen bg-slate-950 text-white selection:bg-blue-500/30">
