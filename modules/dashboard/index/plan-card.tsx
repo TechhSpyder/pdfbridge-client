@@ -1,9 +1,9 @@
-import { Button } from "@/modules/app/button";
+import { Button, SmartContactLink } from "@/modules/app";
+import { GlowCard } from "./glow-card";
 import { PLAN_METADATA } from "@/modules/constants";
 import { cn } from "@/utils";
 import { Check, Loader2, Zap } from "lucide-react";
 import React, { useState } from "react";
-import { GlowCard } from "./glow-card";
 
 export function PlanCard({
   plan,
@@ -151,13 +151,17 @@ export function PlanCard({
               <div className="w-full py-2.5 px-4 rounded-xl bg-slate-800 text-slate-400 text-center text-sm font-bold border border-white/5">
                 Current Plan
               </div>
+            ) : isEnterprise ? (
+              <SmartContactLink
+                email="support@pdfbridge.xyz"
+                isButton
+                className="w-full h-12 shadow-2xl active:scale-95 transition-all text-sm font-black bg-slate-700 hover:bg-slate-600 rounded-md py-2 px-4 flex items-center justify-center text-white"
+              >
+                Contact Support
+              </SmartContactLink>
             ) : (
               <Button
                 onClick={() => {
-                  if (isEnterprise) {
-                    window.location.href = "mailto:support@pdfbridge.xyz";
-                    return;
-                  }
                   onCheckout(plan.id, interval);
                 }}
                 disabled={isCheckoutPending && selectedPlanId !== null}
@@ -171,8 +175,6 @@ export function PlanCard({
               >
                 {isCheckoutPending && selectedPlanId === plan.id ? (
                   <Loader2 className="h-5 w-5 animate-spin mx-auto" />
-                ) : isEnterprise ? (
-                  "Contact Support"
                 ) : isFree ? (
                   "Downgrade to Free"
                 ) : (

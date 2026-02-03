@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { FileText, Link, Globe, CheckCircle } from "lucide-react";
+import NextImage from "next/image";
 
 export default function TransformationAnimation() {
   const [stage, setStage] = useState(0); // 0: URL, 1: Loading, 2: Webpage, 3: PDF Ready
@@ -134,13 +135,19 @@ export default function TransformationAnimation() {
               <div className="w-2 h-2 rounded-full bg-amber-500/50" />
               <div className="w-2 h-2 rounded-full bg-emerald-500/50" />
             </div>
-            <motion.img
-              src="/mock_webpage.png"
-              alt="Webpage Preview"
-              className="w-full h-auto brightness-90 contrast-110"
+            <motion.div
+              className="relative aspect-video overflow-hidden"
               initial={{ filter: "blur(10px)" }}
               animate={{ filter: "blur(0px)" }}
-            />
+            >
+              <NextImage
+                src="/mock_webpage.png"
+                alt="Webpage Preview"
+                fill
+                className="object-cover brightness-90 contrast-110"
+              />
+            </motion.div>
+
             <motion.div
               className="absolute inset-0 bg-blue-600 shadow-[0_0_100px_rgba(37,99,235,0.4)] mix-blend-overlay"
               initial={{ opacity: 0 }}
@@ -160,7 +167,7 @@ export default function TransformationAnimation() {
           >
             <div className="absolute inset-0 bg-blue-500/40 blur-[120px] scale-150 animate-pulse" />
 
-            <motion.div className="relative glass rounded-[2.5rem] p-1 shadow-[0_0_50px_rgba(59,130,246,0.2)] bg-gradient-to-br from-blue-600/20 to-indigo-600/20 animate-float">
+            <motion.div className="relative glass rounded-[2.5rem] p-1 shadow-[0_0_50px_rgba(59,130,246,0.2)] bg-linear-to-br from-blue-600/20 to-indigo-600/20 animate-float">
               <div className="bg-slate-950/80 rounded-[2.3rem] p-8 flex flex-col items-center">
                 <div className="w-24 h-32 bg-slate-900 border-2 border-slate-800 rounded-xl mb-6 relative overflow-hidden group-hover:border-blue-500/50 transition-colors">
                   <div className="absolute top-0 left-0 w-8 h-8 bg-blue-600/30 rounded-br-xl border-r border-b border-blue-500/50" />

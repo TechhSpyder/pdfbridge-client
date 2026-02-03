@@ -8,7 +8,7 @@ import {
   useCancelSubscription,
   usePlans,
 } from "@/modules/hooks/queries";
-import { Button } from "@/modules/app/button";
+import { Button, SmartContactLink } from "@/modules/app";
 import {
   ShieldCheck,
   Globe,
@@ -21,8 +21,8 @@ import {
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import Link from "next/link";
 import { PlanCard, PlanCardSkeleton } from "../index/plan-card";
+import Link from "next/link";
 
 export function BillingPage() {
   const { data: userData, isLoading: userLoading, refetch } = useMe();
@@ -236,7 +236,7 @@ export function BillingPage() {
       </div>
 
       {/* Pricing Grid */}
-      <div className="grid gap-8 md:grid-cols-3">
+      <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
         {Loaders
           ? Array.from({ length: 3 }).map((_, index) => (
               <PlanCardSkeleton key={index} />
@@ -349,13 +349,9 @@ export function BillingPage() {
         </div>
 
         <div className="p-8 rounded-3xl border border-muted bg-slate-900/40 space-y-6 flex flex-col justify-center">
-          <div
-            onClick={() =>
-              toast.info("Enterprise team is reviewing your volume needs", {
-                description: "We will contact you via email.",
-              })
-            }
-            className="flex items-center gap-4 p-4 rounded-2xl bg-black/40 border border-white/5 group cursor-pointer transition-all hover:border-blue-500/30"
+          <SmartContactLink
+            email="sales@pdfbridge.xyz"
+            className="flex items-center gap-4 p-4 rounded-2xl bg-black/40 border border-white/5 group cursor-pointer transition-all hover:border-blue-500/30 text-left"
           >
             <HelpCircle className="h-6 w-6 text-slate-500 group-hover:text-blue-400 transition-colors" />
             <div className="flex-1">
@@ -367,16 +363,11 @@ export function BillingPage() {
               </p>
             </div>
             <ChevronRight className="h-4 w-4 text-slate-600 group-hover:translate-x-1 transition-transform" />
-          </div>
+          </SmartContactLink>
 
-          <div
-            onClick={() =>
-              toast.info("Refund Request portal", {
-                description:
-                  "Email support@pdfbridge.xyz for immediate processing.",
-              })
-            }
-            className="flex items-center gap-4 p-4 rounded-2xl bg-black/40 border border-white/5 group cursor-pointer transition-all hover:border-emerald-500/30"
+          <SmartContactLink
+            email="support@pdfbridge.xyz"
+            className="flex items-center gap-4 p-4 rounded-2xl bg-black/40 border border-white/5 group cursor-pointer transition-all hover:border-emerald-500/30 text-left"
           >
             <ShieldCheck className="h-6 w-6 text-slate-500 group-hover:text-emerald-400 transition-colors" />
             <div className="flex-1">
@@ -388,7 +379,7 @@ export function BillingPage() {
               </p>
             </div>
             <ChevronRight className="h-4 w-4 text-slate-600 group-hover:translate-x-1 transition-transform" />
-          </div>
+          </SmartContactLink>
         </div>
       </div>
     </div>

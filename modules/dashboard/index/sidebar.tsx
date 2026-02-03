@@ -5,14 +5,19 @@ import { cn } from "@/utils";
 import { useEffect, useRef, useState } from "react";
 import { useSidebarStore } from "@/modules/stores";
 import { NAV_LINKS } from "@/modules/constants";
-import { Button } from "@/modules/app/button";
+import {
+  Button,
+  SmartContactLink,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/modules/app";
 import { useClerk, useUser } from "@clerk/nextjs";
 import { LogOut, MessageCircle, Check, ChevronDown, Zap } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import { useClipboard } from "@/modules/hooks/use-copy-to-clipboard";
-import { Popover, PopoverContent, PopoverTrigger } from "@/modules/app/popover";
 import { useWindowSize } from "@uidotdev/usehooks";
 
 const sidebarVariants: Variants = {
@@ -230,13 +235,8 @@ function SidebarContent({ isSmallScreen, setSidebarOpen }: any) {
                       </div>
                     </div>
 
-                    <button
-                      onClick={() =>
-                        copy(
-                          "info@pdfbridge.xyz",
-                          "Email address copied to clipboard",
-                        )
-                      }
+                    <SmartContactLink
+                      email="info@pdfbridge.xyz"
                       className={cn(
                         "flex items-center gap-3 px-3 py-2 text-slate-400 w-full hover:text-white hover:bg-white/5 border border-transparent rounded-lg text-sm font-medium transition-all duration-200 group",
                       )}
@@ -247,8 +247,7 @@ function SidebarContent({ isSmallScreen, setSidebarOpen }: any) {
                         )}
                       />
                       Contact us
-                      {copied && <Check className="h-4 w-4 text-blue-400" />}
-                    </button>
+                    </SmartContactLink>
 
                     <button
                       onClick={() => signOut()}
@@ -278,7 +277,7 @@ export function Sidebar() {
     setMounted(true);
   }, []);
 
-  const isSmallScreen = width && width < 768;
+  const isSmallScreen = width && width < 1024;
 
   // Close sidebar on outside click (mobile only)
   useEffect(() => {
@@ -303,7 +302,7 @@ export function Sidebar() {
           <>
             <motion.div
               key="overlay"
-              className="fixed inset-0 bg-black/60 z-50"
+              className="fixed inset-0 bg-black/60 z-100"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -312,7 +311,7 @@ export function Sidebar() {
             <motion.div
               ref={ref}
               key="sidebar"
-              className="z-50 w-64 bg-sidebar border-r border-muted flex flex-col fixed inset-y-0 left-0"
+              className="z-150 w-64 bg-sidebar border-r border-muted flex flex-col fixed inset-y-0 left-0"
               initial="hidden"
               animate="visible"
               exit="exit"
@@ -328,7 +327,7 @@ export function Sidebar() {
       </AnimatePresence>
 
       {/* Desktop Sidebar (Always CSS visible, never flashes) */}
-      <div className="hidden md:flex z-40 w-64 bg-sidebar border-r border-muted flex-col sticky top-0 h-screen shrink-0">
+      <div className="hidden lg:flex z-40 w-64 bg-sidebar border-r border-muted flex-col sticky top-0 h-screen shrink-0">
         <SidebarContent isSmallScreen={false} setSidebarOpen={setSidebarOpen} />
       </div>
     </>

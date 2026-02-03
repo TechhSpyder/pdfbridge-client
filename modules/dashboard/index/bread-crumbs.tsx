@@ -30,7 +30,7 @@ export function Breadcrumbs() {
   });
 
   return (
-    <nav className="text-sm breadcrumbs p-6 items-center border-b border-b-muted h-20 sticky top-0 bg-background md:flex hidden z-50">
+    <nav className="text-sm breadcrumbs p-6 items-center border-b border-b-muted h-20 fixed top-12 w-full lg:sticky lg:top-0 bg-background md:flex hidden z-50">
       {breadcrumbs.map((crumb, idx) => (
         <span key={crumb.href} className="inline-flex items-center uppercase">
           {idx !== 0 && <span className="mx-1">{">"}</span>}

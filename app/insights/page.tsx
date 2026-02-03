@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { BookOpen, Calendar, User, ArrowRight, Sparkles } from "lucide-react";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600; // Revalidate every hour
 
 export default async function InsightsPage() {
   const posts = await getPublishedPosts();

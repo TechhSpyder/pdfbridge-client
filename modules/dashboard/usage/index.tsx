@@ -104,16 +104,16 @@ export function UsagePage() {
     document.body.removeChild(link);
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex h-[60vh] flex-col items-center justify-center space-y-4">
-        <Clock className="h-8 w-8 animate-spin text-blue-500" />
-        <p className="text-slate-500 text-sm animate-pulse">
-          Loading conversion history...
-        </p>
-      </div>
-    );
-  }
+  // if (isLoading) {
+  //   return (
+  //     <div className="flex h-[60vh] flex-col items-center justify-center space-y-4">
+  //       <Clock className="h-8 w-8 animate-spin text-blue-500" />
+  //       <p className="text-slate-500 text-sm animate-pulse">
+  //         Loading conversion history...
+  //       </p>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -172,7 +172,7 @@ export function UsagePage() {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-white/5 bg-slate-900/50 backdrop-blur-sm overflow-hidden shadow-2xl">
+      <div className="rounded-2xl border border-white/15 bg-slate-900/50 backdrop-blur-sm overflow-hidden shadow-2xl">
         <div className="overflow-x-auto scrollbar-hide">
           <table className="w-full text-left border-collapse min-w-[700px]">
             <thead>
@@ -197,8 +197,19 @@ export function UsagePage() {
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
-              {conversions.length > 0 ? (
+            <tbody className="divide-y divide-white/10">
+              {isLoading ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-24">
+                    <div className="flex flex-col items-center justify-center gap-3 text-slate-500">
+                      <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
+                      <span className="text-sm animate-pulse">
+                        Loading conversions…
+                      </span>
+                    </div>
+                  </td>
+                </tr>
+              ) : conversions.length > 0 ? (
                 conversions.map((job: any) => (
                   <tr
                     key={job.id}
