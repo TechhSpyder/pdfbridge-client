@@ -8,6 +8,7 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
+import NextImage from "next/image";
 
 export function Hero() {
   const { ref: contentRef, isVisible: contentVisible } = useScrollAnimation();
@@ -21,10 +22,12 @@ export function Hero() {
       {/* Premium Background Elements */}
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-[#020617]" />
-        <img
+        <NextImage
           src="/hero_bg.png"
           alt=""
-          className="absolute inset-0 w-full h-full object-cover opacity-40 mix-blend-luminosity"
+          fill
+          priority
+          className="object-cover opacity-40 mix-blend-luminosity"
         />
         <div className="absolute inset-0 bg-linear-to-b from-transparent via-[#020617]/50 to-[#020617]" />
       </div>

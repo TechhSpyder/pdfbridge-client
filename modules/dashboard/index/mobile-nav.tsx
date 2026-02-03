@@ -8,7 +8,7 @@ export function MobileTopBar() {
   const { sidebarOpen, setSidebarOpen } = useSidebarStore();
 
   return (
-    <div className="flex items-center justify-between md:hidden p-4 border-b border-muted bg-background sticky top-0 z-40">
+    <div className="flex items-center justify-between lg:hidden p-4 border-b border-muted bg-background fixed w-full top-0 z-40">
       <Link href="/" className="flex items-center gap-2">
         <Image
           src="/pdfbridge_logo.svg"

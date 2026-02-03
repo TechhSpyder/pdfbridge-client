@@ -4,7 +4,8 @@ import { cn } from "@/utils";
 import { useRef } from "react";
 
 type GlowCardProps = {
-  title: string;
+  title?: string;
+
   description?: string;
   icon?: React.ReactNode;
   sub?: string;
@@ -40,7 +41,7 @@ export function GlowCard({
       ref={cardRef}
       onMouseMove={handleMouseMove}
       className={cn(
-        "group relative overflow-hidden h-full rounded-2xl border border-border bg-background p-6 transition-shadow hover:shadow-lg",
+        "group relative overflow-hidden h-full rounded-2xl border border-muted bg-background p-6 transition-shadow hover:shadow-lg",
         className,
       )}
       style={{
