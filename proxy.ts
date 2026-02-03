@@ -1,22 +1,31 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
-const isProtectedRoute = createRouteMatcher(["/dashboard(.*)"]);
-const isPublicRoute = createRouteMatcher(["/", "/sign-in(.*)", "/sign-up(.*)"]);
+const isPublicRoute = createRouteMatcher([
+  "/",
+  "/sign-in(.*)",
+  "/sign-up(.*)",
+  "/insights(.*)",
+  "/docs(.*)",
+  "/privacy(.*)",
+  "/terms(.*)",
+]);
 
 export default clerkMiddleware(async (auth, req) => {
   const { userId } = await auth();
+  const isHomeOrAuth =
+    req.nextUrl.pathname === "/" ||
+    req.nextUrl.pathname.startsWith("/sign-in") ||
+    req.nextUrl.pathname.startsWith("/sign-up");
 
-  // If user is logged in and trying to access the marketing page or auth pages, redirect to dashboard
-  if (
-    userId &&
-    (req.nextUrl.pathname === "/" ||
-      req.nextUrl.pathname.startsWith("/sign-in") ||
-      req.nextUrl.pathname.startsWith("/sign-up"))
-  ) {
+  // If user is logged in and trying to access the root homepage or auth pages, redirect to dashboard
+  if (userId && isHomeOrAuth) {
     return Response.redirect(new URL("/dashboard", req.url));
   }
 
-  if (isProtectedRoute(req)) await auth.protect();
+  // Protect all routes that are NOT public
+  if (!isPublicRoute(req)) {
+    await auth.protect();
+  }
 });
 
 export const config = {

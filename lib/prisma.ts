@@ -23,8 +23,8 @@ const globalForPrisma = global as unknown as {
 export const prisma =
   globalForPrisma.prisma ||
   new PrismaClient({
-    log: ["query"], // keep your logging if you want
-    adapter, // <-- this is required in Prisma 7+
+    log: ["query"],
+    adapter,
   });
 
 // Cache the client in dev to avoid hot-reload issues

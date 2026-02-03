@@ -7,11 +7,12 @@ export const dynamic = "force-dynamic";
 
 export default async function InsightsPage() {
   const posts = await getPublishedPosts();
+  console.log(posts);
 
   return (
     <div className="min-h-screen bg-slate-950 text-white selection:bg-blue-500/30">
       {/* Hero Section */}
-      <section className="relative pt-32 pb-20 overflow-hidden">
+      <section className="relative pt-20 pb-20 overflow-hidden">
         <div className="absolute inset-0 bg-linear-to-b from-blue-600/10 via-transparent to-transparent pointer-events-none" />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[500px] bg-blue-600/5 blur-[120px] rounded-full" />
 
@@ -53,7 +54,7 @@ export default async function InsightsPage() {
               <Link
                 key={post.id}
                 href={`/insights/${post.slug}`}
-                className="group relative flex flex-col bg-slate-900/30 border border-white/5 rounded-3xl overflow-hidden hover:border-blue-500/30 transition-all duration-500 hover:shadow-2xl hover:shadow-blue-900/10 hover:-translate-y-2"
+                className="group relative flex flex-col bg-slate-900/30 border border-white/15 rounded-3xl overflow-hidden hover:border-blue-500/30 transition-all duration-500 hover:shadow-2xl hover:shadow-blue-900/10 hover:-translate-y-2"
               >
                 {/* Image Container */}
                 <div className="aspect-video relative overflow-hidden">
