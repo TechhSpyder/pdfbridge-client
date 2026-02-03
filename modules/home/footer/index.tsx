@@ -2,6 +2,7 @@
 
 import { Circle } from "lucide-react";
 import Link from "next/link";
+import { SmartContactLink } from "@/modules/app/smart-contact-link";
 
 export function Footer() {
   return (
@@ -115,12 +116,10 @@ export function Footer() {
             <p>Owned and operated by Francis Bello</p>
             <p>
               Contact:{" "}
-              <Link
-                className="hover:text-foreground font-semibold"
-                href="mailto:info@pdfbridge.xyz"
-              >
-                info@pdfbridge.xyz
-              </Link>
+              <SmartContactLink
+                email="info@pdfbridge.xyz"
+                className="hover:text-foreground font-semibold underline decoration-blue-500/30 underline-offset-4"
+              />
             </p>
           </div>
           <span>Built for developers.</span>

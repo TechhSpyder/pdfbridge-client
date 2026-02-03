@@ -1,26 +1,25 @@
-"use client";
-
 import { Breadcrumbs, MobileTopBar, Sidebar } from "@/modules/dashboard";
-import { useUser } from "@clerk/nextjs";
+import { currentUser } from "@clerk/nextjs/server";
 import { MailWarning } from "lucide-react";
 import { Button } from "@/modules/app/button";
+import { redirect } from "next/navigation";
 
-export const dynamic = "force-dynamic";
-
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { user, isLoaded } = useUser();
+  const user = await currentUser();
 
-  if (!isLoaded) return null;
+  if (!user) {
+    redirect("/sign-in");
+  }
 
-  const isVerified = user?.emailAddresses.some(
-    (email) => email.verification.status === "verified",
+  const isVerified = user.emailAddresses.some(
+    (email) => email.verification?.status === "verified",
   );
 
-  if (!isVerified && user) {
+  if (!isVerified) {
     return (
       <div className="min-h-screen bg-[#020617] text-white flex items-center justify-center p-6">
         <div className="max-w-md w-full p-8 rounded-3xl bg-slate-900/40 border border-white/5 space-y-6 text-center animate-in fade-in zoom-in-95 duration-500">
@@ -35,12 +34,20 @@ export default function DashboardLayout({
             verification before you can access the PDFBridge dashboard.
           </p>
           <div className="pt-4">
-            <Button
-              onClick={() => window.location.reload()}
-              className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold h-12"
+            <form
+              action={async () => {
+                "use server";
+                // This is a placeholder for a server action if needed,
+                // but purely for UI we can just have a button that suggests reload
+              }}
             >
-              I've verified my email
-            </Button>
+              <Button
+                type="submit"
+                className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold h-12"
+              >
+                I've verified my email
+              </Button>
+            </form>
           </div>
           <p className="text-[10px] font-black uppercase tracking-widest text-slate-600">
             Check your inbox at{" "}
@@ -56,13 +63,14 @@ export default function DashboardLayout({
   return (
     <div className="min-h-screen bg-[#020617] text-white flex">
       {/* Dashboard Sidebar */}
-
       <Sidebar />
 
-      <main className="w-full">
+      <main className="w-full overflow-hidden">
         <MobileTopBar />
         <Breadcrumbs />
-        <div className="px-4 sm:px-6 lg:px-8 w-full py-6 z-50">{children}</div>
+        <div className="px-4 sm:px-6 lg:px-8 w-full py-6 z-50 max-lg:pt-36">
+          {children}
+        </div>
       </main>
     </div>
   );
