@@ -2,7 +2,7 @@ import { getPostBySlug, getRecentPosts } from "../actions";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import DOMPurify from "isomorphic-dompurify";
+// import DOMPurify from "isomorphic-dompurify";
 import {
   ChevronLeft,
   Calendar,
@@ -12,6 +12,7 @@ import {
   ArrowRight,
   BookMarked,
 } from "lucide-react";
+import sanitizeHtml from "sanitize-html";
 
 export const dynamic = "force-dynamic";
 
@@ -23,6 +24,7 @@ export default async function InsightArticlePage({ params }: PostPageProps) {
   const { slug } = await params;
   const post = await getPostBySlug(slug);
   const recentPosts = await getRecentPosts(2);
+  console.log(post, "postss");
 
   if (!post) {
     notFound();
@@ -41,7 +43,7 @@ export default async function InsightArticlePage({ params }: PostPageProps) {
       </div>
 
       {/* Navigation Header */}
-      <div className="fixed top-0 inset-x-0 h-20 bg-slate-950/80 backdrop-blur-xl border-b border-white/5 z-50 transition-all duration-300">
+      <div className="fixed top-16 inset-x-0 h-20 bg-slate-950/80 backdrop-blur-xl border-b border-white/5 z-50 transition-all duration-300">
         <div className="max-w-7xl mx-auto h-full px-6 flex items-center justify-between">
           <Link
             href="/insights"
@@ -54,21 +56,15 @@ export default async function InsightArticlePage({ params }: PostPageProps) {
             Back to Insights
           </Link>
           <div className="hidden md:flex items-center gap-4">
-            <button className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-slate-400 hover:text-white hover:bg-white/10 transition-all">
+            <button className="p-2.5 cursor-pointer rounded-xl bg-white/5 border border-white/10 text-slate-400 hover:text-white hover:bg-white/10 transition-all">
               <Share2 size={18} />
             </button>
-            <Link
-              href="/"
-              className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-black uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20"
-            >
-              Get Started
-            </Link>
           </div>
         </div>
       </div>
 
       {/* Hero Header */}
-      <header className="pt-40 pb-12 relative z-10 px-6">
+      <header className="pt-28 pb-12 relative z-10 px-6">
         <div className="max-w-4xl mx-auto">
           {post.category && (
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-600/10 border border-blue-500/20 text-blue-400 text-xs font-black uppercase tracking-widest mb-8">
@@ -141,11 +137,20 @@ export default async function InsightArticlePage({ params }: PostPageProps) {
 
           {/* Article Content */}
           <div className="prose prose-invert prose-blue prose-lg max-w-none prose-headings:font-black prose-headings:tracking-tighter prose-p:font-medium prose-p:text-slate-400 prose-p:leading-relaxed prose-strong:text-white prose-a:text-blue-400 prose-code:text-blue-200">
-            <div
+            {/* <div
               dangerouslySetInnerHTML={{
                 __html: DOMPurify.sanitize(
                   post.content.replace(/\n/g, "<br/>"),
                 ),
+              }}
+            /> */}
+            <div
+              dangerouslySetInnerHTML={{
+                __html: sanitizeHtml(post.content.replace(/\n/g, "<br/>"), {
+                  allowedTags: sanitizeHtml.defaults.allowedTags.concat([
+                    "img",
+                  ]),
+                }),
               }}
             />
           </div>
