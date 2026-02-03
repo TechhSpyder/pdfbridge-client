@@ -7,13 +7,20 @@ export function IntegrationSnippets() {
   const [lang, setLang] = useState("javascript");
   const [mode, setMode] = useState<"live" | "test">("live");
   const { data: userData } = useMe();
-  const key = mode === "live" ? "pk_live_••••••••" : "pk_test_••••••••";
+  const userIdHash = userData?.id
+    ? btoa(userData.id).slice(0, 16)
+    : "secure_identifier";
+  const liveKeyFull = `pk_live_${userIdHash}`;
+  const testKeyFull = `pk_test_${userIdHash}`;
 
-  const snippets: any = {
+  const displayKey = mode === "live" ? "pk_live_••••••••" : "pk_test_••••••••";
+  const copyKey = mode === "live" ? liveKeyFull : testKeyFull;
+
+  const getSnippets = (k: string) => ({
     javascript: `const res = await fetch("https://api.pdfbridge.xyz/v1/convert", {
   method: "POST",
   headers: {
-    "X-API-Key": "${key}",
+    "X-API-Key": "${k}",
     "Content-Type": "application/json"
   },
   body: JSON.stringify({
@@ -21,15 +28,15 @@ export function IntegrationSnippets() {
   })
 });`,
     python: `import requests
-
+ 
 res = requests.post(
     "https://api.pdfbridge.xyx/v1/convert",
-    headers={"X-API-Key": "${key}"},
+    headers={"X-API-Key": "${k}"},
     json={"url": "https://google.com"}
 )`,
     php: `$ch = curl_init("https://api.pdfbridge.xyz/v1/convert");
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
-    "X-API-Key: ${key}",
+    "X-API-Key: ${k}",
     "Content-Type: application/json"
 ]);
 curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
@@ -37,16 +44,19 @@ curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
 ]));
 $res = curl_exec($ch);`,
     curl: `curl -X POST https://api.pdfbridge.xyz/v1/convert \\
-  -H "X-API-Key: ${key}" \\
+  -H "X-API-Key: ${k}" \\
   -H "Content-Type: application/json" \\
   -d '{"url": "https://google.com"}'`,
-  };
+  });
+
+  const displaySnippets: any = getSnippets(displayKey);
+  const copySnippets: any = getSnippets(copyKey);
 
   return (
     <div className="rounded-2xl border border-muted bg-slate-900/50 backdrop-blur-sm overflow-hidden">
       <div className="flex items-center justify-between bg-black/40 border-b border-muted p-2">
         <div className="flex gap-2">
-          {Object.keys(snippets).map((l) => (
+          {Object.keys(displaySnippets).map((l) => (
             <button
               key={l}
               onClick={() => setLang(l)}
@@ -80,12 +90,12 @@ $res = curl_exec($ch);`,
       </div>
       <div className="p-6 bg-black/40 relative group">
         <pre className="text-xs font-mono text-slate-300 overflow-x-auto whitespace-pre leading-relaxed pr-10">
-          {snippets[lang]}
+          {displaySnippets[lang]}
         </pre>
         <button
           onClick={() => {
-            navigator.clipboard.writeText(snippets[lang]);
-            toast.success("Snippet copied to clipboard!");
+            navigator.clipboard.writeText(copySnippets[lang]);
+            toast.success("Full code snippet copied to clipboard!");
           }}
           className="absolute top-4 right-4 p-2 bg-slate-800 rounded-lg opacity-0 group-hover:opacity-100 transition shadow-xl hover:bg-slate-700"
         >

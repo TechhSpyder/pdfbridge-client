@@ -45,9 +45,14 @@ export function ApiKeysPage() {
   };
 
   const { data: userData } = useMe();
-  const keyHint = userData?.id
-    ? `${btoa(userData.id)}.••••••••`
-    : "sk_loading_••••••••";
+  const userIdHash = userData?.id
+    ? btoa(userData.id).slice(0, 16)
+    : "secure_identifier";
+  const liveKeyFull = `pk_live_${userIdHash}${userData?.createdAt ? new Date(userData.createdAt).getTime().toString(16) : "0000"}`;
+  const testKeyFull = `pk_test_${userIdHash}${userData?.createdAt ? new Date(userData.createdAt).getTime().toString(16) : "0000"}`;
+
+  const liveKeyHint = "pk_live_••••••••";
+  const testKeyHint = "pk_test_••••••••";
 
   return (
     <div className="max-w-4xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -133,7 +138,7 @@ export function ApiKeysPage() {
                         Live Identifier
                       </span>
                       <code className="text-sm font-mono text-slate-400 truncate">
-                        pk_live_••••••••
+                        {liveKeyHint}
                       </code>
                     </div>
                     <Button
@@ -170,7 +175,7 @@ export function ApiKeysPage() {
                         Test Identifier
                       </span>
                       <code className="text-sm font-mono text-slate-400 truncate">
-                        pk_test_••••••••
+                        {testKeyHint}
                       </code>
                     </div>
                     <Button
