@@ -309,7 +309,7 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
 
       <div className="mt-8 space-y-6">
         {/* Social Buttons */}
-        <div className="grid grid-cols-2 gap-4">
+        {/* <div className="grid grid-cols-2 gap-4">
           <button
             onClick={() => handleSocialSignIn("oauth_google")}
             disabled={loadingGoogle || loadingGithub}
@@ -351,7 +351,7 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
             )}
             <span>GitHub</span>
           </button>
-        </div>
+        </div> */}
 
         {/* <div className="relative flex items-center py-4">
           <div className="grow border-t border-white/10"></div>
