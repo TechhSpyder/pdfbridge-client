@@ -23,6 +23,13 @@ import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { PlanCard, PlanCardSkeleton } from "../index/plan-card";
 import Link from "next/link";
+import Script from "next/script";
+
+declare global {
+  interface Window {
+    Paddle?: any;
+  }
+}
 
 export function BillingPage() {
   const { data: userData, isLoading: userLoading, refetch } = useMe();
@@ -76,7 +83,7 @@ export function BillingPage() {
     }
   }, [searchParams, verifyMutation, refetch]);
 
-  const provider = userData?.region === "NG" ? "paystack" : "lemonsqueezy";
+  const provider = userData?.region === "NG" ? "paystack" : "paddle";
 
   if (plansError) {
     return (
@@ -109,14 +116,42 @@ export function BillingPage() {
         callbackUrl: `${window.location.origin}/dashboard/billing?success=true`,
       });
 
-      const checkoutUrl = response.url || response.authorization_url;
-      if (checkoutUrl) {
-        window.location.href = checkoutUrl;
-      } else if (response.success) {
-        toast.success(response.message || "Account upgraded successfully!", {
-          id: tId,
+      if (response.provider === "paddle") {
+        if (!window.Paddle) {
+          throw new Error(
+            "Paddle.js failed to load. Please refresh and try again.",
+          );
+        }
+        window.Paddle.Checkout.open({
+          settings: {
+            displayMode: "overlay",
+            theme: "dark",
+            locale: "en",
+          },
+          items: [
+            {
+              priceId: response.priceId,
+              quantity: 1,
+            },
+          ],
+          customer: {
+            email: response.email,
+          },
+          customData: {
+            userId: response.userId,
+            planId: planId,
+          },
         });
-        refetch();
+      } else {
+        const checkoutUrl = response.url || response.authorization_url;
+        if (checkoutUrl) {
+          window.location.href = checkoutUrl;
+        } else if (response.success) {
+          toast.success(response.message || "Account upgraded successfully!", {
+            id: tId,
+          });
+          refetch();
+        }
       }
     } catch (error: any) {
       console.error("Checkout failed:", error);
@@ -151,6 +186,22 @@ export function BillingPage() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-1000 pb-20">
+      <Script
+        src="https://cdn.paddle.com/paddlejs/v2/paddle.js"
+        onLoad={() => {
+          if (window.Paddle) {
+            window.Paddle.Environment.set(
+              process.env.NEXT_PUBLIC_PADDLE_ENVIRONMENT === "production"
+                ? "production"
+                : "sandbox",
+            );
+            window.Paddle.Initialize({
+              token: process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN || "",
+            });
+          }
+        }}
+      />
+
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
         <div className="space-y-2">
@@ -327,9 +378,8 @@ export function BillingPage() {
             </h3>
             <p className="text-sm text-slate-400 leading-relaxed">
               We partner with industry-leading payment processors to ensure your
-              data is always safe. Lemon Squeezy handles international tax
-              compliance, while Paystack provides seamless local transactions in
-              Nigeria.
+              data is always safe. Paddle handles international tax compliance,
+              while Paystack provides seamless local transactions in Nigeria.
             </p>
           </div>
           <div className="flex gap-4 pt-4 grayscale opacity-50 flex-wrap">

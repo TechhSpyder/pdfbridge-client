@@ -274,6 +274,12 @@ export default function RichTextEditor({
         >
           <TableIcon size={14} className="rotate-270 opacity-100" />
         </MenuButton>
+        <MenuButton
+          onClick={() => editor.chain().focus().addRowBefore().run()}
+          title="Add Row Before"
+        >
+          <TableIcon size={14} className="rotate-270 opacity-100" />
+        </MenuButton>
         {editor.isActive("table") && (
           <>
             <div className="w-px h-6 bg-white/5 mx-1" />

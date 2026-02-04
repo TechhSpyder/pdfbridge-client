@@ -167,7 +167,7 @@ export default function BlogEditor({ post, onClose }: EditorProps) {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
+        <div className="flex-1 flex flex-col overflow-hidden">
           {error && (
             <div className="mb-8 p-4 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center gap-3 text-red-400 animate-in shake-in duration-300">
               <AlertCircle size={20} />
@@ -176,66 +176,74 @@ export default function BlogEditor({ post, onClose }: EditorProps) {
           )}
 
           {isPreview ? (
-            <div className="max-w-3xl mx-auto prose prose-invert prose-blue">
-              <h1 className="text-4xl font-black uppercase tracking-tight">
-                {formData.title || "Untitled Article"}
-              </h1>
-              {formData.coverImage && (
-                <img
-                  src={formData.coverImage}
-                  className="w-full rounded-2xl my-8 border border-white/10"
-                />
-              )}
-              <div
-                className="prose prose-invert prose-blue max-w-none"
-                dangerouslySetInnerHTML={{
-                  __html: sanitizeHtml(formData.content, {
-                    allowedTags: sanitizeHtml.defaults.allowedTags.concat([
-                      "img",
-                      "table",
-                      "thead",
-                      "tbody",
-                      "tr",
-                      "th",
-                      "td",
-                      "pre",
-                      "code",
-                      "span",
-                      "br",
-                      "hr",
-                      "u",
-                    ]),
-                    allowedAttributes: {
-                      ...sanitizeHtml.defaults.allowedAttributes,
-                      span: ["class", "style"],
-                      code: ["class"],
-                      p: ["style", "class"],
-                      h1: ["style", "class"],
-                      h2: ["style", "class"],
-                      h3: ["style", "class"],
-                      a: ["href", "name", "target", "class"],
-                      mark: ["class"],
-                    },
-                    allowedClasses: {
-                      "*": ["text-*", "bg-*", "underline", "prose-*", "hljs-*"],
-                    },
-                    allowedStyles: {
-                      "*": {
-                        "text-align": [
-                          /^left$/,
-                          /^right$/,
-                          /^center$/,
-                          /^justify$/,
+            <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
+              <div className="max-w-3xl mx-auto prose prose-invert prose-blue">
+                <h1 className="text-4xl font-black uppercase tracking-tight">
+                  {formData.title || "Untitled Article"}
+                </h1>
+                {formData.coverImage && (
+                  <img
+                    src={formData.coverImage}
+                    className="w-full rounded-2xl my-8 border border-white/10"
+                  />
+                )}
+                <div
+                  className="prose prose-invert prose-blue max-w-none"
+                  dangerouslySetInnerHTML={{
+                    __html: sanitizeHtml(formData.content, {
+                      allowedTags: sanitizeHtml.defaults.allowedTags.concat([
+                        "img",
+                        "table",
+                        "thead",
+                        "tbody",
+                        "tr",
+                        "th",
+                        "td",
+                        "pre",
+                        "code",
+                        "span",
+                        "br",
+                        "hr",
+                        "u",
+                      ]),
+                      allowedAttributes: {
+                        ...sanitizeHtml.defaults.allowedAttributes,
+                        span: ["class", "style"],
+                        code: ["class"],
+                        p: ["style", "class"],
+                        h1: ["style", "class"],
+                        h2: ["style", "class"],
+                        h3: ["style", "class"],
+                        a: ["href", "name", "target", "class"],
+                        mark: ["class"],
+                      },
+                      allowedClasses: {
+                        "*": [
+                          "text-*",
+                          "bg-*",
+                          "underline",
+                          "prose-*",
+                          "hljs-*",
                         ],
                       },
-                    },
-                  }),
-                }}
-              />
+                      allowedStyles: {
+                        "*": {
+                          "text-align": [
+                            /^left$/,
+                            /^right$/,
+                            /^center$/,
+                            /^justify$/,
+                          ],
+                        },
+                      },
+                    }),
+                  }}
+                />
+              </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-              <div className="lg:col-span-2 space-y-8">
+            <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 h-full overflow-hidden">
+              <div className="lg:col-span-2 h-full overflow-y-auto p-8 custom-scrollbar space-y-8">
                 {/* Main Content */}
                 <div className="space-y-3">
                   <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">
@@ -264,8 +272,7 @@ export default function BlogEditor({ post, onClose }: EditorProps) {
                   />
                 </div>
               </div>
-
-              <div className="space-y-8">
+              <div className="lg:col-span-1 h-full overflow-y-auto p-8 border-l border-white/5 bg-slate-900/10 space-y-8 custom-scrollbar">
                 {/* Sidebar Config */}
                 <div className="p-6 rounded-3xl bg-slate-900/30 border border-white/5 space-y-6">
                   <h3 className="text-sm font-black uppercase tracking-widest text-slate-400">

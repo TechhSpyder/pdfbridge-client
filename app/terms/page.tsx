@@ -5,7 +5,6 @@ import { FC } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import { Button } from "@/modules/app/button";
 
 const Terms: FC = () => {
   const router = useRouter();
@@ -26,14 +25,15 @@ const Terms: FC = () => {
       </p>
 
       <p className="mb-4">
-        PDFBridge (“the Service”) is a product operated by{" "}
+        PDFBridge (“the Service”) is a software product operated by{" "}
         <strong>Francis Bello</strong> under the brand{" "}
         <strong>TechhSpyder</strong>.
       </p>
+
       <p className="mb-6">
-        ⚠️ Until TechhSpyder Product Studio Limited is officially registered,
-        all legal obligations, liabilities, and responsibilities remain with{" "}
-        <strong>Francis Bello</strong> personally.
+        Until <strong>TechhSpyder Product Studio Limited</strong> is officially
+        registered, all legal obligations, liabilities, and responsibilities
+        relating to the Service remain with <strong>Francis Bello</strong>.
       </p>
 
       <section className="mb-6">
@@ -51,113 +51,148 @@ const Terms: FC = () => {
         <ul className="list-disc list-inside">
           <li>Maintain accurate account information</li>
           <li>Secure your login credentials</li>
-          <li>All activity under your account</li>
+          <li>You are responsible for all activity under your account</li>
         </ul>
       </section>
 
       <section className="mb-6">
         <h2 className="text-xl font-semibold mb-2">
-          3. Subscriptions & Billing
+          3. Subscriptions, Billing & Payments
         </h2>
 
-        <h3 className="font-medium">Subscription Plans</h3>
-        <p>
-          PDFBridge offers monthly and yearly plans. Prices, features, and
-          limits are displayed on the Service. Taxes may apply depending on your
-          location.
-        </p>
-        <p>
-          Payments are processed by third-party providers (Stripe, Paystack). I
-          do <strong>not</strong> store full payment credentials.
+        <h3 className="font-medium">Payments</h3>
+        <p className="mb-2">
+          Payments for PDFBridge are processed by <strong>Paddle.com</strong>,
+          who acts as the <strong>Merchant of Record</strong>. Paddle handles
+          payment processing, invoicing, taxes, refunds, and compliance with
+          applicable consumer protection laws.
         </p>
 
-        <h3 className="font-medium mt-2">Plan Changes</h3>
-        <ul className="list-disc list-inside mb-2">
+        <p className="mb-4">
+          PDFBridge does not store full payment credentials.
+        </p>
+
+        <h3 className="font-medium">Subscription Plans</h3>
+        <p className="mb-2">
+          PDFBridge offers monthly and yearly subscription plans. Prices,
+          features, and limits are displayed on the Service and may change from
+          time to time.
+        </p>
+
+        <p className="mb-4">
+          Applicable taxes may be added depending on your location.
+        </p>
+
+        <h3 className="font-medium">Plan Changes</h3>
+        <ul className="list-disc list-inside mb-4">
           <li>
-            <strong>Upgrades:</strong> Take effect immediately. Charges are
+            <strong>Upgrades:</strong> Take effect immediately and may be
             prorated.
           </li>
           <li>
-            <strong>Downgrades:</strong> Take effect at the end of the billing
-            cycle. No refunds or credits for unused time.
+            <strong>Downgrades:</strong> Take effect at the end of the current
+            billing cycle.
           </li>
         </ul>
 
-        <h3 className="font-medium mt-2">Cancellations</h3>
-        <ul className="list-disc list-inside mb-2">
-          <li>
-            Cancel anytime; stops future billing but past payments are not
-            refunded
-          </li>
-          <li>Access remains until billing period ends</li>
-        </ul>
-
-        <h3 className="font-medium mt-2">Failed Payments & Chargebacks</h3>
+        <h3 className="font-medium">Cancellations</h3>
         <ul className="list-disc list-inside">
-          <li>Access may be restricted if payment fails</li>
+          <li>You may cancel at any time</li>
+          <li>Future billing will stop upon cancellation</li>
           <li>
-            Unauthorized chargebacks may result in suspension or termination
+            Access remains available until the end of the current billing period
           </li>
         </ul>
       </section>
 
       <section className="mb-6">
-        <h2 className="text-xl font-semibold mb-2">4. Intellectual Property</h2>
+        <h2 className="text-xl font-semibold mb-2">4. Refund Policy</h2>
+        <p className="mb-2">
+          In accordance with Paddle’s Buyer Terms and applicable consumer
+          protection laws, customers may request a refund within{" "}
+          <strong>14 days of purchase</strong>.
+        </p>
+        <p className="mb-2">
+          Refund requests must be submitted through Paddle or by contacting us
+          at{" "}
+          <a href="mailto:legal@techhspyder.com" className="underline">
+            legal@techhspyder.com
+          </a>
+          .
+        </p>
+        <p>
+          Refunds are processed by Paddle and returned to the original payment
+          method. Refunds may be refused in cases of abuse, excessive usage, or
+          violation of these Terms.
+        </p>
+      </section>
+
+      <section className="mb-6">
+        <h2 className="text-xl font-semibold mb-2">5. Intellectual Property</h2>
         <ul className="list-disc list-inside">
           <li>
-            All PDFBridge software, branding, code, and materials are owned by
-            Francis Bello under TechhSpyder
+            All software, code, branding, and materials are owned by Francis
+            Bello under TechhSpyder
           </li>
-          <li>Users have a limited, revocable, non-transferable license</li>
+          <li>
+            Users are granted a limited, non-exclusive, non-transferable, and
+            revocable license
+          </li>
           <li>Reverse engineering, resale, or redistribution is prohibited</li>
         </ul>
       </section>
 
       <section className="mb-6">
-        <h2 className="text-xl font-semibold mb-2">5. User Files & Content</h2>
+        <h2 className="text-xl font-semibold mb-2">6. User Files & Content</h2>
         <ul className="list-disc list-inside">
           <li>Users retain ownership of uploaded files</li>
-          <li>Files are processed solely to deliver the Service</li>
+          <li>Files are processed solely to provide the Service</li>
           <li>
-            Users are responsible for having legal rights to uploaded content
+            Users are responsible for ensuring they have legal rights to
+            uploaded content
           </li>
         </ul>
       </section>
 
       <section className="mb-6">
-        <h2 className="text-xl font-semibold mb-2">6. Service Availability</h2>
+        <h2 className="text-xl font-semibold mb-2">7. Service Availability</h2>
         <p>
-          Provided “as is” and “as available.” No guarantee of uninterrupted
-          uptime or error-free performance.
+          The Service is provided “as is” and “as available.” We do not
+          guarantee uninterrupted uptime or error-free operation.
         </p>
       </section>
 
       <section className="mb-6">
         <h2 className="text-xl font-semibold mb-2">
-          7. Limitation of Liability
+          8. Limitation of Liability
         </h2>
         <p>
-          Maximum liability is limited to fees paid in the last 3 months. I
-          shall not be liable for indirect, incidental, or consequential
-          damages.
+          To the maximum extent permitted by law, liability is limited to the
+          fees paid for the Service in the three months preceding the claim.
+          This does not affect statutory consumer rights that cannot be
+          excluded.
         </p>
       </section>
 
       <section className="mb-6">
-        <h2 className="text-xl font-semibold mb-2">8. Termination</h2>
+        <h2 className="text-xl font-semibold mb-2">9. Termination</h2>
         <p>
-          Access may be suspended or terminated for violations, non-payment, or
-          legal compliance. Outstanding fees remain payable.
+          Access may be suspended or terminated for violations of these Terms,
+          non-payment, or legal compliance requirements. Outstanding fees remain
+          payable.
         </p>
       </section>
 
       <section className="mb-6">
-        <h2 className="text-xl font-semibold mb-2">9. Governing Law</h2>
-        <p>These Terms are governed by the laws of Nigeria.</p>
+        <h2 className="text-xl font-semibold mb-2">10. Governing Law</h2>
+        <p>
+          These Terms are governed by the laws of Nigeria, without limiting any
+          mandatory consumer rights under applicable local laws.
+        </p>
       </section>
 
       <section className="mb-6">
-        <h2 className="text-xl font-semibold mb-2">10. Contact</h2>
+        <h2 className="text-xl font-semibold mb-2">11. Contact</h2>
         <p>
           Email:{" "}
           <a href="mailto:legal@techhspyder.com" className="underline">
