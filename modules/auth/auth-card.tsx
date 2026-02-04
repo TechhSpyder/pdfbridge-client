@@ -7,6 +7,7 @@ import { Button } from "@/modules/app/button";
 import { Github, Mail, Eye, EyeOff, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { Turnstile } from "@marsidev/react-turnstile";
+import { PasswordStrengthIndicator } from "./password-strength";
 
 interface AuthCardProps {
   type: "sign-in" | "sign-up";
@@ -38,6 +39,8 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
   const [countdown, setCountdown] = useState(60);
   const [canResend, setCanResend] = useState(false);
   const [resending, setResending] = useState(false);
+  const [isPasswordValid, setIsPasswordValid] = useState(false);
+  const [isRouting, setIsRouting] = useState(false);
   const router = useRouter();
 
   const isSignIn = type === "sign-in";
@@ -104,6 +107,7 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
       });
 
       if (result.status === "complete") {
+        setIsRouting(true);
         await setSignUpActive({ session: result.createdSessionId });
         router.push("/dashboard");
       } else {
@@ -124,6 +128,11 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
 
     if (!isSignIn && password !== confirmPassword) {
       setError("Passwords do not match");
+      return;
+    }
+
+    if (!isSignIn && !isPasswordValid) {
+      setError("Please meet all password strength requirements.");
       return;
     }
 
@@ -161,6 +170,7 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
         });
 
         if (result.status === "complete") {
+          setIsRouting(true);
           await setSignInActive({ session: result.createdSessionId });
           router.push("/dashboard");
         } else {
@@ -178,6 +188,7 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
         // If verification is needed, Clerk's pre-built component is often better,
         // but for a "bespoke" look we can redirect to a verification page.
         if (result.status === "complete") {
+          setIsRouting(true);
           await setSignUpActive({ session: result.createdSessionId });
           router.push("/dashboard");
         } else if (result.status === "missing_requirements") {
@@ -307,6 +318,23 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
         </p>
       </div>
 
+      {isRouting && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#020617]/80 backdrop-blur-md animate-in fade-in duration-500">
+          <div className="relative">
+            <div className="h-24 w-24 rounded-full border-t-2 border-b-2 border-blue-500 animate-spin"></div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="h-16 w-16 rounded-full border-r-2 border-l-2 border-indigo-500 animate-spin-slow"></div>
+            </div>
+          </div>
+          <p className="mt-8 text-lg font-medium text-white animate-pulse">
+            Configuring your workspace...
+          </p>
+          <p className="mt-2 text-sm text-slate-400">
+            Redirecting to dashboard
+          </p>
+        </div>
+      )}
+
       <div className="mt-8 space-y-6">
         {/* Social Buttons */}
         {/* <div className="grid grid-cols-2 gap-4">
@@ -414,6 +442,22 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
                 )}
               </button>
             </div>
+            {isSignIn && (
+              <div className="mt-2 flex justify-end">
+                <Link
+                  href="/forgot-password"
+                  className="text-xs font-medium text-blue-500 hover:text-blue-400 transition"
+                >
+                  Forgot password?
+                </Link>
+              </div>
+            )}
+            {!isSignIn && (
+              <PasswordStrengthIndicator
+                password={password}
+                onValidationChange={setIsPasswordValid}
+              />
+            )}
           </div>
 
           {!isSignIn && (
