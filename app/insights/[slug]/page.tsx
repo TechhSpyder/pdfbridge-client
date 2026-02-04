@@ -76,6 +76,12 @@ export default async function InsightArticlePage({ params }: PostPageProps) {
             {post.title}
           </h1>
 
+          {post.description && (
+            <p className="text-xl md:text-2xl text-slate-400 font-medium mb-10 leading-relaxed max-w-3xl">
+              {post.description}
+            </p>
+          )}
+
           <div className="flex flex-wrap items-center gap-6 text-[10px] font-black uppercase tracking-widest text-slate-500">
             <div className="flex items-center gap-2 group">
               <div className="h-10 w-10 rounded-full overflow-hidden border border-white/10 group-hover:border-blue-500/50 transition-colors">
@@ -135,24 +141,66 @@ export default async function InsightArticlePage({ params }: PostPageProps) {
           </div>
 
           {/* Article Content */}
-          <div className="prose prose-invert prose-blue prose-lg max-w-none prose-headings:font-black prose-headings:tracking-tighter prose-p:font-medium prose-p:text-slate-400 prose-p:leading-relaxed prose-strong:text-white prose-a:text-blue-400 prose-code:text-blue-200">
-            {/* <div
-              dangerouslySetInnerHTML={{
-                __html: DOMPurify.sanitize(
-                  post.content.replace(/\n/g, "<br/>"),
-                ),
-              }}
-            /> */}
+          <div className="prose prose-invert prose-blue prose-lg max-w-none prose-headings:font-black prose-headings:tracking-tighter prose-p:font-medium prose-p:text-slate-300 prose-p:leading-relaxed prose-strong:text-white prose-a:text-blue-400 prose-code:text-blue-200">
             <div
               dangerouslySetInnerHTML={{
-                __html: sanitizeHtml(post.content.replace(/\n/g, "<br/>"), {
+                __html: sanitizeHtml(post.content, {
                   allowedTags: sanitizeHtml.defaults.allowedTags.concat([
                     "img",
+                    "table",
+                    "thead",
+                    "tbody",
+                    "tr",
+                    "th",
+                    "td",
+                    "pre",
+                    "code",
+                    "span",
+                    "br",
+                    "hr",
+                    "u",
                   ]),
+                  allowedAttributes: {
+                    ...sanitizeHtml.defaults.allowedAttributes,
+                    span: ["class", "style"],
+                    code: ["class"],
+                    p: ["style", "class"],
+                    h1: ["style", "class"],
+                    h2: ["style", "class"],
+                    h3: ["style", "class"],
+                    a: ["href", "name", "target", "class"],
+                    mark: ["class"],
+                  },
+                  allowedClasses: {
+                    "*": ["text-*", "bg-*", "underline", "prose-*", "hljs-*"],
+                  },
+                  allowedStyles: {
+                    "*": {
+                      "text-align": [
+                        /^left$/,
+                        /^right$/,
+                        /^center$/,
+                        /^justify$/,
+                      ],
+                    },
+                  },
                 }),
               }}
             />
           </div>
+
+          {post.tags && post.tags.length > 0 && (
+            <div className="mt-12 flex flex-wrap gap-2">
+              {post.tags.map((tag: string) => (
+                <span
+                  key={tag}
+                  className="px-3 py-1 rounded-lg bg-slate-900 border border-white/5 text-slate-500 text-[10px] font-black uppercase tracking-widest hover:text-blue-400 hover:border-blue-500/20 transition-colors"
+                >
+                  #{tag}
+                </span>
+              ))}
+            </div>
+          )}
 
           <hr className="my-16 border-white/5" />
 

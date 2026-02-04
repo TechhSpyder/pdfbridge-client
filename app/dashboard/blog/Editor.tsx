@@ -13,8 +13,9 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { Button } from "@/modules/app/button";
-import { GlowCard } from "@/modules/app/glow-card";
 import { upsertPost, getCategories, getAuthors } from "./actions";
+import RichTextEditor from "@/modules/dashboard/blog/RichTextEditor";
+import sanitizeHtml from "sanitize-html";
 
 interface EditorProps {
   post?: any;
@@ -27,6 +28,8 @@ export default function BlogEditor({ post, onClose }: EditorProps) {
     slug: post?.slug || "",
     content: post?.content || "",
     excerpt: post?.excerpt || "",
+    description: post?.description || "",
+    tags: post?.tags?.join(", ") || "",
     coverImage: post?.coverImage || "",
     published: post?.published || false,
     categoryId: post?.categoryId || "",
@@ -57,6 +60,10 @@ export default function BlogEditor({ post, onClose }: EditorProps) {
       await upsertPost({
         id: post?.id,
         ...formData,
+        tags: formData.tags
+          .split(",")
+          .map((t: string) => t.trim())
+          .filter((t: string) => t !== ""),
       });
       onClose();
     } catch (err: any) {
@@ -133,6 +140,10 @@ export default function BlogEditor({ post, onClose }: EditorProps) {
                       id: post?.id,
                       ...formData,
                       published: true,
+                      tags: formData.tags
+                        .split(",")
+                        .map((t: string) => t.trim())
+                        .filter((t: string) => t !== ""),
                     });
                     onClose();
                   } catch (err: any) {
@@ -156,7 +167,7 @@ export default function BlogEditor({ post, onClose }: EditorProps) {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
+        <div className="flex-1 flex flex-col overflow-hidden">
           {error && (
             <div className="mb-8 p-4 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center gap-3 text-red-400 animate-in shake-in duration-300">
               <AlertCircle size={20} />
@@ -165,25 +176,74 @@ export default function BlogEditor({ post, onClose }: EditorProps) {
           )}
 
           {isPreview ? (
-            <div className="max-w-3xl mx-auto prose prose-invert prose-blue">
-              <h1 className="text-4xl font-black uppercase tracking-tight">
-                {formData.title || "Untitled Article"}
-              </h1>
-              {formData.coverImage && (
-                <img
-                  src={formData.coverImage}
-                  className="w-full rounded-2xl my-8 border border-white/10"
+            <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
+              <div className="max-w-3xl mx-auto prose prose-invert prose-blue">
+                <h1 className="text-4xl font-black uppercase tracking-tight">
+                  {formData.title || "Untitled Article"}
+                </h1>
+                {formData.coverImage && (
+                  <img
+                    src={formData.coverImage}
+                    className="w-full rounded-2xl my-8 border border-white/10"
+                  />
+                )}
+                <div
+                  className="prose prose-invert prose-blue max-w-none"
+                  dangerouslySetInnerHTML={{
+                    __html: sanitizeHtml(formData.content, {
+                      allowedTags: sanitizeHtml.defaults.allowedTags.concat([
+                        "img",
+                        "table",
+                        "thead",
+                        "tbody",
+                        "tr",
+                        "th",
+                        "td",
+                        "pre",
+                        "code",
+                        "span",
+                        "br",
+                        "hr",
+                        "u",
+                      ]),
+                      allowedAttributes: {
+                        ...sanitizeHtml.defaults.allowedAttributes,
+                        span: ["class", "style"],
+                        code: ["class"],
+                        p: ["style", "class"],
+                        h1: ["style", "class"],
+                        h2: ["style", "class"],
+                        h3: ["style", "class"],
+                        a: ["href", "name", "target", "class"],
+                        mark: ["class"],
+                      },
+                      allowedClasses: {
+                        "*": [
+                          "text-*",
+                          "bg-*",
+                          "underline",
+                          "prose-*",
+                          "hljs-*",
+                        ],
+                      },
+                      allowedStyles: {
+                        "*": {
+                          "text-align": [
+                            /^left$/,
+                            /^right$/,
+                            /^center$/,
+                            /^justify$/,
+                          ],
+                        },
+                      },
+                    }),
+                  }}
                 />
-              )}
-              <div
-                dangerouslySetInnerHTML={{
-                  __html: formData.content.replace(/\n/g, "<br/>"),
-                }}
-              />
+              </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-              <div className="lg:col-span-2 space-y-8">
+            <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 h-full overflow-hidden">
+              <div className="lg:col-span-2 h-full overflow-y-auto p-8 custom-scrollbar space-y-8">
                 {/* Main Content */}
                 <div className="space-y-3">
                   <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">
@@ -202,20 +262,17 @@ export default function BlogEditor({ post, onClose }: EditorProps) {
 
                 <div className="space-y-3">
                   <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">
-                    Content (Markdown supported)
+                    Content
                   </label>
-                  <textarea
-                    placeholder="Tell your story..."
-                    value={formData.content}
-                    onChange={(e) =>
-                      setFormData({ ...formData, content: e.target.value })
+                  <RichTextEditor
+                    content={formData.content}
+                    onChange={(content) =>
+                      setFormData({ ...formData, content })
                     }
-                    className="w-full min-h-[500px] bg-slate-900/50 border border-white/5 rounded-2xl px-6 py-6 text-white focus:outline-hidden focus:border-blue-500/50 transition-all font-mono leading-relaxed resize-none"
                   />
                 </div>
               </div>
-
-              <div className="space-y-8">
+              <div className="lg:col-span-1 h-full overflow-y-auto p-8 border-l border-white/5 bg-slate-900/10 space-y-8 custom-scrollbar">
                 {/* Sidebar Config */}
                 <div className="p-6 rounded-3xl bg-slate-900/30 border border-white/5 space-y-6">
                   <h3 className="text-sm font-black uppercase tracking-widest text-slate-400">
@@ -334,7 +391,6 @@ export default function BlogEditor({ post, onClose }: EditorProps) {
                     </div>
                   )}
                 </div>
-
                 <div className="p-6 rounded-3xl bg-slate-900/30 border border-white/5 space-y-3">
                   <label className="text-[10px] font-bold uppercase text-slate-500">
                     Short Excerpt
@@ -348,11 +404,132 @@ export default function BlogEditor({ post, onClose }: EditorProps) {
                     placeholder="A brief summary for listings..."
                   />
                 </div>
+
+                <div className="p-6 rounded-3xl bg-slate-900/30 border border-white/5 space-y-3">
+                  <label className="text-[10px] font-bold uppercase text-slate-500">
+                    SEO Description
+                  </label>
+                  <textarea
+                    value={formData.description}
+                    onChange={(e) =>
+                      setFormData({ ...formData, description: e.target.value })
+                    }
+                    className="w-full h-24 bg-slate-950 border border-white/5 rounded-xl px-4 py-3 text-sm text-slate-400 focus:border-blue-500/50 focus:outline-hidden resize-none"
+                    placeholder="Meta description for search engines..."
+                  />
+                </div>
+
+                <div className="p-6 rounded-3xl bg-slate-900/30 border border-white/5 space-y-3">
+                  <label className="text-[10px] font-bold uppercase text-slate-500">
+                    Tags (comma separated)
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.tags}
+                    onChange={(e) =>
+                      setFormData({ ...formData, tags: e.target.value })
+                    }
+                    className="w-full bg-slate-950 border border-white/5 rounded-xl px-4 py-2.5 text-sm text-slate-400 focus:border-blue-500/50 focus:outline-hidden"
+                    placeholder="nextjs, scale, engineering"
+                  />
+                </div>
               </div>
             </div>
           )}
         </div>
       </div>
+      <style jsx global>{`
+        .prose table {
+          width: 100%;
+          border-collapse: collapse;
+          margin: 2rem 0;
+          font-size: 0.9rem;
+          line-height: 1.5;
+        }
+        .prose th {
+          background: rgba(255, 255, 255, 0.05);
+          font-weight: 700;
+          text-align: left;
+          padding: 0.75rem 1rem;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .prose td {
+          padding: 0.75rem 1rem;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          color: #cbd5e1;
+        }
+        .prose pre {
+          background: #0d1117 !important;
+          border: 1px solid rgba(255, 255, 255, 0.05) !important;
+          padding: 1.5rem !important;
+          border-radius: 1rem !important;
+          margin: 2.5rem 0 !important;
+          box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+        }
+        .prose code {
+          font-family: var(--font-mono), monospace !important;
+          font-size: 0.95rem !important;
+          background: transparent !important;
+          padding: 0 !important;
+        }
+        .prose p {
+          margin-bottom: 2rem !important;
+        }
+        .prose hr {
+          border: none !important;
+          border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+          margin: 4rem 0 !important;
+        }
+        .prose mark {
+          background-color: rgba(59, 130, 246, 0.3);
+          color: inherit;
+          padding: 0 0.2rem;
+          border-radius: 0.2rem;
+        }
+        /* Syntax Highlighting - GitHub Dark Dimmed inspired */
+        .hljs-comment,
+        .hljs-quote {
+          color: #768390;
+          font-style: italic;
+        }
+        .hljs-keyword,
+        .hljs-selector-tag {
+          color: #f47067;
+        }
+        .hljs-string,
+        .hljs-attr,
+        .hljs-variable,
+        .hljs-template-variable {
+          color: #96d0ff;
+        }
+        .hljs-type,
+        .hljs-selector-id,
+        .hljs-selector-class,
+        .hljs-quote,
+        .hljs-template-tag,
+        .hljs-deletion {
+          color: #f69d50;
+        }
+        .hljs-title,
+        .hljs-section,
+        .hljs-bullet {
+          color: #dcbdfb;
+        }
+        .hljs-addition {
+          color: #adbac7;
+          background-color: #223d33;
+        }
+        .hljs-deletion {
+          color: #adbac7;
+          background-color: #442320;
+        }
+        .hljs-emphasis {
+          font-style: italic;
+        }
+        .hljs-strong {
+          font-weight: bold;
+        }
+      `}</style>
     </div>
   );
 }

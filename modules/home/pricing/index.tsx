@@ -19,7 +19,7 @@ const tiers = [
     ],
   },
   {
-    title: "Pro",
+    title: "Starter",
     price: "$10",
     sub: "For scaling teams",
     features: [
@@ -31,11 +31,11 @@ const tiers = [
     ],
   },
   {
-    title: "Business",
+    title: "Pro",
     price: "$30",
     sub: "Enterprise solutions",
     features: [
-      "20,000+ conversions/month",
+      "20,000 conversions/month",
       "Dedicated infrastructure",
       "SLA guarantee",
       "24/7 phone support",
