@@ -93,7 +93,8 @@ export default async function InsightsPage() {
                   </h3>
 
                   <p className="text-slate-400 leading-relaxed mb-8 line-clamp-3 text-sm font-medium">
-                    {post.excerpt ||
+                    {post.description ||
+                      post.excerpt ||
                       (post.content.length > 150
                         ? post.content.substring(0, 150) + "..."
                         : post.content)}

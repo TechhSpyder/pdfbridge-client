@@ -75,6 +75,8 @@ export async function upsertPost(data: {
   slug: string;
   content: string;
   excerpt?: string;
+  description?: string;
+  tags?: string[];
   coverImage?: string;
   published: boolean;
   categoryId?: string;
@@ -90,6 +92,8 @@ export async function upsertPost(data: {
       .replace(/[^\w-]+/g, ""),
     content: data.content,
     excerpt: data.excerpt,
+    description: data.description,
+    tags: data.tags || [],
     coverImage: data.coverImage,
     published: data.published,
     categoryId: data.categoryId || undefined,

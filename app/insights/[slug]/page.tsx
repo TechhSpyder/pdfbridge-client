@@ -76,6 +76,12 @@ export default async function InsightArticlePage({ params }: PostPageProps) {
             {post.title}
           </h1>
 
+          {post.description && (
+            <p className="text-xl md:text-2xl text-slate-400 font-medium mb-10 leading-relaxed max-w-3xl">
+              {post.description}
+            </p>
+          )}
+
           <div className="flex flex-wrap items-center gap-6 text-[10px] font-black uppercase tracking-widest text-slate-500">
             <div className="flex items-center gap-2 group">
               <div className="h-10 w-10 rounded-full overflow-hidden border border-white/10 group-hover:border-blue-500/50 transition-colors">
@@ -135,24 +141,66 @@ export default async function InsightArticlePage({ params }: PostPageProps) {
           </div>
 
           {/* Article Content */}
-          <div className="prose prose-invert prose-blue prose-lg max-w-none prose-headings:font-black prose-headings:tracking-tighter prose-p:font-medium prose-p:text-slate-400 prose-p:leading-relaxed prose-strong:text-white prose-a:text-blue-400 prose-code:text-blue-200">
-            {/* <div
-              dangerouslySetInnerHTML={{
-                __html: DOMPurify.sanitize(
-                  post.content.replace(/\n/g, "<br/>"),
-                ),
-              }}
-            /> */}
+          <div className="prose prose-invert prose-blue prose-lg max-w-none prose-headings:font-black prose-headings:tracking-tighter prose-p:font-medium prose-p:text-slate-300 prose-p:leading-relaxed prose-strong:text-white prose-a:text-blue-400 prose-code:text-blue-200">
             <div
               dangerouslySetInnerHTML={{
-                __html: sanitizeHtml(post.content.replace(/\n/g, "<br/>"), {
+                __html: sanitizeHtml(post.content, {
                   allowedTags: sanitizeHtml.defaults.allowedTags.concat([
                     "img",
+                    "table",
+                    "thead",
+                    "tbody",
+                    "tr",
+                    "th",
+                    "td",
+                    "pre",
+                    "code",
+                    "span",
+                    "br",
+                    "hr",
+                    "u",
                   ]),
+                  allowedAttributes: {
+                    ...sanitizeHtml.defaults.allowedAttributes,
+                    span: ["class", "style"],
+                    code: ["class"],
+                    p: ["style", "class"],
+                    h1: ["style", "class"],
+                    h2: ["style", "class"],
+                    h3: ["style", "class"],
+                    a: ["href", "name", "target", "class"],
+                    mark: ["class"],
+                  },
+                  allowedClasses: {
+                    "*": ["text-*", "bg-*", "underline", "prose-*", "hljs-*"],
+                  },
+                  allowedStyles: {
+                    "*": {
+                      "text-align": [
+                        /^left$/,
+                        /^right$/,
+                        /^center$/,
+                        /^justify$/,
+                      ],
+                    },
+                  },
                 }),
               }}
             />
           </div>
+
+          {post.tags && post.tags.length > 0 && (
+            <div className="mt-12 flex flex-wrap gap-2">
+              {post.tags.map((tag: string) => (
+                <span
+                  key={tag}
+                  className="px-3 py-1 rounded-lg bg-slate-900 border border-white/5 text-slate-500 text-[10px] font-black uppercase tracking-widest hover:text-blue-400 hover:border-blue-500/20 transition-colors"
+                >
+                  #{tag}
+                </span>
+              ))}
+            </div>
+          )}
 
           <hr className="my-16 border-white/5" />
 
@@ -254,6 +302,98 @@ export default async function InsightArticlePage({ params }: PostPageProps) {
           </div>
         </aside>
       </main>
+      <style jsx global>{`
+        .prose table {
+          width: 100%;
+          border-collapse: collapse;
+          margin: 2rem 0;
+          font-size: 0.9rem;
+          line-height: 1.5;
+        }
+        .prose th {
+          background: rgba(255, 255, 255, 0.05);
+          font-weight: 700;
+          text-align: left;
+          padding: 0.75rem 1rem;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .prose td {
+          padding: 0.75rem 1rem;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          color: #cbd5e1;
+        }
+        .prose pre {
+          background: #0d1117 !important;
+          border: 1px solid rgba(255, 255, 255, 0.05) !important;
+          padding: 1.5rem !important;
+          border-radius: 1rem !important;
+          margin: 2.5rem 0 !important;
+          box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+        }
+        .prose code {
+          font-family: var(--font-mono), monospace !important;
+          font-size: 0.95rem !important;
+          background: transparent !important;
+          padding: 0 !important;
+        }
+        .prose p {
+          margin-bottom: 2rem !important;
+        }
+        .prose hr {
+          border: none !important;
+          border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+          margin: 4rem 0 !important;
+        }
+        .prose mark {
+          background-color: rgba(59, 130, 246, 0.3);
+          color: inherit;
+          padding: 0 0.2rem;
+          border-radius: 0.2rem;
+        }
+        /* Syntax Highlighting - GitHub Dark Dimmed inspired */
+        .hljs-comment,
+        .hljs-quote {
+          color: #768390;
+          font-style: italic;
+        }
+        .hljs-keyword,
+        .hljs-selector-tag {
+          color: #f47067;
+        }
+        .hljs-string,
+        .hljs-attr,
+        .hljs-variable,
+        .hljs-template-variable {
+          color: #96d0ff;
+        }
+        .hljs-type,
+        .hljs-selector-id,
+        .hljs-selector-class,
+        .hljs-quote,
+        .hljs-template-tag,
+        .hljs-deletion {
+          color: #f69d50;
+        }
+        .hljs-title,
+        .hljs-section,
+        .hljs-bullet {
+          color: #dcbdfb;
+        }
+        .hljs-addition {
+          color: #adbac7;
+          background-color: #223d33;
+        }
+        .hljs-deletion {
+          color: #adbac7;
+          background-color: #442320;
+        }
+        .hljs-emphasis {
+          font-style: italic;
+        }
+        .hljs-strong {
+          font-weight: bold;
+        }
+      `}</style>
     </article>
   );
 }
