@@ -168,14 +168,16 @@ export function Documentation({
             <CodeBlock
               code={`{
   "url": "https://stripe.com",
-  "filename": "invoice_jan_2024",
+  "filename": "monthly_invoice_january",
   "webhookUrl": "https://your-app.com/api/webhooks/pdf",
   "options": {
     "format": "A4",
     "printBackground": true,
-    "margin": { "top": "0.5in", "bottom": "0.5in" }
+    "displayHeaderFooter": true,
+    "headerTemplate": "<div style='font-size: 10px;'>Page <span class='pageNumber'></span> of <span class='totalPages'></span></div>",
+    "margin": { "top": "1in", "bottom": "1in" }
   },
-  "metadata": { "id": "12345" }
+  "metadata": { "user_id": "usr_789" }
 }`}
               language="json"
             />
@@ -236,20 +238,46 @@ export function Documentation({
             />
             <GlowCard
               title="Header & Footer"
-              sub="Raw HTML templates"
+              sub="HTML Templates & Placeholders"
               content={
-                <p className="text-xs text-slate-500 mt-2 leading-relaxed">
-                  Use Chromium header/footer logic for complex layouts.
-                </p>
+                <div className="space-y-2 mt-2">
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    Set{" "}
+                    <code className="text-blue-400">
+                      displayHeaderFooter: true
+                    </code>
+                    . Use these classes for dynamic data:
+                  </p>
+                  <ul className="text-[10px] text-slate-400 space-y-1 ml-2">
+                    <li>
+                      • <code className="text-emerald-400">pageNumber</code>:
+                      Current page
+                    </li>
+                    <li>
+                      • <code className="text-emerald-400">totalPages</code>:
+                      Total pages
+                    </li>
+                    <li>
+                      • <code className="text-emerald-400">date</code>: Current
+                      date
+                    </li>
+                    <li>
+                      • <code className="text-emerald-400">title</code>:
+                      Document title
+                    </li>
+                  </ul>
+                </div>
               }
             />
             <GlowCard
-              title="Backgrounds"
-              sub="Boolean: printBackground"
+              title="Dimensions & Viewport"
+              sub="width, height, deviceScaleFactor"
               content={
                 <p className="text-xs text-slate-500 mt-2 leading-relaxed">
-                  Specifies whether to print the page's background colors and
-                  images.
+                  Provide <code className="text-blue-400">width</code> or{" "}
+                  <code className="text-blue-400">height</code> in pixels to
+                  override standard paper sizes and control the rendering
+                  viewport.
                 </p>
               }
             />

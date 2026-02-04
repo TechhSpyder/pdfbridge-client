@@ -301,6 +301,24 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
             </div>
           </div>
         </form>
+
+        {/* Post-Auth Routing Loader for Verification */}
+        {isRouting && (
+          <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#020617]/80 backdrop-blur-md animate-in fade-in duration-500">
+            <div className="relative">
+              <div className="h-24 w-24 rounded-full border-t-2 border-b-2 border-blue-500 animate-spin" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Loader2 className="h-10 w-10 text-blue-500 animate-pulse" />
+              </div>
+            </div>
+            <p className="mt-8 text-lg font-medium text-white animate-pulse">
+              Configuring your workspace...
+            </p>
+            <p className="mt-2 text-sm text-slate-400">
+              Redirecting to dashboard
+            </p>
+          </div>
+        )}
       </div>
     );
   }
@@ -536,6 +554,24 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
           </Link>
         </p>
       </div>
+
+      {/* Post-Auth Routing Loader */}
+      {isRouting && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#020617]/80 backdrop-blur-md animate-in fade-in duration-500">
+          <div className="relative">
+            <div className="h-24 w-24 rounded-full border-t-2 border-b-2 border-blue-500 animate-spin" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Loader2 className="h-10 w-10 text-blue-500 animate-pulse" />
+            </div>
+          </div>
+          <p className="mt-8 text-lg font-medium text-white animate-pulse">
+            Configuring your workspace...
+          </p>
+          <p className="mt-2 text-sm text-slate-400">
+            Redirecting to dashboard
+          </p>
+        </div>
+      )}
     </div>
   );
 };
