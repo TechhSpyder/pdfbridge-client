@@ -232,6 +232,11 @@ export default function BlogCMSPage() {
                       <h3 className="text-lg font-bold text-white group-hover:text-blue-400 transition-colors uppercase tracking-tight">
                         {post.title}
                       </h3>
+                      {post.description && (
+                        <p className="text-xs text-slate-500 line-clamp-1 max-w-md">
+                          {post.description}
+                        </p>
+                      )}
                       {post.published ? (
                         <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[10px] font-black uppercase tracking-widest">
                           Live

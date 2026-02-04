@@ -432,3 +432,94 @@ body {
 .scrollbar-hide::-webkit-scrollbar {
   display: none; /* Chrome, Safari and Opera */
 }
+
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 2rem 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+.prose th {
+  background: rgba(255, 255, 255, 0.05);
+  font-weight: 700;
+  text-align: left;
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.prose td {
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+}
+.prose pre {
+  background: #0d1117 !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  padding: 1.5rem !important;
+  border-radius: 1rem !important;
+  margin: 2.5rem 0 !important;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+}
+.prose code {
+  font-family: var(--font-mono), monospace !important;
+  font-size: 0.95rem !important;
+  background: transparent !important;
+  padding: 0 !important;
+}
+.prose p {
+  margin-bottom: 2rem !important;
+}
+.prose hr {
+  border: none !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+  margin: 4rem 0 !important;
+}
+.prose mark {
+  background-color: rgba(59, 130, 246, 0.3);
+  color: inherit;
+  padding: 0 0.2rem;
+  border-radius: 0.2rem;
+}
+/* Syntax Highlighting - GitHub Dark Dimmed inspired */
+.hljs-comment,
+.hljs-quote {
+  color: #768390;
+  font-style: italic;
+}
+.hljs-keyword,
+.hljs-selector-tag {
+  color: #f47067;
+}
+.hljs-string,
+.hljs-attr,
+.hljs-variable,
+.hljs-template-variable {
+  color: #96d0ff;
+}
+.hljs-type,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-quote,
+.hljs-template-tag,
+.hljs-deletion {
+  color: #f69d50;
+}
+.hljs-title,
+.hljs-section,
+.hljs-bullet {
+  color: #dcbdfb;
+}
+.hljs-addition {
+  color: #adbac7;
+  background-color: #223d33;
+}
+.hljs-deletion {
+  color: #adbac7;
+  background-color: #442320;
+}
+.hljs-emphasis {
+  font-style: italic;
+}
+.hljs-strong {
+  font-weight: bold;
+}
