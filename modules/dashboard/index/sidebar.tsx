@@ -88,10 +88,7 @@ function SidebarContent({ isSmallScreen, setSidebarOpen }: any) {
               (user?.publicMetadata?.userRole as string) ||
               "";
             const primaryEmail = user?.primaryEmailAddress?.emailAddress || "";
-            const allowedEmails = [
-              "admin@pdfbridge.xyz",
-              "bellofrancis87@gmail.com",
-            ]; // Fallback or sync with actions
+            const allowedEmails = ["admin@pdfbridge.xyz"]; // Fallback or sync with actions
             return (
               userRole === "platform-owner" ||
               allowedEmails.includes(primaryEmail.toLowerCase())
