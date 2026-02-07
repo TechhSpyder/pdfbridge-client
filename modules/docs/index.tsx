@@ -30,6 +30,21 @@ const SECTIONS = [
     title: "Options Reference",
     icon: <Layout className="h-4 w-4" />,
   },
+  {
+    id: "tailwind",
+    title: "Tailwind-Native",
+    icon: <Code2 className="h-4 w-4" />,
+  },
+  {
+    id: "ai",
+    title: "AI Metadata",
+    icon: <Cpu className="h-4 w-4" />,
+  },
+  {
+    id: "n8n",
+    title: "n8n Integration",
+    icon: <Webhook className="h-4 w-4" />,
+  },
   { id: "webhooks", title: "Webhooks", icon: <Webhook className="h-4 w-4" /> },
 ];
 
@@ -177,7 +192,9 @@ export function Documentation({
     "headerTemplate": "<div style='font-size: 10px;'>Page <span class='pageNumber'></span> of <span class='totalPages'></span></div>",
     "margin": { "top": "1in", "bottom": "1in" }
   },
-  "metadata": { "user_id": "usr_789" }
+  "metadata": { "user_id": "usr_789" },
+  "tailwind": true,
+  "extractMetadata": true
 }`}
               language="json"
             />
@@ -281,6 +298,211 @@ export function Documentation({
                 </p>
               }
             />
+          </div>
+        </section>
+
+        {/* Tailwind-Native */}
+        <section id="tailwind" className="scroll-mt-24 space-y-6">
+          <h2 className="text-3xl font-bold text-white flex items-center gap-4">
+            <Code2 className="text-blue-400" /> Tailwind-Native
+          </h2>
+          <p className="text-slate-400 leading-relaxed">
+            PDFBridge features native support for Tailwind CSS. You can use any
+            utility classes directly in your HTML payloads without manually
+            linking stylesheets or configuring complex build pipelines.
+          </p>
+
+          <GlowCard
+            title="How it Works"
+            sub="Automatic JIT Injection"
+            icon={<Info className="h-5 w-5 text-blue-400" />}
+            content={
+              <div className="space-y-4 mt-4 text-sm text-slate-400">
+                <p>
+                  When you set{" "}
+                  <code className="text-blue-400 font-mono">
+                    tailwind: true
+                  </code>{" "}
+                  in your request:
+                </p>
+                <ol className="list-decimal list-inside space-y-2 ml-2">
+                  <li>
+                    The engine automatically injects the Tailwind Play CDN
+                    script.
+                  </li>
+                  <li>
+                    The generator waits until the JIT compiler has fully
+                    rendered your styles before taking the snapshot.
+                  </li>
+                  <li>You get a pixel-perfect Tailwind PDF every time.</li>
+                </ol>
+              </div>
+            }
+          />
+
+          <div className="space-y-4">
+            <h4 className="font-bold text-white text-sm">Example Payload</h4>
+            <CodeBlock
+              code={`{
+  "html": "<div class='bg-blue-600 p-12 text-white text-center rounded-3xl shadow-2xl'>
+    <h1 class='text-4xl font-black mb-4'>Tailwind-Native</h1>
+    <p class='text-blue-100'>No setup. No hacks. Just CSS utilities.</p>
+  </div>",
+  "tailwind": true
+}`}
+              language="json"
+            />
+          </div>
+        </section>
+
+        {/* AI Metadata */}
+        <section id="ai" className="scroll-mt-24 space-y-6">
+          <h2 className="text-3xl font-bold text-white flex items-center gap-4">
+            <Cpu className="text-purple-400" /> AI Metadata Layer
+          </h2>
+          <p className="text-slate-400 leading-relaxed">
+            PDFBridge uses <strong>Gemini 1.5 Flash</strong> to automatically
+            analyze and extract structured JSON data from your generated PDFs.
+            Perfect for auto-tagging, data entry automation, and content
+            summarization.
+          </p>
+
+          <div className="grid md:grid-cols-3 gap-4">
+            <div className="p-4 rounded-xl border border-white/5 bg-white/5">
+              <h4 className="font-bold text-white text-xs mb-1">Doc Types</h4>
+              <p className="text-[10px] text-slate-500">
+                Invoices, Receipts, Reports, CVs, and more.
+              </p>
+            </div>
+            <div className="p-4 rounded-xl border border-white/5 bg-white/5">
+              <h4 className="font-bold text-white text-xs mb-1">Entities</h4>
+              <p className="text-[10px] text-slate-500">
+                Totals, Dates, Companies, and Names.
+              </p>
+            </div>
+            <div className="p-4 rounded-xl border border-white/5 bg-white/5">
+              <h4 className="font-bold text-white text-xs mb-1">Summaries</h4>
+              <p className="text-[10px] text-slate-500">
+                Automated 1-2 sentence content insights.
+              </p>
+            </div>
+          </div>
+
+          <GlowCard
+            title="Pricing & Restrictions"
+            sub="Paid Tiers Only"
+            icon={<Info className="h-5 w-5 text-purple-400" />}
+            content={
+              <div className="space-y-4 mt-4 text-sm text-slate-400">
+                <p>
+                  AI Metadata extraction is exclusive to our{" "}
+                  <strong>Paid Plans</strong> (Starter, Pro, Enterprise).
+                </p>
+                <div className="p-3 rounded-lg bg-orange-500/10 border border-orange-500/20 text-orange-200 text-xs">
+                  <strong>Sandbox Mode:</strong> This feature is disabled when
+                  using Test Keys (`pk_test_...`) to prevent quota abuse.
+                </div>
+              </div>
+            }
+          />
+
+          <div className="space-y-4">
+            <h4 className="font-bold text-white text-sm">
+              Example AI Response
+            </h4>
+            <CodeBlock
+              code={`{
+  "documentType": "invoice",
+  "total": 540.50,
+  "currency": "USD",
+  "summary": "Monthly subscription invoice for cloud services.",
+  "tags": ["financial", "cloud", "saas"]
+}`}
+              language="json"
+            />
+          </div>
+        </section>
+
+        {/* n8n Integration */}
+        <section id="n8n" className="scroll-mt-24 space-y-6">
+          <h2 className="text-3xl font-bold text-white flex items-center gap-4">
+            <Webhook className="text-orange-500" /> n8n Integration
+          </h2>
+          <p className="text-slate-400 leading-relaxed">
+            Connect PDFBridge to 400+ applications using our custom n8n node.
+            Automate your document generation workflows without writing code.
+          </p>
+
+          <GlowCard
+            title="Professional Automation"
+            sub="No-Code Document Workflows"
+            icon={<Info className="h-5 w-5 text-orange-400" />}
+            content={
+              <div className="space-y-4 mt-4 text-sm text-slate-400 leading-relaxed">
+                <p>
+                  Our <strong>n8n Community Node</strong> allows you to
+                  integrate PDFBridge directly into your automated pipelines.
+                  Whether you're generating invoices from a database or
+                  summaries from web scrapers, the n8n node provides a visual
+                  interface for configuring every aspect of the conversion.
+                </p>
+                <p>
+                  The node supports all core API features, including
+                  Tailwind-Native rendering, AI Metadata extraction, and custom
+                  formatting options, making it the ideal choice for
+                  enterprise-grade automation.
+                </p>
+              </div>
+            }
+          />
+
+          <div className="space-y-4">
+            <h4 className="font-bold text-white text-sm">How to use it:</h4>
+            <div className="p-6 rounded-2xl border border-white/5 bg-slate-900/50 backdrop-blur-sm space-y-4">
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 font-bold text-sm">
+                  1
+                </div>
+                <div>
+                  <h5 className="text-white font-bold text-sm">Install Node</h5>
+                  <p className="text-xs text-slate-500 mt-1">
+                    In your n8n settings, go to "Community Nodes" and install:
+                    <br />
+                    <code className="text-emerald-400 font-mono">
+                      n8n-nodes-pdfbridge
+                    </code>
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 font-bold text-sm">
+                  2
+                </div>
+                <div>
+                  <h5 className="text-white font-bold text-sm">
+                    Add Your Secret Key
+                  </h5>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Copy your API Key from the dashboard and paste it into the
+                    node's credentials.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 font-bold text-sm">
+                  3
+                </div>
+                <div>
+                  <h5 className="text-white font-bold text-sm">
+                    Start Printing!
+                  </h5>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Drag the PDFBridge node into your workflow, give it a URL,
+                    and watch the magic happen!
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
