@@ -20,12 +20,30 @@ import {
 import Link from "next/link";
 import { useMe } from "../hooks/queries";
 import { toast } from "sonner";
-import { RecentConversionsList } from "./index/recent-converion";
-import { ApiPlayground } from "./index/api-playgorund";
-import { IntegrationSnippets } from "./index/integration";
-import { UsageAlert } from "./index/usage-alert";
-import { UsageGraph } from "./index/usage-graph";
+import dynamic from "next/dynamic";
 import { useClipboard } from "../hooks/use-copy-to-clipboard";
+
+const RecentConversionsList = dynamic(
+  () =>
+    import("./index/recent-converion").then((mod) => mod.RecentConversionsList),
+  { ssr: false },
+);
+const ApiPlayground = dynamic(
+  () => import("./index/api-playgorund").then((mod) => mod.ApiPlayground),
+  { ssr: false },
+);
+const IntegrationSnippets = dynamic(
+  () => import("./index/integration").then((mod) => mod.IntegrationSnippets),
+  { ssr: false },
+);
+const UsageAlert = dynamic(
+  () => import("./index/usage-alert").then((mod) => mod.UsageAlert),
+  { ssr: false },
+);
+const UsageGraph = dynamic(
+  () => import("./index/usage-graph").then((mod) => mod.UsageGraph),
+  { ssr: false },
+);
 
 export function DashboardPage() {
   const { user: clerkUser, isLoaded: clerkLoaded } = useUser();

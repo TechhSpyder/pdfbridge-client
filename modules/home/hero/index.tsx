@@ -7,8 +7,7 @@ import TransformationAnimation from "./index/TransformationAnimation";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { toast } from "sonner";
-import NextImage from "next/image";
+import Image from "next/image";
 
 export function Hero() {
   const { ref: contentRef, isVisible: contentVisible } = useScrollAnimation();
@@ -22,9 +21,9 @@ export function Hero() {
       {/* Premium Background Elements */}
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-[#020617]" />
-        <NextImage
-          src="/hero_bg.png"
-          alt=""
+        <Image
+          src="/webp/hero_bg_1_1x.webp"
+          alt="hero background"
           fill
           priority
           className="object-cover opacity-40 mix-blend-luminosity"

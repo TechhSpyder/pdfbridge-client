@@ -89,10 +89,11 @@ export function Navbar() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
           <Image
-            src="/pdfbridge_logo.svg"
+            src="/webp/pdfbridge_logo.webp"
             alt="PDFBridge"
             width={48}
             height={48}
+            priority
           />
 
           <span className="hidden sm:inline font-semibold text-lg">
