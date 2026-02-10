@@ -188,6 +188,7 @@ export function BillingPage() {
     <div className="max-w-6xl mx-auto space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-1000 pb-20">
       <Script
         src="https://cdn.paddle.com/paddlejs/v2/paddle.js"
+        strategy="lazyOnload"
         onLoad={() => {
           if (window.Paddle) {
             window.Paddle.Environment.set(
