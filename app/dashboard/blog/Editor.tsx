@@ -16,6 +16,7 @@ import { Button } from "@/modules/app/button";
 import { upsertPost, getCategories, getAuthors } from "./actions";
 import RichTextEditor from "@/modules/dashboard/blog/RichTextEditor";
 import sanitizeHtml from "sanitize-html";
+import Image from "next/image";
 
 interface EditorProps {
   post?: any;
@@ -376,9 +377,13 @@ export default function BlogEditor({ post, onClose }: EditorProps) {
                   />
                   {formData.coverImage && (
                     <div className="aspect-video rounded-xl overflow-hidden border border-white/10 group relative">
-                      <img
-                        src={formData.coverImage}
+                      <Image
+                        src={formData.coverImage || ""}
+                        alt="Cover preview"
+                        width={400}
+                        height={225}
                         className="w-full h-full object-cover"
+                        unoptimized
                       />
                       <button
                         onClick={() =>

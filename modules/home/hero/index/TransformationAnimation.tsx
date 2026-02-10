@@ -141,7 +141,7 @@ export default function TransformationAnimation() {
               animate={{ filter: "blur(0px)" }}
             >
               <NextImage
-                src="/mock_webpage.png"
+                src="/webp/mock_webpage.avif"
                 alt="Webpage Preview"
                 fill
                 className="object-cover brightness-90 contrast-110"

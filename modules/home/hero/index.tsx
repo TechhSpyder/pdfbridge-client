@@ -23,7 +23,7 @@ export function Hero() {
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-[#020617]" />
         <NextImage
-          src="/hero_bg.png"
+          src="/webp/hero_bg.avif"
           alt=""
           fill
           priority
