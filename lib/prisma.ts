@@ -9,9 +9,9 @@ const connectionString = process.env.DATABASE_URL!;
 const pool = new Pool({
   connectionString,
   // Optional: tune these based on your needs / Supabase limits
-  max: 10, // max connections in pool
+  max: 20, // increased for multi-worker builds
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
+  connectionTimeoutMillis: 10000, // increased to handle build-time latency
 });
 
 const adapter = new PrismaPg(pool);
