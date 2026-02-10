@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { FileText, Link, Globe, CheckCircle } from "lucide-react";
-import NextImage from "next/image";
+import Image from "next/image";
 
 export default function TransformationAnimation() {
   const [stage, setStage] = useState(0); // 0: URL, 1: Loading, 2: Webpage, 3: PDF Ready
@@ -140,8 +140,8 @@ export default function TransformationAnimation() {
               initial={{ filter: "blur(10px)" }}
               animate={{ filter: "blur(0px)" }}
             >
-              <NextImage
-                src="/webp/mock_webpage.avif"
+              <Image
+                src="/webp/mock_webpage_1_1x.webp"
                 alt="Webpage Preview"
                 fill
                 className="object-cover brightness-90 contrast-110"
