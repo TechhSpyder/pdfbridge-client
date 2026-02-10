@@ -28,14 +28,20 @@ export default function SignUpPage() {
         >
           Terms of Service
         </Link>{" "}
-        and{" "}
+        ,{" "}
         <Link
           href="/privacy"
           className="text-blue-500 hover:text-blue-400 transition underline underline-offset-4"
         >
           Privacy Policy
         </Link>
-        .
+        , and
+        <Link
+          href="/dpa"
+          className="text-blue-500 hover:text-blue-400 transition underline underline-offset-4"
+        >
+          Data Processing Agreement.
+        </Link>
       </div>
     </div>
   );

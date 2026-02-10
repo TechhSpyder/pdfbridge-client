@@ -94,6 +94,7 @@ export default async function InsightArticlePage({ params }: PostPageProps) {
                   width={40}
                   height={40}
                   className="object-cover"
+                  sizes="40px"
                 />
               </div>
               <div>
@@ -137,6 +138,7 @@ export default async function InsightArticlePage({ params }: PostPageProps) {
               fill
               className="object-cover"
               priority
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
             />
           </div>
 
@@ -216,6 +218,7 @@ export default async function InsightArticlePage({ params }: PostPageProps) {
                 width={80}
                 height={80}
                 className="object-cover"
+                sizes="80px"
               />
             </div>
             <div className="flex-1 text-center md:text-left">

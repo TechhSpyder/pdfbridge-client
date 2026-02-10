@@ -82,6 +82,14 @@ const Privacy: FC = () => {
         <p>
           I do <strong>not</strong> sell your data.
         </p>
+        <p className="mt-2">
+          Where PDFBridge processes personal data on behalf of customers, such
+          processing is governed by our{" "}
+          <Link href="/dpa" className="underline">
+            Data Processing Agreement
+          </Link>
+          .
+        </p>
       </section>
 
       <section className="mb-6">
