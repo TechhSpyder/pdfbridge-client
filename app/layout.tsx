@@ -73,6 +73,8 @@ export const metadata: Metadata = {
   manifest: "/site.webmanifest",
 };
 
+import { InactivityHandler } from "@/modules/auth/inactivity-handler";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -82,6 +84,7 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
         <body className={`${inter.variable} antialiased`}>
+          <InactivityHandler />
           <Navbar />
           <Providers>{children}</Providers>
           <SpeedInsights />
