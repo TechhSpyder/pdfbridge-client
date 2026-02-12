@@ -5,7 +5,7 @@
     {
       "src": "/webp/pdfbridge_logo.webp",
       "sizes": "any",
-      "type": "image/svg+xml"
+      "type": "image/webp"
     }
   ],
   "theme_color": "#ffffff",
