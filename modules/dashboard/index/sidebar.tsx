@@ -61,7 +61,7 @@ function SidebarContent({ isSmallScreen, setSidebarOpen }: any) {
       <div className="p-6 border-b border-muted h-20 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3">
           <Image
-            src="/pdfbridge_logo.svg"
+            src="/webp/pdfbridge_logo.webp"
             alt="PDFBridge"
             width={32}
             height={32}
