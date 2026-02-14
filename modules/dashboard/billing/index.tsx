@@ -63,23 +63,15 @@ export function BillingPage() {
             ? "production"
             : "sandbox";
         window.Paddle.Environment.set(env);
-        console.log(
-          "[PADDLE] SDK Initializing. Environment:",
-          env,
-          "| Token:",
-          process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN?.substring(0, 10) + "...",
-        );
         window.Paddle.Initialize({
           token: process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN || "",
         });
-        console.log("[PADDLE] Initialized in", window.Paddle.Environment.get());
         return true;
       }
       return false;
     };
 
     if (!initPaddle()) {
-      console.log("[PADDLE] Waiting for SDK to load...");
       const pollInterval = window.setInterval(() => {
         if (initPaddle()) window.clearInterval(pollInterval);
       }, 500);
@@ -124,12 +116,8 @@ export function BillingPage() {
     }
   }, [searchParams, verifyMutation, refetch]);
 
-  const overrideProvider = searchParams.get("provider") as
-    | "paddle"
-    | "paystack"
-    | null;
   const defaultProvider = userData?.region === "NG" ? "paystack" : "paddle";
-  const provider = overrideProvider || defaultProvider;
+  const provider = defaultProvider;
 
   if (plansError) {
     return (
@@ -274,52 +262,6 @@ export function BillingPage() {
                     {item === "month" ? "Monthly" : "Annual"}
                   </button>
                 ))}
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-2 items-end">
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-                Switch Billing Gateway (Testing)
-              </span>
-              <div className="flex p-1 rounded-xl bg-slate-900 border border-white/5 gap-1">
-                <button
-                  onClick={() => {
-                    const params = new URLSearchParams(searchParams);
-                    params.set("provider", "paystack");
-                    window.history.replaceState(
-                      null,
-                      "",
-                      "?" + params.toString(),
-                    );
-                  }}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                    provider === "paystack"
-                      ? "bg-blue-500 text-white shadow-lg shadow-blue-500/20"
-                      : "text-slate-400 hover:text-white hover:bg-white/5"
-                  }`}
-                >
-                  <CreditCard className="h-3.5 w-3.5" />
-                  Paystack
-                </button>
-                <button
-                  onClick={() => {
-                    const params = new URLSearchParams(searchParams);
-                    params.set("provider", "paddle");
-                    window.history.replaceState(
-                      null,
-                      "",
-                      "?" + params.toString(),
-                    );
-                  }}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                    provider === "paddle"
-                      ? "bg-blue-500 text-white shadow-lg shadow-blue-500/20"
-                      : "text-slate-400 hover:text-white hover:bg-white/5"
-                  }`}
-                >
-                  <Globe className="h-3.5 w-3.5" />
-                  Paddle
-                </button>
               </div>
             </div>
           </div>

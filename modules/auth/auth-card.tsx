@@ -549,7 +549,7 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
             </div>
           )} */}
           {showTurnstile && (
-            <div className="flex justify-center py-2">
+            <div className="flex flex-col items-center gap-2 py-2">
               <Turnstile
                 siteKey={
                   process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ||
@@ -563,6 +563,10 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
                 }}
                 options={{ theme: "dark" }}
               />
+              <p className="text-[10px] text-slate-500 text-center">
+                Security check failing? Try disabling extensions (like MetaMask)
+                or use an Incognito window.
+              </p>
             </div>
           )}
 

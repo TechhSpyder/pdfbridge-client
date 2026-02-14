@@ -207,8 +207,9 @@ export function Documentation({
             <Cpu className="text-amber-500" /> Bulk Conversion
           </h2>
           <p className="text-slate-400 leading-relaxed">
-            Process up to 50 conversions in a single request. Highly efficient
-            for generating large sets of documents like monthly invoices.
+            Process up to 1,000 conversions in a single request. Highly
+            efficient for generating large sets of documents like monthly
+            invoices.
           </p>
           <div className="space-y-4">
             <div className="flex items-center gap-2 font-mono text-sm">
@@ -521,7 +522,7 @@ export function Documentation({
   "event": "pdf.generated",
   "jobId": "4ce4fc3a-2865-4404-933c-22da12f19679",
   "status": "completed",
-  "url": "https://storage.pdfbridge.xyz/pdfs/..."
+  "url": "https://assets.pdfbridge.xyz/pdfs/..."
 }`}
             language="json"
           />
