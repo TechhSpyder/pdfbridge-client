@@ -74,6 +74,7 @@ export const metadata: Metadata = {
 };
 
 import { InactivityHandler } from "@/modules/auth/inactivity-handler";
+import Script from "next/script";
 
 export default function RootLayout({
   children,
@@ -84,6 +85,10 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
         <body className={`${inter.variable} antialiased`}>
+          <Script
+            src="https://cdn.paddle.com/paddle/v2/paddle.js"
+            strategy="afterInteractive"
+          />
           <InactivityHandler />
           <Navbar />
           <Providers>{children}</Providers>
