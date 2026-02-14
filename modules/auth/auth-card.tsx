@@ -42,8 +42,13 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
   const [isPasswordValid, setIsPasswordValid] = useState(false);
   const [isRouting, setIsRouting] = useState(false);
   const router = useRouter();
-
+  const [showTurnstile, setShowTurnstile] = useState(false);
   const isSignIn = type === "sign-in";
+  useEffect(() => {
+    if (!isSignIn) {
+      setShowTurnstile(true);
+    }
+  }, [isSignIn]);
 
   useEffect(() => {
     const key =
@@ -524,7 +529,7 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
           )}
 
           {error && <p className="text-sm text-red-500">{error}</p>}
-          {!isSignIn && (
+          {/* {!isSignIn && (
             <div className="flex justify-center py-2">
               <Turnstile
                 siteKey={
@@ -542,7 +547,25 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
                 }}
               />
             </div>
+          )} */}
+          {showTurnstile && (
+            <div className="flex justify-center py-2">
+              <Turnstile
+                siteKey={
+                  process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ||
+                  "1x00000000000000000000AA"
+                }
+                onSuccess={(token) => setTurnstileToken(token)}
+                onExpire={() => setTurnstileToken(null)}
+                onError={() => {
+                  setError("Error loading security check. Please refresh.");
+                  setTurnstileToken(null);
+                }}
+                options={{ theme: "dark" }}
+              />
+            </div>
           )}
+
           <Button
             type="submit"
             disabled={loading}
