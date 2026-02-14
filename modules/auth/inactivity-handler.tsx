@@ -35,9 +35,20 @@ export function InactivityHandler() {
     }, CHECK_INTERVAL);
 
     // Also monitor for server-side SESSION_EXPIRED
+    // We wrap fetch to catch 401 SESSION_EXPIRED responses
     const originalFetch = window.fetch;
-    window.fetch = async (...args) => {
-      const response = await originalFetch(...args);
+    window.fetch = async function (...args) {
+      const response = await originalFetch.apply(this, args);
+
+      // Skip for Turnstile/Security endpoints to avoid interference
+      const url = typeof args[0] === "string" ? args[0] : "";
+      if (
+        url.includes("challenges.cloudflare.com") ||
+        url.includes("/verify-turnstile")
+      ) {
+        return response;
+      }
+
       if (response.status === 401) {
         try {
           const data = await response.clone().json();
