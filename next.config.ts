@@ -56,6 +56,10 @@ const nextConfig: NextConfig = {
 
               // Workers
               "worker-src 'self' blob:",
+
+              // Security & Form handling
+              "base-uri 'self'",
+              "form-action 'self'",
             ].join("; "),
           },
 

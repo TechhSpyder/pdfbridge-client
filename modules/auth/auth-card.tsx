@@ -46,6 +46,18 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
   const isSignIn = type === "sign-in";
 
   useEffect(() => {
+    const key =
+      process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000AA";
+    if (key === "1x00000000000000000000AA") {
+      console.warn(
+        "[TURNSTILE] Using LOCAL TEST site key. This WILL fail on production domains.",
+      );
+    } else {
+      console.log(`[TURNSTILE] Loaded site key: ${key.substring(0, 6)}...`);
+    }
+  }, []);
+
+  useEffect(() => {
     let timer: NodeJS.Timeout;
     if (pendingVerification && countdown > 0) {
       timer = setInterval(() => {
