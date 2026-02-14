@@ -523,3 +523,7 @@ body {
 .hljs-strong {
   font-weight: bold;
 }
+
+.fmmAGG {
+  background-color: var(--background) !important;
+}

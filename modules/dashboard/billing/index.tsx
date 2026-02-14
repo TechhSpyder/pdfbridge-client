@@ -24,6 +24,7 @@ import { toast } from "sonner";
 import { PlanCard, PlanCardSkeleton } from "../index/plan-card";
 import Link from "next/link";
 import Script from "next/script";
+import { cn } from "@/utils";
 
 declare global {
   interface Window {
@@ -44,10 +45,48 @@ export function BillingPage() {
   const { data: billingInfo } = useBillingInfo();
   const cancelMutation = useCancelSubscription();
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
+  const [interval, setInterval] = useState<"month" | "year">("month");
   const verifyingRef = useRef(false);
+  const token = process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN!;
+  useEffect(() => {
+    if (userData?.billingInterval) {
+      setInterval(userData.billingInterval as any);
+    }
+  }, [userData?.billingInterval]);
+
+  useEffect(() => {
+    // Initialize Paddle if it's available, or poll briefly if it's still loading
+    const initPaddle = () => {
+      if (window.Paddle) {
+        window.Paddle.Environment.set(
+          process.env.NEXT_PUBLIC_PADDLE_ENVIRONMENT === "production"
+            ? "production"
+            : "sandbox",
+        );
+        console.log(
+          "[PADDLE] Initializing with token:",
+          process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN?.substring(0, 10) + "...",
+        );
+        window.Paddle.Initialize({
+          token: process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN || "",
+        });
+        console.log("[PADDLE] Initialized in", window.Paddle.Environment.get());
+        return true;
+      }
+      return false;
+    };
+
+    if (!initPaddle()) {
+      console.log("[PADDLE] Waiting for SDK to load...");
+      const pollInterval = window.setInterval(() => {
+        if (initPaddle()) window.clearInterval(pollInterval);
+      }, 500);
+      return () => window.clearInterval(pollInterval);
+    }
+  }, []);
 
   const Loaders = userLoading || plansLoading;
-
+  const intervals = userData.billingInterval === "year" ? "Annual" : "Monthly";
   useEffect(() => {
     const reference = searchParams.get("reference");
     const success = searchParams.get("success");
@@ -83,7 +122,12 @@ export function BillingPage() {
     }
   }, [searchParams, verifyMutation, refetch]);
 
-  const provider = userData?.region === "NG" ? "paystack" : "paddle";
+  const overrideProvider = searchParams.get("provider") as
+    | "paddle"
+    | "paystack"
+    | null;
+  const defaultProvider = userData?.region === "NG" ? "paystack" : "paddle";
+  const provider = overrideProvider || defaultProvider;
 
   if (plansError) {
     return (
@@ -127,6 +171,8 @@ export function BillingPage() {
             displayMode: "overlay",
             theme: "dark",
             locale: "en",
+            // allowQuantity: false,
+            // businessName: "PDFBridge",
           },
           items: [
             {
@@ -137,11 +183,15 @@ export function BillingPage() {
           customer: {
             email: response.email,
           },
+
           customData: {
             userId: response.userId,
             planId: planId,
+            product_name: `PDFBridge ${plansData.find((p: any) => p.id === planId)?.name}`,
+            description: "Unlimited PDFs, no stress",
           },
         });
+        toast.dismiss(tId);
       } else {
         const checkoutUrl = response.url || response.authorization_url;
         if (checkoutUrl) {
@@ -185,255 +235,300 @@ export function BillingPage() {
     );
 
   return (
-    <div className="max-w-6xl mx-auto space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-1000 pb-20">
-      <Script
-        src="https://cdn.paddle.com/paddlejs/v2/paddle.js"
-        strategy="lazyOnload"
-        onLoad={() => {
-          if (window.Paddle) {
-            window.Paddle.Environment.set(
-              process.env.NEXT_PUBLIC_PADDLE_ENVIRONMENT === "production"
-                ? "production"
-                : "sandbox",
-            );
-            window.Paddle.Initialize({
-              token: process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN || "",
-            });
-          }
-        }}
-      />
-
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
-        <div className="space-y-2">
-          <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
-            Upgrade your <span className="text-blue-500">Infrastructure</span>
-          </h1>
-          <p className="text-lg text-slate-400 max-w-2xl">
-            Scale your PDF generation from side projects to enterprise clusters
-            with our globally distributed edge network.
-          </p>
-        </div>
-
-        <div className="flex flex-col gap-4 items-end">
-          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-            Automatic Billing Region
-          </span>
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900 border border-white/5 text-xs font-medium text-slate-300">
-            {provider === "paystack" ? (
-              <>
-                <CreditCard className="h-3 w-3 text-emerald-500" />
-                Nigeria (NGN)
-              </>
-            ) : (
-              <>
-                <Globe className="h-3 w-3 text-blue-500" />
-                International (USD)
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Active Subscription Management */}
-
-      <div className="rounded-3xl border border-blue-500/20 bg-blue-500/5 p-8 backdrop-blur-md">
-        {Loaders ? (
-          <ActiveSubSkeleton />
-        ) : (
-          (userData?.plan?.priceUsd > 0 || userData?.plan?.priceNgn > 0) && (
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-              <div className="flex gap-4 items-center">
-                <div className="p-3 rounded-2xl bg-blue-500/10">
-                  <ShieldCheck className="h-6 w-6 text-blue-500" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold text-white">
-                    Active {userData.plan.name} Subscription
-                  </h2>
-                  <p className="text-sm text-slate-400">
-                    You are currently on the {userData.plan.name} plan. Managed
-                    via {billingInfo?.provider || "our secure gateway"}.
-                  </p>
-                </div>
-              </div>
-              <div className="flex gap-3">
-                {billingInfo?.portalUrl ? (
-                  <Link href={billingInfo.portalUrl} target="_blank">
-                    <Button
-                      variant="outline"
-                      className="gap-2 border-white/5 hover:bg-white/5"
-                    >
-                      <ExternalLinkIcon className="h-4 w-4" />
-                      Manage Billing Portal
-                    </Button>
-                  </Link>
-                ) : (
-                  <Button
-                    variant="outline"
-                    onClick={handleCancel}
-                    disabled={cancelMutation.isPending}
-                    className="gap-2 border-red-500/20 text-red-500 hover:bg-red-500/10 hover:border-red-500/40"
-                  >
-                    <XCircle className="h-4 w-4" />
-                    {cancelMutation.isPending
-                      ? "Cancelling..."
-                      : "Cancel Subscription"}
-                  </Button>
-                )}
-              </div>
-            </div>
-          )
-        )}
-      </div>
-
-      {/* Pricing Grid */}
-      <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-        {Loaders
-          ? Array.from({ length: 3 }).map((_, index) => (
-              <PlanCardSkeleton key={index} />
-            ))
-          : plans.map((plan: any) => (
-              <PlanCard
-                key={plan.id}
-                plan={plan}
-                userData={userData}
-                provider={provider}
-                onCheckout={handleCheckout}
-                isCheckoutPending={checkoutMutation.isPending}
-                selectedPlanId={selectedPlanId}
-              />
-            ))}
-      </div>
-
-      {/* Billing History */}
-      <div className="space-y-6">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-slate-800/50">
-            <Receipt className="h-5 w-5 text-slate-400" />
-          </div>
-          <h2 className="text-xl font-bold text-white">Billing History</h2>
-        </div>
-        <div className="rounded-2xl border border-white/5 bg-slate-900/40 p-1 overflow-x-auto scrollbar-hide">
-          <table className="w-full text-left text-sm min-w-[600px]">
-            <thead className="bg-white/5 text-slate-500 text-[10px] font-bold uppercase tracking-widest">
-              <tr>
-                <th className="px-6 py-3">Date</th>
-                <th className="px-6 py-3">Amount</th>
-                <th className="px-6 py-3">Status</th>
-                <th className="px-6 py-3">Receipt</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/5">
-              {userData?.plan?.priceUsd > 0 || userData?.plan?.priceNgn > 0 ? (
-                <tr>
-                  <td className="px-6 py-4 text-slate-400">
-                    {new Date(
-                      userData?.planStartedAt || userData?.createdAt,
-                    ).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
-                  </td>
-                  <td className="px-6 py-4 text-white font-medium">
-                    {provider === "paystack" ? "₦" : "$"}
-                    {(provider === "paystack"
-                      ? userData.plan.priceNgn / 100
-                      : userData.plan.priceUsd / 100
-                    ).toLocaleString()}
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 text-[10px] font-bold">
-                      Paid
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-slate-500 italic text-xs">
-                    Sent via Email
-                  </td>
-                </tr>
-              ) : (
-                <tr>
-                  <td
-                    colSpan={4}
-                    className="px-6 py-12 text-center text-slate-500 italic"
-                  >
-                    No payment history found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* FAQ / Trust Bar */}
-      <div className="grid gap-8 lg:grid-cols-2">
-        <div className="p-8 rounded-3xl border border-muted bg-slate-900/40 space-y-6">
-          <div className="flex bg-blue-500/10 w-fit p-3 rounded-2xl">
-            <ShieldCheck className="h-6 w-6 text-blue-500" />
-          </div>
+    <>
+      <div className="max-w-6xl mx-auto space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-1000 pb-20">
+        {/* Header */}
+        <div className="flex flex-col justify-between gap-8">
           <div className="space-y-2">
-            <h3 className="text-xl font-bold text-white">
-              Secure Global Payments
-            </h3>
-            <p className="text-sm text-slate-400 leading-relaxed">
-              We partner with industry-leading payment processors to ensure your
-              data is always safe. Paddle handles international tax compliance,
-              while Paystack provides seamless local transactions in Nigeria.
+            <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
+              Upgrade your <span className="text-blue-500">Infrastructure</span>
+            </h1>
+            <p className="text-lg text-slate-400 max-w-2xl">
+              Scale your PDF generation from side projects to enterprise
+              clusters with our globally distributed edge network.
             </p>
           </div>
-          <div className="flex gap-4 pt-4 grayscale opacity-50 flex-wrap">
-            <div className="px-3 py-1 rounded border border-white/10 text-[10px] font-bold text-slate-500">
-              VISA
+
+          <div className="flex flex-col gap-4 items-end">
+            <div className="flex flex-col gap-2 items-end">
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                Billing Cycle
+              </span>
+              <div className="flex p-1 rounded-xl bg-slate-900 border border-white/5 gap-1">
+                {(["month", "year"] as const).map((item) => (
+                  <button
+                    key={item}
+                    onClick={() => setInterval(item)}
+                    className={cn(
+                      "px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
+                      {
+                        "bg-emerald-500 text-white shadow-lg shadow-emerald-500/20":
+                          interval === item,
+                        "text-slate-400 hover:text-white hover:bg-white/5":
+                          interval !== item,
+                      },
+                    )}
+                  >
+                    {item === "month" ? "Monthly" : "Annual"}
+                  </button>
+                ))}
+              </div>
             </div>
-            <div className="px-3 py-1 rounded border border-white/10 text-[10px] font-bold text-slate-500">
-              MASTERCARD
+
+            <div className="flex flex-col gap-2 items-end">
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                Switch Billing Gateway (Testing)
+              </span>
+              <div className="flex p-1 rounded-xl bg-slate-900 border border-white/5 gap-1">
+                <button
+                  onClick={() => {
+                    const params = new URLSearchParams(searchParams);
+                    params.set("provider", "paystack");
+                    window.history.replaceState(
+                      null,
+                      "",
+                      "?" + params.toString(),
+                    );
+                  }}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                    provider === "paystack"
+                      ? "bg-blue-500 text-white shadow-lg shadow-blue-500/20"
+                      : "text-slate-400 hover:text-white hover:bg-white/5"
+                  }`}
+                >
+                  <CreditCard className="h-3.5 w-3.5" />
+                  Paystack
+                </button>
+                <button
+                  onClick={() => {
+                    const params = new URLSearchParams(searchParams);
+                    params.set("provider", "paddle");
+                    window.history.replaceState(
+                      null,
+                      "",
+                      "?" + params.toString(),
+                    );
+                  }}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                    provider === "paddle"
+                      ? "bg-blue-500 text-white shadow-lg shadow-blue-500/20"
+                      : "text-slate-400 hover:text-white hover:bg-white/5"
+                  }`}
+                >
+                  <Globe className="h-3.5 w-3.5" />
+                  Paddle
+                </button>
+              </div>
             </div>
-            <div className="px-3 py-1 rounded border border-white/10 text-[10px] font-bold text-slate-500">
-              APPLE PAY
+          </div>
+
+          {/* Active Subscription Management */}
+
+          <div className="rounded-3xl border border-blue-500/20 bg-blue-500/5 p-8 backdrop-blur-md">
+            {Loaders ? (
+              <ActiveSubSkeleton />
+            ) : (
+              (userData?.plan?.priceUsd > 0 ||
+                userData?.plan?.priceNgn > 0) && (
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                  <div className="flex gap-4 items-center">
+                    <div className="p-3 rounded-2xl bg-blue-500/10">
+                      <ShieldCheck className="h-6 w-6 text-blue-500" />
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-bold text-white">
+                        Active {userData.plan.name} Subscription
+                      </h2>
+                      <p className="text-sm text-slate-400">
+                        You are currently on the {userData.plan.name}{" "}
+                        {intervals} plan. Managed via{" "}
+                        {billingInfo?.provider || "our secure gateway"}.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-3">
+                    {billingInfo?.portalUrl ? (
+                      <Link href={billingInfo.portalUrl} target="_blank">
+                        <Button
+                          variant="outline"
+                          className="gap-2 border-white/5 hover:bg-white/5"
+                        >
+                          <ExternalLinkIcon className="h-4 w-4" />
+                          Manage Billing Portal
+                        </Button>
+                      </Link>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        onClick={handleCancel}
+                        disabled={cancelMutation.isPending}
+                        className="gap-2 border-red-500/20 text-red-500 hover:bg-red-500/10 hover:border-red-500/40"
+                      >
+                        <XCircle className="h-4 w-4" />
+                        {cancelMutation.isPending
+                          ? "Cancelling..."
+                          : "Cancel Subscription"}
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              )
+            )}
+          </div>
+
+          {/* Pricing Grid */}
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {Loaders
+              ? Array.from({ length: 3 }).map((_, index) => (
+                  <PlanCardSkeleton key={index} />
+                ))
+              : plans.map((plan: any) => (
+                  <PlanCard
+                    key={plan.id}
+                    plan={plan}
+                    userData={userData}
+                    provider={provider}
+                    onCheckout={handleCheckout}
+                    isCheckoutPending={checkoutMutation.isPending}
+                    selectedPlanId={selectedPlanId}
+                    forcedInterval={interval}
+                  />
+                ))}
+          </div>
+
+          {/* Billing History */}
+          <div className="space-y-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-slate-800/50">
+                <Receipt className="h-5 w-5 text-slate-400" />
+              </div>
+              <h2 className="text-xl font-bold text-white">Billing History</h2>
             </div>
-            <div className="px-3 py-1 rounded border border-white/10 text-[10px] font-bold text-slate-500">
-              BANK TRANSFER
+            <div className="rounded-2xl border border-white/5 bg-slate-900/40 p-1 overflow-x-auto scrollbar-hide">
+              <table className="w-full text-left text-sm min-w-[600px]">
+                <thead className="bg-white/5 text-slate-500 text-[10px] font-bold uppercase tracking-widest">
+                  <tr>
+                    <th className="px-6 py-3">Date</th>
+                    <th className="px-6 py-3">Amount</th>
+                    <th className="px-6 py-3">Status</th>
+                    <th className="px-6 py-3">Receipt</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {userData?.plan?.priceUsd > 0 ||
+                  userData?.plan?.priceNgn > 0 ? (
+                    <tr>
+                      <td className="px-6 py-4 text-slate-400">
+                        {new Date(
+                          userData?.planStartedAt || userData?.createdAt,
+                        ).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </td>
+                      <td className="px-6 py-4 text-white font-medium">
+                        {provider === "paystack" ? "₦" : "$"}
+                        {(provider === "paystack"
+                          ? userData.plan.priceNgn / 100
+                          : userData.plan.priceUsd / 100
+                        ).toLocaleString()}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 text-[10px] font-bold">
+                          Paid
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-slate-500 italic text-xs">
+                        Sent via Email
+                      </td>
+                    </tr>
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan={4}
+                        className="px-6 py-12 text-center text-slate-500 italic"
+                      >
+                        No payment history found.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* FAQ / Trust Bar */}
+          <div className="grid gap-8 lg:grid-cols-2">
+            <div className="p-8 rounded-3xl border border-muted bg-slate-900/40 space-y-6">
+              <div className="flex bg-blue-500/10 w-fit p-3 rounded-2xl">
+                <ShieldCheck className="h-6 w-6 text-blue-500" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-xl font-bold text-white">
+                  Secure Global Payments
+                </h3>
+                <p className="text-sm text-slate-400 leading-relaxed">
+                  We partner with industry-leading payment processors to ensure
+                  your data is always safe. Paddle handles international tax
+                  compliance, while Paystack provides seamless local
+                  transactions in Nigeria.
+                </p>
+              </div>
+              <div className="flex gap-4 pt-4 grayscale opacity-50 flex-wrap">
+                <div className="px-3 py-1 rounded border border-white/10 text-[10px] font-bold text-slate-500">
+                  VISA
+                </div>
+                <div className="px-3 py-1 rounded border border-white/10 text-[10px] font-bold text-slate-500">
+                  MASTERCARD
+                </div>
+                <div className="px-3 py-1 rounded border border-white/10 text-[10px] font-bold text-slate-500">
+                  APPLE PAY
+                </div>
+                <div className="px-3 py-1 rounded border border-white/10 text-[10px] font-bold text-slate-500">
+                  BANK TRANSFER
+                </div>
+              </div>
+            </div>
+
+            <div className="p-8 rounded-3xl border border-muted bg-slate-900/40 space-y-6 flex flex-col justify-center">
+              <SmartContactLink
+                email="sales@pdfbridge.xyz"
+                className="flex items-center gap-4 p-4 rounded-2xl bg-black/40 border border-white/5 group cursor-pointer transition-all hover:border-blue-500/30 text-left"
+              >
+                <HelpCircle className="h-6 w-6 text-slate-500 group-hover:text-blue-400 transition-colors" />
+                <div className="flex-1">
+                  <h4 className="text-white font-bold text-sm">
+                    Need a Custom Enterprise Plan?
+                  </h4>
+                  <p className="text-xs text-slate-400">
+                    For high-volume needs (&gt;100k/mo), contact our sales team.
+                  </p>
+                </div>
+                <ChevronRight className="h-4 w-4 text-slate-600 group-hover:translate-x-1 transition-transform" />
+              </SmartContactLink>
+
+              <SmartContactLink
+                email="support@pdfbridge.xyz"
+                className="flex items-center gap-4 p-4 rounded-2xl bg-black/40 border border-white/5 group cursor-pointer transition-all hover:border-emerald-500/30 text-left"
+              >
+                <ShieldCheck className="h-6 w-6 text-slate-500 group-hover:text-emerald-400 transition-colors" />
+                <div className="flex-1">
+                  <h4 className="text-white font-bold text-sm">
+                    14-Day Money Back Guarantee
+                  </h4>
+                  <p className="text-xs text-slate-400">
+                    Not satisfied? We offer full refunds within 14 days of
+                    upgrade.
+                  </p>
+                </div>
+                <ChevronRight className="h-4 w-4 text-slate-600 group-hover:translate-x-1 transition-transform" />
+              </SmartContactLink>
             </div>
           </div>
         </div>
-
-        <div className="p-8 rounded-3xl border border-muted bg-slate-900/40 space-y-6 flex flex-col justify-center">
-          <SmartContactLink
-            email="sales@pdfbridge.xyz"
-            className="flex items-center gap-4 p-4 rounded-2xl bg-black/40 border border-white/5 group cursor-pointer transition-all hover:border-blue-500/30 text-left"
-          >
-            <HelpCircle className="h-6 w-6 text-slate-500 group-hover:text-blue-400 transition-colors" />
-            <div className="flex-1">
-              <h4 className="text-white font-bold text-sm">
-                Need a Custom Enterprise Plan?
-              </h4>
-              <p className="text-xs text-slate-400">
-                For high-volume needs (&gt;100k/mo), contact our sales team.
-              </p>
-            </div>
-            <ChevronRight className="h-4 w-4 text-slate-600 group-hover:translate-x-1 transition-transform" />
-          </SmartContactLink>
-
-          <SmartContactLink
-            email="support@pdfbridge.xyz"
-            className="flex items-center gap-4 p-4 rounded-2xl bg-black/40 border border-white/5 group cursor-pointer transition-all hover:border-emerald-500/30 text-left"
-          >
-            <ShieldCheck className="h-6 w-6 text-slate-500 group-hover:text-emerald-400 transition-colors" />
-            <div className="flex-1">
-              <h4 className="text-white font-bold text-sm">
-                14-Day Money Back Guarantee
-              </h4>
-              <p className="text-xs text-slate-400">
-                Not satisfied? We offer full refunds within 14 days of upgrade.
-              </p>
-            </div>
-            <ChevronRight className="h-4 w-4 text-slate-600 group-hover:translate-x-1 transition-transform" />
-          </SmartContactLink>
-        </div>
       </div>
-    </div>
+    </>
   );
 }
 
