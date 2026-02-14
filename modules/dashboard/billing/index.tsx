@@ -58,13 +58,15 @@ export function BillingPage() {
     // Initialize Paddle if it's available, or poll briefly if it's still loading
     const initPaddle = () => {
       if (window.Paddle) {
-        window.Paddle.Environment.set(
+        const env =
           process.env.NEXT_PUBLIC_PADDLE_ENVIRONMENT === "production"
             ? "production"
-            : "sandbox",
-        );
+            : "sandbox";
+        window.Paddle.Environment.set(env);
         console.log(
-          "[PADDLE] Initializing with token:",
+          "[PADDLE] SDK Initializing. Environment:",
+          env,
+          "| Token:",
           process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN?.substring(0, 10) + "...",
         );
         window.Paddle.Initialize({
