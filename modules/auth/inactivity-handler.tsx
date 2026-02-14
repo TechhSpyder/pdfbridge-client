@@ -35,30 +35,28 @@ export function InactivityHandler() {
     }, CHECK_INTERVAL);
 
     // Also monitor for server-side SESSION_EXPIRED
-    // We wrap fetch to catch 401 SESSION_EXPIRED responses.
-    // IMPORTANT: We use a non-async function here to return the original promise
-    // immediately for security/Turnstile endpoints, avoiding any PAT interference.
+    // We wrap fetch ONLY for our own API calls to avoid breaking
+    // third-party security challenges like Cloudflare Turnstile/PAT.
     const originalFetch = window.fetch;
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
+
     window.fetch = function (...args) {
       const url = typeof args[0] === "string" ? args[0] : "";
+      const isInternalApi = apiUrl && url.includes(apiUrl);
 
-      // If it's a security/Turnstile URL, return original promise immediately
-      if (
-        url.includes("challenges.cloudflare.com") ||
-        url.includes("/verify-turnstile")
-      ) {
+      // If it's NOT our API, don't even add a .then() - return original promise immediately.
+      // This is the most transparent way to pass through security/PAT handshakes.
+      if (!isInternalApi || url.includes("/verify-turnstile")) {
         return originalFetch.apply(this, args);
       }
 
-      // For other requests, handle the response
+      // For our API requests, monitor for session expiration
       return originalFetch.apply(this, args).then(async (response) => {
         if (response.status === 401) {
           try {
             const data = await response.clone().json();
             if (data.error === "SESSION_EXPIRED") {
-              console.log(
-                "Session expired on server. Redirecting to sign-in...",
-              );
+              console.log("Session expired. Redirecting to sign-in...");
               signOut(() => router.push("/sign-in"));
             }
           } catch (e) {
