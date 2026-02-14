@@ -35,32 +35,38 @@ export function InactivityHandler() {
     }, CHECK_INTERVAL);
 
     // Also monitor for server-side SESSION_EXPIRED
-    // We wrap fetch to catch 401 SESSION_EXPIRED responses
+    // We wrap fetch to catch 401 SESSION_EXPIRED responses.
+    // IMPORTANT: We use a non-async function here to return the original promise
+    // immediately for security/Turnstile endpoints, avoiding any PAT interference.
     const originalFetch = window.fetch;
-    window.fetch = async function (...args) {
-      const response = await originalFetch.apply(this, args);
-
-      // Skip for Turnstile/Security endpoints to avoid interference
+    window.fetch = function (...args) {
       const url = typeof args[0] === "string" ? args[0] : "";
+
+      // If it's a security/Turnstile URL, return original promise immediately
       if (
         url.includes("challenges.cloudflare.com") ||
         url.includes("/verify-turnstile")
       ) {
-        return response;
+        return originalFetch.apply(this, args);
       }
 
-      if (response.status === 401) {
-        try {
-          const data = await response.clone().json();
-          if (data.error === "SESSION_EXPIRED") {
-            console.log("Session expired on server. Redirecting to sign-in...");
-            signOut(() => router.push("/sign-in"));
+      // For other requests, handle the response
+      return originalFetch.apply(this, args).then(async (response) => {
+        if (response.status === 401) {
+          try {
+            const data = await response.clone().json();
+            if (data.error === "SESSION_EXPIRED") {
+              console.log(
+                "Session expired on server. Redirecting to sign-in...",
+              );
+              signOut(() => router.push("/sign-in"));
+            }
+          } catch (e) {
+            // Ignore non-JSON or other errors
           }
-        } catch (e) {
-          // Ignore non-JSON or other errors
         }
-      }
-      return response;
+        return response;
+      });
     };
 
     return () => {
