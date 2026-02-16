@@ -11,8 +11,6 @@ import {
 import { Button, SmartContactLink } from "@/modules/app";
 import {
   ShieldCheck,
-  Globe,
-  CreditCard,
   ChevronRight,
   HelpCircle,
   ExternalLink as ExternalLinkIcon,
@@ -23,7 +21,6 @@ import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { PlanCard, PlanCardSkeleton } from "../index/plan-card";
 import Link from "next/link";
-import Script from "next/script";
 import { cn } from "@/utils";
 
 declare global {
@@ -161,8 +158,6 @@ export function BillingPage() {
             displayMode: "overlay",
             theme: "dark",
             locale: "en",
-            // allowQuantity: false,
-            // businessName: "PDFBridge",
           },
           items: [
             {

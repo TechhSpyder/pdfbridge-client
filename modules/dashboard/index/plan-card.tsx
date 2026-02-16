@@ -3,7 +3,6 @@ import { GlowCard } from "./glow-card";
 import { PLAN_METADATA } from "@/modules/constants";
 import { cn } from "@/utils";
 import { Check, Loader2, Zap } from "lucide-react";
-import React, { useState } from "react";
 
 export function PlanCard({
   plan,
