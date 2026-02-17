@@ -15,7 +15,8 @@ import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 
-const PUBLIC_DEMO_KEY = "pk_demo_public_bridge_2026";
+const PUBLIC_DEMO_KEY =
+  process.env.NEXT_PUBLIC_PUBLIC_DEMO_KEY || "pk_demo_public_bridge_2026";
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
 export function PublicPlayground() {
