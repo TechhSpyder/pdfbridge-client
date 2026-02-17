@@ -46,7 +46,8 @@ export function Hero() {
                 transition={{ delay: 0.2 }}
                 className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold tracking-wider uppercase"
               >
-                <Sparkles className="w-3 h-3" /> Now in Public Beta
+                <Sparkles className="w-3 h-3" /> Launching on Product Hunt March
+                3 → Get Notified
               </motion.div>
 
               <h1 className="text-5xl sm:text-6xl lg:text-6xl font-black tracking-tight leading-[1.1]">

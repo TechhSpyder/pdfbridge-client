@@ -206,11 +206,8 @@ export function Documentation({
           <h2 className="text-3xl font-bold text-white flex items-center gap-4">
             <Cpu className="text-amber-500" /> Bulk Conversion
           </h2>
-          <p className="text-slate-400 leading-relaxed">
-            Process up to 1,000 conversions in a single request. Highly
-            efficient for generating large sets of documents like monthly
-            invoices.
-          </p>
+          Process up to 1,000 conversions in a single request. Highly efficient
+          for generating large sets of documents like monthly invoices.
           <div className="space-y-4">
             <div className="flex items-center gap-2 font-mono text-sm">
               <span className="px-2 py-1 bg-emerald-500/10 text-emerald-500 rounded border border-emerald-500/20 font-bold">

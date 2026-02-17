@@ -63,8 +63,6 @@ const tiers = [
       "Webhooks Included",
       "Unlimited Conversions",
       "100MB+ File Limit",
-      "Custom Headers/Footers",
-      "Dedicated Infrastructure",
       "Priority SLA Support",
       "Webhooks Included",
     ],
@@ -129,10 +127,10 @@ export function Pricing() {
                       </span>
                     </div>
                     <ul className="mt-2 mb-4 space-y-3 text-sm text-muted-foreground">
-                      {tier.features.map((f) => (
+                      {tier.features.map((f, i) => (
                         // <li key={f}><Check className="w-4 h-4 text-blue-400 flex-shrink-0" /> {f}</li>
                         <li
-                          key={tier.id}
+                          key={`${tier.id}-${i}`}
                           className="flex items-center gap-3 text-sm"
                         >
                           <Check className="w-4 h-4 text-blue-400 shrink-0" />
