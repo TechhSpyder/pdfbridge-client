@@ -1,4 +1,5 @@
 import { getPostBySlug, getRecentPosts } from "../actions";
+import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -18,6 +19,52 @@ export const dynamic = "force-dynamic";
 
 interface PostPageProps {
   params: Promise<{ slug: string }>;
+}
+
+export async function generateMetadata({
+  params,
+}: PostPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const post = await getPostBySlug(slug);
+
+  if (!post) {
+    return {
+      title: "Post Not Found",
+    };
+  }
+
+  const images = post.coverImage
+    ? [
+        {
+          url: post.coverImage,
+          width: 1200,
+          height: 630,
+          alt: post.title,
+        },
+      ]
+    : [];
+
+  return {
+    title: post.title,
+    description: post.description || post.title,
+    openGraph: {
+      title: post.title,
+      description: post.description || post.title,
+      type: "article",
+      url: `https://pdfbridge.xyz/insights/${slug}`,
+      images,
+      publishedTime: post.createdAt
+        ? new Date(post.createdAt).toISOString()
+        : undefined,
+      authors: [post.author?.name || "PDFBridge Team"],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.description || post.title,
+      images: post.coverImage ? [post.coverImage] : [],
+    },
+  };
 }
 
 export default async function InsightArticlePage({ params }: PostPageProps) {

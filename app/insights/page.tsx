@@ -1,9 +1,24 @@
 import { getPublishedPosts } from "./actions";
+import { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { BookOpen, Calendar, User, ArrowRight, Sparkles } from "lucide-react";
 
-export const revalidate = 3600; // Revalidate every hour
+export const metadata: Metadata = {
+  title: "Insights & Engineering Journal",
+  description:
+    "Technical deep dives, product updates, and architecture insights from the team building PDFBridge.",
+  openGraph: {
+    title: "Insights & Engineering Journal | PDFBridge",
+    description:
+      "Technical deep dives, product updates, and architecture insights from the team building PDFBridge.",
+    images: [
+      "https://res.cloudinary.com/duv0exsir/image/upload/v1769535362/branded_og_image_pdfbridge_1769534994459_qn8iyg.jpg",
+    ],
+  },
+};
+
+export const revalidate = 3600;
 
 export default async function InsightsPage() {
   const posts = await getPublishedPosts();

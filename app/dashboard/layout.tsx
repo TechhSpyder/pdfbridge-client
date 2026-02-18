@@ -3,6 +3,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import { MailWarning } from "lucide-react";
 import { Button } from "@/modules/app/button";
 import { redirect } from "next/navigation";
+import { InactivityHandler } from "@/modules/auth/inactivity-handler";
 
 export default async function DashboardLayout({
   children,
@@ -62,6 +63,7 @@ export default async function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-[#020617] text-white flex">
+      <InactivityHandler />
       {/* Dashboard Sidebar */}
       <Sidebar />
 

@@ -72,9 +72,12 @@ export function RecentConversionsList() {
           </div>
           <div className="flex items-center gap-2">
             {conv.status === "PENDING" ? (
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/10 text-blue-500 flex items-center gap-1.5 animate-pulse">
-                <Loader2 className="h-2.5 w-2.5 animate-spin" />
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-yellow-500/10 text-yellow-500 border border-yellow-500/20">
                 Pending
+              </span>
+            ) : conv.status === "EXPIRED" ? (
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-orange-500/10 text-orange-500 border border-orange-500/20">
+                Expired
               </span>
             ) : conv.status === "FAILED" || !conv.success ? (
               <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-500/10 text-red-500">
@@ -97,7 +100,7 @@ export function RecentConversionsList() {
               </div>
             )}
 
-            {conv.success && (
+            {conv.success && conv.status !== "EXPIRED" && (
               <div className="flex items-center gap-1">
                 {conv.aiMetadata && (
                   <button

@@ -6,6 +6,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { Providers } from "@/modules/app/provider";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
+import Script from "next/script";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -73,14 +74,11 @@ export const metadata: Metadata = {
   manifest: "/site.webmanifest",
 };
 
-import { InactivityHandler } from "@/modules/auth/inactivity-handler";
-import Script from "next/script";
-
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
@@ -89,7 +87,6 @@ export default function RootLayout({
             src="https://cdn.paddle.com/paddle/v2/paddle.js"
             strategy="afterInteractive"
           />
-          <InactivityHandler />
           <Navbar />
           <Providers>{children}</Providers>
           <SpeedInsights />

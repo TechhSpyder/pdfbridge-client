@@ -29,10 +29,17 @@ export const metadata: Metadata = {
     "Generate high-fidelity PDFs from HTML, URLs, and React components. 99.9% Uptime, lightning-fast rendering, and developer-first documentation.",
 };
 
+const PublicPlayground = dynamic(() =>
+  import("@/modules/home").then((mod) => mod.PublicPlayground),
+);
+
 export default function Home() {
   return (
     <div className="flex flex-col items-center justify-center">
       <Hero />
+      <div id="playground" className="w-full py-10">
+        <PublicPlayground />
+      </div>
       <SocialProof />
       <WhyPdfBridge />
       <HowItWorks />
