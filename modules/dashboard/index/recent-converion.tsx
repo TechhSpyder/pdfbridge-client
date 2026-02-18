@@ -1,6 +1,10 @@
 import { useConversions } from "@/modules/hooks/queries";
-import { Activity, Copy, Download, Loader2 } from "lucide-react";
+import { cn } from "@/utils";
+import * as Dialog from "@radix-ui/react-dialog";
+import { AnimatePresence, motion } from "framer-motion";
+import { Activity, Brain, Copy, Download, Loader2, X } from "lucide-react";
 import Link from "next/link";
+import { Highlight, themes } from "prism-react-renderer";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -18,6 +22,15 @@ export function RecentConversionsList() {
       setPollInterval(30000); // Slow poll otherwise
     }
   }, [hasPending]);
+
+  const [selectedConversion, setSelectedConversion] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleViewAiData = (conv: any) => {
+    if (!conv.aiMetadata) return;
+    setSelectedConversion(conv);
+    setIsModalOpen(true);
+  };
 
   if (isLoading) {
     return (
@@ -86,6 +99,15 @@ export function RecentConversionsList() {
 
             {conv.success && (
               <div className="flex items-center gap-1">
+                {conv.aiMetadata && (
+                  <button
+                    onClick={() => handleViewAiData(conv)}
+                    title="View AI Insights"
+                    className="p-1.5 hover:bg-blue-500/10 rounded-md transition text-blue-400 hover:text-blue-200 cursor-pointer"
+                  >
+                    <Brain className="h-3.5 w-3.5" />
+                  </button>
+                )}
                 <Link
                   href={conv.url}
                   target="_blank"
@@ -110,6 +132,109 @@ export function RecentConversionsList() {
           </div>
         </div>
       ))}
+      <AnimatePresence>
+        {isModalOpen && selectedConversion && (
+          <Dialog.Root open={isModalOpen} onOpenChange={setIsModalOpen}>
+            <Dialog.Portal forceMount>
+              <Dialog.Overlay asChild>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+                />
+              </Dialog.Overlay>
+              <Dialog.Content asChild>
+                <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-50">
+                  <motion.div
+                    initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                    animate={{ scale: 1, opacity: 1, y: 0 }}
+                    exit={{ scale: 0.95, opacity: 0, y: 20 }}
+                    className="w-full max-w-3xl bg-slate-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden pointer-events-auto"
+                  >
+                    <div className="p-6 border-b border-white/5 flex items-center justify-between bg-black/20">
+                      <Dialog.Title>
+                        <div className="flex items-center gap-3">
+                          <div className="h-8 w-8 bg-blue-500/10 rounded-lg flex items-center justify-center text-blue-400 border border-blue-500/20">
+                            <Brain className="h-4 w-4" />
+                          </div>
+                          <div>
+                            <h2 className="text-sm font-bold text-white uppercase tracking-wider">
+                              AI Extraction Insights
+                            </h2>
+                            <p className="text-[10px] text-slate-500">
+                              Extracted via Gemini 1.5 Flash (BETA)
+                            </p>
+                          </div>
+                        </div>
+                      </Dialog.Title>
+                      <Dialog.Close asChild>
+                        <button className="p-2 hover:bg-white/5 rounded-full transition-colors text-slate-400 hover:text-white cursor-pointer">
+                          <X className="h-4 w-4" />
+                        </button>
+                      </Dialog.Close>
+                    </div>
+
+                    <div
+                      className="p-1 bg-black/40 max-h-[400px] overflow-y-auto custom-scrollbar font-mono"
+                      data-lenis-prevent
+                    >
+                      <Highlight
+                        theme={themes.vsDark}
+                        code={JSON.stringify(
+                          selectedConversion.aiMetadata,
+                          null,
+                          2,
+                        )}
+                        language="json"
+                      >
+                        {({
+                          className,
+                          style,
+                          tokens,
+                          getLineProps,
+                          getTokenProps,
+                        }) => (
+                          <pre
+                            className={cn(
+                              className,
+                              "p-6 m-0 bg-transparent whitespace-pre-wrap break-words",
+                            )}
+                            style={style}
+                            data-lenis-prevent
+                          >
+                            {tokens.map((line, i) => (
+                              <div key={i} {...getLineProps({ line, key: i })}>
+                                <span className="inline-block w-8 text-slate-600 select-none text-[10px]">
+                                  {i + 1}
+                                </span>
+                                {line.map((token, key) => (
+                                  <span
+                                    key={key}
+                                    {...getTokenProps({ token, key })}
+                                  />
+                                ))}
+                              </div>
+                            ))}
+                          </pre>
+                        )}
+                      </Highlight>
+                    </div>
+
+                    <div className="p-4 bg-slate-950/50 border-t border-white/5 flex justify-end">
+                      <Dialog.Close asChild>
+                        <button className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold transition-all shadow-lg shadow-blue-500/20 cursor-pointer">
+                          Done
+                        </button>
+                      </Dialog.Close>
+                    </div>
+                  </motion.div>
+                </div>
+              </Dialog.Content>
+            </Dialog.Portal>
+          </Dialog.Root>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -9,6 +9,7 @@ export function ApiPlayground() {
   const [url, setUrl] = useState("https://example.com");
   const [loading, setLoading] = useState(false);
   const [mode, setMode] = useState<"live" | "test">("test");
+  const [extractMetadata, setExtractMetadata] = useState(false);
   const api = useApiClient();
 
   const handleTest = async () => {
@@ -17,7 +18,11 @@ export function ApiPlayground() {
       description: "We are preparing your PDF...",
     });
     try {
-      await api.post("/api/v1/convert", { url, testMode: mode === "test" });
+      await api.post("/api/v1/convert", {
+        url,
+        testMode: mode === "test",
+        extractMetadata: mode === "live" && extractMetadata,
+      });
       toast.success("Conversion queued successfully!", {
         id: tId,
         description:
@@ -85,9 +90,44 @@ export function ApiPlayground() {
             )}
           </Button>
         </div>
+
+        <div className="flex items-center justify-between pt-2">
+          <div className="flex flex-col gap-1">
+            <span className="text-[10px] font-bold text-slate-300 flex items-center gap-2">
+              Gemini AI Extraction
+              <span className="bg-blue-500/10 text-blue-400 px-1.5 py-0.5 rounded text-[8px] border border-blue-500/20">
+                BETA
+              </span>
+            </span>
+            <p className="text-[9px] text-slate-500">
+              Automatically extract structured JSON from the generated document.
+            </p>
+          </div>
+          <button
+            onClick={() => setExtractMetadata(!extractMetadata)}
+            disabled={mode === "test"}
+            className={cn(
+              "relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+              extractMetadata && mode === "live"
+                ? "bg-blue-600"
+                : "bg-slate-700",
+            )}
+          >
+            <span
+              className={cn(
+                "pointer-events-none block h-4 w-4 rounded-full bg-white shadow-lg ring-0 transition-transform",
+                extractMetadata && mode === "live"
+                  ? "translate-x-4"
+                  : "translate-x-1",
+              )}
+            />
+          </button>
+        </div>
+
         {mode === "test" && (
           <p className="text-[10px] text-orange-400 font-medium italic">
-            * Test mode adds a diagonal watermark to the generated PDF.
+            * Test mode adds a diagonal watermark to the generated PDF. AI
+            extraction is disabled in Test mode.
           </p>
         )}
       </div>
@@ -100,13 +140,17 @@ export function ApiPlayground() {
         </div>
         <pre className="text-xs font-mono text-blue-400 overflow-x-auto">
           {JSON.stringify(
-            { url, options: { format: "A4" }, testMode: mode === "test" },
+            {
+              url,
+              options: { format: "A4" },
+              testMode: mode === "test",
+              extractMetadata: mode === "live" && extractMetadata,
+            },
             null,
             2,
           )}
         </pre>
       </div>
     </div>
-    // </div>
   );
 }
