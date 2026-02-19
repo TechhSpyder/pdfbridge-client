@@ -116,7 +116,7 @@ export function RecentConversionsList() {
                   target="_blank"
                   download
                   title="Download PDF"
-                  className="p-1.5 hover:bg-white/10 rounded-md transition text-slate-400 hover:text-white"
+                  className="p-1.5 hover:bg-white/10 rounded-md transition text-slate-400 hover:text-white cursor-pointer"
                 >
                   <Download className="h-3.5 w-3.5" />
                 </Link>
@@ -201,7 +201,7 @@ export function RecentConversionsList() {
                           <pre
                             className={cn(
                               className,
-                              "p-6 m-0 bg-transparent whitespace-pre-wrap break-words",
+                              "p-6 m-0 bg-transparent whitespace-pre-wrap wrap-break-words",
                             )}
                             style={style}
                             data-lenis-prevent

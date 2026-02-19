@@ -396,7 +396,7 @@ export function UsagePage() {
                           const table = document.querySelector("h1");
                           table?.scrollIntoView({ behavior: "smooth" });
                         }}
-                        className={`w-7 h-7 rounded-lg text-[10px] font-bold transition-all ${
+                        className={`w-7 h-7 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${
                           page === pageNum
                             ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20 ring-1 ring-blue-400/50"
                             : "text-slate-500 hover:bg-white/5 hover:text-slate-300"
