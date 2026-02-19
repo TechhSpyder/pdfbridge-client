@@ -21,7 +21,7 @@ const DPA: FC = () => {
 
       <h1 className="text-3xl font-bold mb-4">Data Processing Agreement</h1>
       <p className="mb-6">
-        <strong>Last Updated:</strong> 26/01/2026
+        <strong>Last Updated:</strong> 19/02/2026
       </p>
 
       <p className="mb-6">
@@ -57,6 +57,12 @@ const DPA: FC = () => {
           <li>Generating, transforming, and delivering PDF documents</li>
           <li>Temporary storage required for processing</li>
           <li>Service operation, security, and reliability</li>
+          <li>
+            <strong>Zero-Retention Processing (Ghost Mode):</strong> Where
+            requested by the customer, personal data in generated outputs is
+            processed without persistent storage, ensuring immediate deletion
+            post-delivery.
+          </li>
         </ul>
       </section>
 
@@ -97,6 +103,7 @@ const DPA: FC = () => {
           <li>Render (application hosting)</li>
           <li>Redis (caching and queues)</li>
           <li>Paystack and Paddle (payment processing)</li>
+          <li>Google (AI metadata extraction)</li>
         </ul>
         <p className="mt-2">
           Sub-processors are subject to contractual obligations consistent with

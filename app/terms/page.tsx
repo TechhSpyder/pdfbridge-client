@@ -21,7 +21,7 @@ const Terms: FC = () => {
 
       <h1 className="text-3xl font-bold mb-4">Terms and Conditions</h1>
       <p className="mb-6">
-        <strong>Last Updated:</strong> 26/01/2026
+        <strong>Last Updated:</strong> 19/02/2026
       </p>
 
       <p className="mb-4">
@@ -145,11 +145,24 @@ const Terms: FC = () => {
       <section className="mb-6">
         <h2 className="text-xl font-semibold mb-2">6. User Files & Content</h2>
         <ul className="list-disc list-inside">
-          <li>Users retain ownership of uploaded files</li>
+          <li>Users retain ownership of uploaded files and provided URLs</li>
           <li>Files are processed solely to provide the Service</li>
           <li>
-            Users are responsible for ensuring they have legal rights to
-            uploaded content
+            Users are solely responsible for ensures they have the legal right
+            and authorization to capture or process the content of any URL
+            provided to the Service.
+          </li>
+          <li>
+            <strong>Rendering Fidelity:</strong> The Service may use standard
+            browser emulation techniques (including User-Agent masking) to
+            ensure high-fidelity rendering of responsive websites.
+          </li>
+          <li>
+            <strong>Ghost Mode (Zero-Retention):</strong> When enabled via the
+            API, the Service bypasses standard storage and instantly deletes the
+            generated PDF after processing. Users are responsible for ensuring
+            they capture the output via Webhook, as no copy will be available
+            for regeneration.
           </li>
         </ul>
       </section>

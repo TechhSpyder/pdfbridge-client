@@ -32,6 +32,15 @@ export const useConversions = (
   });
 };
 
+export const useWebhookLogs = (conversionId: string) => {
+  const api = useApiClient();
+  return useQuery({
+    queryKey: ["webhook-logs", conversionId],
+    queryFn: () => api.get(`/api/v1/conversions/${conversionId}/webhooks`),
+    enabled: !!conversionId,
+  });
+};
+
 export const useConversionStats = (refetchInterval?: number) => {
   const api = useApiClient();
   return useQuery({

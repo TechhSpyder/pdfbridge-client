@@ -33,6 +33,7 @@ const tiers = [
       "Advanced analytics",
       "25MB File Limit",
       "30 Days Retention",
+      "AI Extraction Included",
       "Webhooks Included",
     ],
   },
@@ -102,6 +103,9 @@ export function Pricing() {
             <div
               key={tier.title}
               onClick={() => setActiveIndex(index)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === "Enter" && setActiveIndex(index)}
               className={cn(
                 "transition-all duration-500 ease-out cursor-pointer",
                 index === activeIndex && "md:scale-110",

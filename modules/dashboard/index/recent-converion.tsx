@@ -147,7 +147,7 @@ export function RecentConversionsList() {
                   className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
                 />
               </Dialog.Overlay>
-              <Dialog.Content asChild>
+              <Dialog.Content aria-describedby={"AI Metadata"} asChild>
                 <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-50">
                   <motion.div
                     initial={{ scale: 0.95, opacity: 0, y: 20 }}
@@ -206,19 +206,20 @@ export function RecentConversionsList() {
                             style={style}
                             data-lenis-prevent
                           >
-                            {tokens.map((line, i) => (
-                              <div key={i} {...getLineProps({ line, key: i })}>
-                                <span className="inline-block w-8 text-slate-600 select-none text-[10px]">
-                                  {i + 1}
-                                </span>
-                                {line.map((token, key) => (
-                                  <span
-                                    key={key}
-                                    {...getTokenProps({ token, key })}
-                                  />
-                                ))}
-                              </div>
-                            ))}
+                            {tokens.map((line, i) => {
+                              const lineProps = getLineProps({ line, key: i });
+                              return (
+                                <div key={i} {...lineProps}>
+                                  <span className="inline-block w-8 text-slate-600 select-none text-[10px]">
+                                    {i + 1}
+                                  </span>
+                                  {line.map((token, key) => {
+                                    const tokenProps = getTokenProps({ token });
+                                    return <span key={key} {...tokenProps} />;
+                                  })}
+                                </div>
+                              );
+                            })}
                           </pre>
                         )}
                       </Highlight>

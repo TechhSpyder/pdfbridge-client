@@ -411,6 +411,18 @@ body {
   overflow-x: hidden;
 }
 
+/* Global Cursor Polish */
+
+a,
+select,
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+[role="button"],
+.cursor-pointer {
+  cursor: pointer !important;
+}
+
 .skeleton-el {
   @apply bg-accent/20 rounded-lg w-full min-h-[20px] p-1.5 text-sm;
   background-size: 30px 100%;

@@ -13,7 +13,7 @@ export const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const baseStyles =
-    "px-4 py-2 rounded-md font-medium transition-all text-sm cursor-pointer active:scale-105 outline-none duration-200 flex items-center justify-center";
+    "px-4 py-2 rounded-md font-medium transition-all text-sm cursor-pointer active:scale-105 outline-none duration-200 flex items-center justify-center disabled:cursor-not-allowed disabled:opacity-50";
 
   const variants = {
     primary:

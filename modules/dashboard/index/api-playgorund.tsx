@@ -1,4 +1,5 @@
 import { Button } from "@/modules/app/button";
+import { useMe } from "@/modules/hooks/queries";
 import { cn } from "@/utils";
 import { useApiClient } from "@/utils/api-client";
 import { Loader2 } from "lucide-react";
@@ -12,7 +13,16 @@ export function ApiPlayground() {
   const [extractMetadata, setExtractMetadata] = useState(false);
   const api = useApiClient();
 
+  const { data: userData } = useMe();
+  const allowAi = userData?.user?.plan?.allowAi;
+
   const handleTest = async () => {
+    if (extractMetadata && !allowAi && mode === "live") {
+      toast.error("AI Extraction restricted", {
+        description: "Please upgrade your plan to use Gemini AI features.",
+      });
+      return;
+    }
     setLoading(true);
     const tId = toast.loading(`Processing ${mode} conversion...`, {
       description: "We are preparing your PDF...",
@@ -21,13 +31,13 @@ export function ApiPlayground() {
       await api.post("/api/v1/convert", {
         url,
         testMode: mode === "test",
-        extractMetadata: mode === "live" && extractMetadata,
+        extractMetadata: mode === "live" && extractMetadata && allowAi,
       });
       toast.success("Conversion queued successfully!", {
         id: tId,
         description:
           mode === "test"
-            ? "Test PDF (watermarked) will appear in and Recent Activity."
+            ? "Test PDF (watermarked) will appear in Recent Activity."
             : "PDF will appear in Recent Activity momentarily.",
       });
     } catch (e: any) {
@@ -95,20 +105,32 @@ export function ApiPlayground() {
           <div className="flex flex-col gap-1">
             <span className="text-[10px] font-bold text-slate-300 flex items-center gap-2">
               Gemini AI Extraction
-              <span className="bg-blue-500/10 text-blue-400 px-1.5 py-0.5 rounded text-[8px] border border-blue-500/20">
-                BETA
-              </span>
+              {!allowAi && (
+                <span className="bg-amber-500/10 text-amber-500 px-1.5 py-0.5 rounded text-[8px] border border-amber-500/20 uppercase">
+                  Upgrade Required
+                </span>
+              )}
+              {allowAi && (
+                <span className="bg-blue-500/10 text-blue-400 px-1.5 py-0.5 rounded text-[8px] border border-blue-500/20 uppercase">
+                  Pro Feature
+                </span>
+              )}
             </span>
             <p className="text-[9px] text-slate-500">
-              Automatically extract structured JSON from the generated document.
+              {allowAi
+                ? "Automatically extract structured JSON from the generated document."
+                : "Structured AI extraction is available on Starter plans and above."}
             </p>
           </div>
           <button
             onClick={() => setExtractMetadata(!extractMetadata)}
-            disabled={mode === "test"}
+            disabled={mode === "test" || !allowAi}
             className={cn(
-              "relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-              extractMetadata && mode === "live"
+              "relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed!",
+              mode === "test" || !allowAi
+                ? "cursor-not-allowed!"
+                : "cursor-pointer",
+              extractMetadata && mode === "live" && allowAi
                 ? "bg-blue-600"
                 : "bg-slate-700",
             )}
@@ -116,7 +138,7 @@ export function ApiPlayground() {
             <span
               className={cn(
                 "pointer-events-none block h-4 w-4 rounded-full bg-white shadow-lg ring-0 transition-transform",
-                extractMetadata && mode === "live"
+                extractMetadata && mode === "live" && allowAi
                   ? "translate-x-4"
                   : "translate-x-1",
               )}
@@ -142,7 +164,7 @@ export function ApiPlayground() {
           {JSON.stringify(
             {
               url,
-              options: { format: "A4" },
+              // options: { format: "A4" },
               testMode: mode === "test",
               extractMetadata: mode === "live" && extractMetadata,
             },
