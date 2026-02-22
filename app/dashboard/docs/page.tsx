@@ -1,5 +1,9 @@
-import { Documentation } from "@/modules/docs";
+import dynamic from "next/dynamic";
 import { Metadata } from "next";
+
+const Documentation = dynamic(() =>
+  import("@/modules/docs").then((mod) => mod.Documentation),
+);
 
 export const metadata: Metadata = {
   title: "API Documentation",

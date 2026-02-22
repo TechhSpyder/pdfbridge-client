@@ -4,6 +4,7 @@ import { MailWarning } from "lucide-react";
 import { Button } from "@/modules/app/button";
 import { redirect } from "next/navigation";
 import { InactivityHandler } from "@/modules/auth/inactivity-handler";
+import Script from "next/script";
 
 export default async function DashboardLayout({
   children,
@@ -63,6 +64,10 @@ export default async function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-[#020617] text-white flex">
+      <Script
+        src="https://cdn.paddle.com/paddle/v2/paddle.js"
+        strategy="lazyOnload"
+      />
       <InactivityHandler />
       {/* Dashboard Sidebar */}
       <Sidebar />

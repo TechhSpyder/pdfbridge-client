@@ -91,10 +91,6 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
         <body className={`${inter.variable} antialiased`}>
-          <Script
-            src="https://cdn.paddle.com/paddle/v2/paddle.js"
-            strategy="afterInteractive"
-          />
           <Navbar />
           <Providers>{children}</Providers>
           <SpeedInsights />

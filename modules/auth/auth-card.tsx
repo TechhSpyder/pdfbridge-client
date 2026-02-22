@@ -344,7 +344,7 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
     <div className="w-full max-w-md space-y-8 animate-in fade-in zoom-in duration-500">
       <div className="flex justify-center mb-6">
         <Link
-          href="/"
+          href="/?redirect=false"
           className="group flex items-center gap-2 text-xs font-medium text-slate-500 hover:text-white transition-all duration-300 px-3 py-1.5 rounded-full border border-white/5 hover:border-white/10 bg-white/5"
         >
           <svg
