@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useSignIn, useSignUp } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { Button } from "@/modules/app/button";
-import { Github, Mail, Eye, EyeOff, Loader2 } from "lucide-react";
+import { Github, Mail, Eye, EyeOff, Loader2, Lock } from "lucide-react";
 import Link from "next/link";
 import { Turnstile } from "@marsidev/react-turnstile";
 import { PasswordStrengthIndicator } from "./password-strength";
@@ -43,6 +43,8 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
   const [isRouting, setIsRouting] = useState(false);
   const router = useRouter();
   const [showTurnstile, setShowTurnstile] = useState(false);
+  const [show2FA, setShow2FA] = useState(false);
+  const [activeStrategy, setActiveStrategy] = useState<string | null>(null);
   const isSignIn = type === "sign-in";
   useEffect(() => {
     if (!isSignIn) {
@@ -139,6 +141,32 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
     }
   };
 
+  const onVerify2FA = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!signInLoaded) return;
+    setLoading(true);
+    setError("");
+
+    try {
+      const result = await signIn.attemptSecondFactor({
+        strategy: (activeStrategy as any) || "totp",
+        code,
+      });
+
+      if (result.status === "complete") {
+        setIsRouting(true);
+        await setSignInActive({ session: result.createdSessionId });
+        router.push("/dashboard");
+      } else {
+        setError("Invalid 2FA code. Please try again.");
+      }
+    } catch (err: any) {
+      setError(err.errors?.[0]?.message || "Invalid 2FA code.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -198,7 +226,21 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
               "Authentication incomplete. Please check your credentials.",
             );
           } else if (result.status === "needs_second_factor") {
-            setError("Two-factor authentication is required for this account.");
+            setShow2FA(true);
+            setCode("");
+            setError("");
+
+            // Automatically prepare the first available factor that needs it
+            const factor = result.supportedSecondFactors?.find(
+              (f) => f.strategy === "phone_code" || f.strategy === "email_code",
+            );
+            if (factor) {
+              setActiveStrategy(factor.strategy);
+              await signIn.prepareSecondFactor({ strategy: factor.strategy });
+            } else {
+              // Default to TOTP if no sendable factors
+              setActiveStrategy("totp");
+            }
           } else {
             setError(
               `Sign-in status: ${result.status}. Please contact support.`,
@@ -347,6 +389,112 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
             </p>
           </div>
         )}
+      </div>
+    );
+  }
+
+  if (show2FA) {
+    return (
+      <div className="w-full max-w-md space-y-8 animate-in fade-in zoom-in duration-500">
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-500/10 mb-6 group transition-transform hover:scale-110">
+            <Lock className="h-8 w-8 text-blue-500 group-hover:animate-bounce" />
+          </div>
+          <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+            Security Check
+          </h2>
+          <p className="mt-4 text-slate-400">
+            Enter the 2FA code from your <br />
+            <span className="text-white font-semibold capitalize">
+              {activeStrategy?.replace("_", " ") || "Authenticator app"}
+            </span>
+          </p>
+        </div>
+
+        <form onSubmit={onVerify2FA} className="mt-8 space-y-8">
+          <div className="space-y-6">
+            <div className="relative group">
+              <label
+                className="block text-sm font-medium text-slate-400 mb-2 transition-colors group-focus-within:text-blue-500"
+                htmlFor="2fa-code"
+              >
+                Verification Code
+              </label>
+              <input
+                id="2fa-code"
+                type="text"
+                required
+                maxLength={6}
+                className="block w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-5 text-white placeholder-slate-600 transition-all duration-300 focus:border-blue-500/50 focus:bg-white/[0.07] focus:outline-none focus:ring-4 focus:ring-blue-500/10 text-center tracking-[0.75em] font-mono text-3xl uppercase"
+                placeholder="000000"
+                value={code}
+                autoFocus
+                autoComplete="one-time-code"
+                onChange={(e) => setCode(e.target.value.replace(/[^0-9]/g, ""))}
+              />
+              <div className="absolute inset-x-0 bottom-0 h-px bg-linear-to-r from-transparent via-blue-500/50 to-transparent scale-x-0 group-focus-within:scale-x-100 transition-transform duration-500" />
+            </div>
+
+            {error && (
+              <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 animate-shake">
+                <p className="text-sm text-red-500 text-center">{error}</p>
+              </div>
+            )}
+
+            <Button
+              type="submit"
+              disabled={loading || code.length < 6}
+              className="w-full py-5 text-lg font-bold shadow-2xl shadow-blue-500/20 flex items-center justify-center group relative overflow-hidden active:scale-[0.98] transition-transform"
+            >
+              <div className="absolute inset-0 bg-linear-to-r from-blue-600 to-indigo-600 opacity-0 group-hover:opacity-10 transition-opacity" />
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Verifying...
+                </>
+              ) : (
+                "Verify & Sign In"
+              )}
+            </Button>
+
+            <div className="flex flex-col items-center gap-4 pt-2">
+              {(activeStrategy === "phone_code" ||
+                activeStrategy === "email_code") && (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (!signInLoaded || !activeStrategy) return;
+                    setLoading(true);
+                    try {
+                      await signIn.prepareSecondFactor({
+                        strategy: activeStrategy as any,
+                      });
+                      setError(""); // Clear any old errors on success
+                    } catch (err: any) {
+                      setError(err.errors?.[0]?.message || "Failed to resend.");
+                    } finally {
+                      setLoading(false);
+                    }
+                  }}
+                  className="text-xs text-blue-500 hover:text-blue-400 transition-colors"
+                >
+                  Didn't get a code? Resend
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => {
+                  setShow2FA(false);
+                  setCode("");
+                  setError("");
+                }}
+                className="text-sm text-slate-500 hover:text-white transition-colors flex items-center gap-1"
+              >
+                <span>Use a different account?</span>
+              </button>
+            </div>
+          </div>
+        </form>
       </div>
     );
   }
