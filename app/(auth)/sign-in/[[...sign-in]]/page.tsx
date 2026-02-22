@@ -14,7 +14,6 @@ const AuthCard = dynamic(
         </div>
       </div>
     ),
-    ssr: false,
   },
 );
 
