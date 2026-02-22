@@ -40,15 +40,22 @@ export function PublicPlayground() {
             headers: { "X-API-Key": PUBLIC_DEMO_KEY },
           });
           const data = await res.json();
-          if (data.status === "done") {
+          const normalizedStatus = data.status?.toLowerCase();
+
+          if (normalizedStatus === "done" || normalizedStatus === "success") {
             setStatus("done");
             setPdfUrl(data.result.url);
             clearInterval(interval);
-          } else if (data.status === "failed") {
+          } else if (
+            normalizedStatus === "failed" ||
+            normalizedStatus === "error"
+          ) {
             setStatus("failed");
             clearInterval(interval);
-          } else {
-            setStatus(data.status);
+          } else if (normalizedStatus === "processing") {
+            setStatus("processing");
+          } else if (normalizedStatus === "queued") {
+            setStatus("queued");
           }
         } catch (e) {
           console.error("Polling error:", e);
@@ -181,7 +188,7 @@ export function PublicPlayground() {
                     <Loader2 className="w-8 h-8 text-blue-500 animate-spin mb-4" />
                     <h4 className="text-white font-bold">In Queue</h4>
                     <p className="text-slate-500 text-sm">
-                      One second, our engines are warming up...
+                      Connecting to our high-performance rendering engine...
                     </p>
                   </>
                 )}
@@ -192,10 +199,10 @@ export function PublicPlayground() {
                       <ShieldCheck className="w-4 h-4 text-emerald-400 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
                     </div>
                     <h4 className="text-white font-bold">
-                      Generating Pixel-Perfect Layout
+                      Generating High-Fidelity PDF
                     </h4>
                     <p className="text-slate-500 text-sm">
-                      Gotenberg is rendering your page at 300 DPI.
+                      Applying professional styles and layout precision...
                     </p>
                   </>
                 )}
