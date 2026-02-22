@@ -32,7 +32,11 @@ export default clerkMiddleware(async (auth, req) => {
 
   // 2. Returning User Logic: If not logged in but has visited before,
   // redirect homepage to sign-in for a faster "back to work" flow.
-  if (!userId && isHome && isReturning) {
+  // SKIP if explicit query param ?redirect=false is present (for "Back to Home" buttons)
+  const shouldSkipRedirect =
+    req.nextUrl.searchParams.get("redirect") === "false";
+
+  if (!userId && isHome && isReturning && !shouldSkipRedirect) {
     return NextResponse.redirect(new URL("/sign-in", req.url));
   }
 

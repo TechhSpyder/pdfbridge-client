@@ -21,6 +21,11 @@ const SECTIONS = [
   { id: "intro", title: "Introduction", icon: <Book className="h-4 w-4" /> },
   { id: "auth", title: "Authentication", icon: <Key className="h-4 w-4" /> },
   {
+    id: "usage",
+    title: "Usage & Credits",
+    icon: <Info className="h-4 w-4" />,
+  },
+  {
     id: "convert",
     title: "Convert PDF",
     icon: <FileCode className="h-4 w-4" />,
@@ -193,6 +198,71 @@ export function Documentation({
   -d '{"url": "https://example.com"}'`}
             language="bash"
           />
+        </section>
+
+        {/* Usage & Credits */}
+        <section id="usage" className="scroll-mt-24 space-y-6">
+          <h2 className="text-3xl font-bold text-white flex items-center gap-4">
+            <Info className="text-blue-500" /> Usage & Credits
+          </h2>
+          <p className="text-slate-400 leading-relaxed">
+            Each conversion job counts towards your plan's monthly credit limit.
+            To ensure fair infrastructure usage, credits are calculated based on
+            the final PDF file size.
+          </p>
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="p-5 rounded-2xl border border-white/5 bg-white/5 space-y-3">
+              <h4 className="font-bold text-white text-sm">Standard Credits</h4>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                1 credit is deducted for any document up to your plan's base
+                size limit (e.g., 10MB on Free Tier).
+              </p>
+            </div>
+            <div className="p-5 rounded-2xl border border-blue-500/10 bg-blue-500/5 space-y-3">
+              <h4 className="font-bold text-blue-400 text-sm">
+                Dynamic Scaling
+              </h4>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                If a document exceeds the base unit, 1 extra credit is deducted
+                per additional unit (or part thereof).
+              </p>
+            </div>
+          </div>
+          <div className="p-6 rounded-2xl border border-white/5 bg-slate-900/50 backdrop-blur-sm">
+            <h4 className="font-bold text-white text-sm mb-4">
+              Calculation Table (Free Tier Example)
+            </h4>
+            <div className="overflow-hidden rounded-xl border border-white/5">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="bg-white/5 text-slate-300">
+                    <th className="px-4 py-3 font-semibold">File Size</th>
+                    <th className="px-4 py-3 font-semibold">
+                      Credits Deducted
+                    </th>
+                    <th className="px-4 py-3 font-semibold">Explanation</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5 text-slate-400">
+                  <tr>
+                    <td className="px-4 py-3">0.5 MB - 10.0 MB</td>
+                    <td className="px-4 py-3 text-white font-mono">1</td>
+                    <td className="px-4 py-3 italic font-light">Base cost</td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-3">10.1 MB - 20.0 MB</td>
+                    <td className="px-4 py-3 text-white font-mono">2</td>
+                    <td className="px-4 py-3 font-light">+1 extra credit</td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-3">20.1 MB - 30.0 MB</td>
+                    <td className="px-4 py-3 text-white font-mono">3</td>
+                    <td className="px-4 py-3 font-light">+2 extra credits</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </section>
 
         {/* Convert PDF */}
