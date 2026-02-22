@@ -47,7 +47,10 @@ export function Hero() {
                 className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold tracking-wider uppercase"
               >
                 <Sparkles className="w-3 h-3" />
-                <Link href="https://www.producthunt.com/products/pdfbridge?launch=pdfbridge">
+                <Link
+                  href="https://www.producthunt.com/products/pdfbridge?launch=pdfbridge"
+                  target="_blank"
+                >
                   Launching on Product Hunt March 3 → Follow for updates
                 </Link>
               </motion.div>
