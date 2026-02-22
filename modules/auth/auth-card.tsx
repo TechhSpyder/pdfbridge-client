@@ -191,8 +191,19 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
           await setSignInActive({ session: result.createdSessionId });
           router.push("/dashboard");
         } else {
-          console.log(result);
-          setError("This account uses a different sign-in method.");
+          // Handle other statuses more gracefully instead of a vague hardcoded string
+          console.log("Clerk sign-in status:", result.status);
+          if (result.status === "needs_first_factor") {
+            setError(
+              "Authentication incomplete. Please check your credentials.",
+            );
+          } else if (result.status === "needs_second_factor") {
+            setError("Two-factor authentication is required for this account.");
+          } else {
+            setError(
+              `Sign-in status: ${result.status}. Please contact support.`,
+            );
+          }
         }
       } else {
         if (!signUpLoaded) return;

@@ -55,7 +55,7 @@ $res = curl_exec($ch);`,
   return (
     <div className="rounded-2xl border border-muted bg-slate-900/50 backdrop-blur-sm overflow-hidden">
       <div className="flex items-center justify-between bg-black/40 border-b border-muted p-2">
-        <div className="flex gap-2">
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide whitespace-nowrap pb-0">
           {Object.keys(displaySnippets).map((l) => (
             <button
               key={l}
