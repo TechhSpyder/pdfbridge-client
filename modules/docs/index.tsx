@@ -14,6 +14,8 @@ import {
   Cpu,
 } from "lucide-react";
 import { Highlight, themes } from "prism-react-renderer";
+import { useActiveSection } from "../hooks/use-active-section";
+import { useEffect } from "react";
 
 const SECTIONS = [
   { id: "intro", title: "Introduction", icon: <Book className="h-4 w-4" /> },
@@ -56,6 +58,15 @@ export function Documentation({
   const [activeSection, setActiveSection] = useState("intro");
   const [copiedBaseUrl, setCopiedBaseUrl] = useState(false);
 
+  const sectionIds = SECTIONS.map((s) => s.id);
+  const activeId = useActiveSection(sectionIds);
+
+  useEffect(() => {
+    if (activeId) {
+      setActiveSection(activeId);
+    }
+  }, [activeId]);
+
   const copyBaseUrl = () => {
     navigator.clipboard.writeText("https://api.pdfbridge.xyz/api/v1");
     setCopiedBaseUrl(true);
@@ -65,7 +76,7 @@ export function Documentation({
   const content = (
     <div className="flex flex-col lg:flex-row gap-12 items-start">
       {/* Sidebar Navigation */}
-      <aside className="w-full lg:w-64 shrink-0">
+      <aside className="w-full lg:w-64 shrink-0 lg:sticky top-24">
         <nav className="sticky top-24 space-y-1">
           <p className="text-xs font-bold text-slate-500 uppercase tracking-widest px-3 mb-4">
             Documentation
@@ -254,18 +265,70 @@ export function Documentation({
               title="Page Formats"
               sub="Available: A4, Letter, Legal, Tabloid, Ledger, A3"
               content={
-                <p className="text-xs text-slate-500 mt-2 leading-relaxed">
-                  Standardized Chromium paper sizes. Default is A4.
-                </p>
+                <div className="space-y-2 mt-2">
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    Standard Chromium paper sizes. Default is A4.
+                  </p>
+                  <p className="text-[10px] text-slate-400">
+                    Set <code className="text-indigo-400">landscape: true</code>{" "}
+                    or{" "}
+                    <code className="text-indigo-400">
+                      orientation: 'landscape'
+                    </code>{" "}
+                    for horizontal layouts.
+                  </p>
+                </div>
               }
             />
             <GlowCard
-              title="Custom Margins"
-              sub="Supports inches (in), pixels (px), or cm"
+              title="Custom Dimensions"
+              sub="paperWidth, paperHeight, preferCSSPageSize"
               content={
-                <p className="text-xs text-slate-500 mt-2 leading-relaxed">
-                  Define top, bottom, left, and right individually.
-                </p>
+                <div className="space-y-2 mt-2">
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    Override standard formats with custom values (numbers in{" "}
+                    <strong>mm</strong> or strings like "10in").
+                  </p>
+                  <p className="text-[10px] text-slate-400">
+                    Use{" "}
+                    <code className="text-indigo-400">
+                      preferCSSPageSize: true
+                    </code>{" "}
+                    to respect <code>@page</code> rules in your CSS.
+                  </p>
+                </div>
+              }
+            />
+            <GlowCard
+              title="Precise Margins"
+              sub="marginTop, marginBottom, marginLeft, marginRight"
+              content={
+                <div className="space-y-2 mt-2">
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    Define margins globally via{" "}
+                    <code className="text-indigo-400">margin</code> or use
+                    individual overrides for pixel-perfect control.
+                  </p>
+                  <p className="text-[10px] text-slate-400">
+                    Supports numbers (mm) or strings (e.g., "0.5in", "20px").
+                  </p>
+                </div>
+              }
+            />
+            <GlowCard
+              title="Rendering Engine"
+              sub="waitDelay, userAgent, width, height"
+              content={
+                <div className="space-y-2 mt-2">
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    Tune the generator for complex sites. Default width is{" "}
+                    <strong>1440px</strong> for URLs.
+                  </p>
+                  <p className="text-[10px] text-slate-400">
+                    Use <code className="text-indigo-400">waitDelay: "5s"</code>{" "}
+                    to wait for JS hydration or heavy animations.
+                  </p>
+                </div>
               }
             />
             <GlowCard
@@ -290,27 +353,22 @@ export function Documentation({
                       Total pages
                     </li>
                     <li>
-                      • <code className="text-emerald-400">date</code>: Current
-                      date
+                      • <code className="text-emerald-400">date</code>:
+                      Rendering date
                     </li>
                     <li>
                       • <code className="text-emerald-400">title</code>:
                       Document title
                     </li>
                   </ul>
+                  <p className="text-[10px] text-slate-400 mt-2">
+                    Set a document title via{" "}
+                    <code className="text-indigo-400">
+                      options.metadata.title
+                    </code>{" "}
+                    to enable PDF/A compliance.
+                  </p>
                 </div>
-              }
-            />
-            <GlowCard
-              title="Dimensions & Viewport"
-              sub="width, height, deviceScaleFactor"
-              content={
-                <p className="text-xs text-slate-500 mt-2 leading-relaxed">
-                  Provide <code className="text-blue-400">width</code> or{" "}
-                  <code className="text-blue-400">height</code> in pixels to
-                  override standard paper sizes and control the rendering
-                  viewport.
-                </p>
               }
             />
           </div>
@@ -540,6 +598,37 @@ export function Documentation({
 }`}
             language="json"
           />
+
+          <div className="space-y-4">
+            <h4 className="font-bold text-white text-sm">
+              Cryptographic Verification (HMAC-SHA256)
+            </h4>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Every webhook sent by PDFBridge includes an{" "}
+              <code className="text-blue-400">X-PDFBridge-Signature</code>{" "}
+              header. This allows you to verify that the notification came from
+              us and has not been altered in transit.
+            </p>
+            <CodeBlock
+              code={`const crypto = require('crypto');
+
+// The raw body of the POST request
+const payload = JSON.stringify(req.body); 
+const signature = req.headers['x-pdfbridge-signature'];
+const secret = process.env.PDFBRIDGE_WEBHOOK_SECRET;
+
+const hmac = crypto.createHmac('sha256', secret);
+const digest = hmac.update(payload).digest('hex');
+
+if (crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(digest))) {
+  console.log("Verified! Process the PDF...");
+} else {
+  console.error("Invalid signature. Rejecting request.");
+}`}
+              language="javascript"
+            />
+          </div>
+
           <div className="rounded-xl border border-indigo-500/10 bg-indigo-500/5 p-6 space-y-3">
             <h4 className="font-bold text-indigo-400 text-sm flex items-center gap-2">
               <Info className="h-4 w-4" /> Webhook Inspector
@@ -554,20 +643,39 @@ export function Documentation({
           </div>
         </section>
 
-        {/* Ghost Mode */}
         <section id="ghost" className="scroll-mt-24 space-y-6">
           <h2 className="text-3xl font-bold text-white flex items-center gap-4">
             <Info className="text-blue-400" /> Ghost Mode (Privacy-First)
           </h2>
           <p className="text-slate-400 leading-relaxed">
             For sensitive documents, enable <strong>Ghost Mode</strong> by
-            passing
+            passing{" "}
             <code className="text-blue-400 font-mono">"ghostMode": true</code>.
-            The PDF will be generated, streamed to your webhook, and
-            <strong> instantly deleted</strong> from our processing
-            infrastructure. No records are stored in S3, ensuring zero footprint
-            for your most sensitive data.
+            The PDF will be generated, streamed to your webhook, and{" "}
+            <strong>instantly deleted</strong> from our processing
+            infrastructure.
           </p>
+
+          <GlowCard
+            title="Pricing & Tier Gating"
+            sub="Pro & Enterprise Only"
+            icon={<Info className="h-5 w-5 text-blue-400" />}
+            content={
+              <div className="space-y-4 mt-4 text-sm text-slate-400">
+                <p>
+                  Ghost Mode is exclusive to our <strong>Pro</strong> and{" "}
+                  <strong>Enterprise</strong> plans. It is designed for
+                  high-compliance environments where data must never touch
+                  persistent storage.
+                </p>
+                <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-200 text-xs">
+                  <strong>Zero-Storage Guarantee:</strong> When Ghost Mode is
+                  enabled, no records are stored in S3, and retention is set to
+                  0 days.
+                </div>
+              </div>
+            }
+          />
           <GlowCard
             title="Compliance & Security"
             sub="Zero-Storage Policy"

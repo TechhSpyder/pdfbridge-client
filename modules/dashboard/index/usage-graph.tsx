@@ -60,7 +60,7 @@ export function UsageGraph() {
 
   return (
     <div className="space-y-6">
-      <div className="h-40 relative px-2">
+      <div className="h-60 relative px-2">
         {/* Background Grid Lines */}
         <div className="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-20">
           {[0, 1, 2, 3].map((_, i) => (

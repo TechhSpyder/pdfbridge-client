@@ -29,11 +29,11 @@ const tiers = [
     // sub: "For scaling teams",
     features: [
       "2,000 conversions/month",
-      "Priority email support",
-      "Advanced analytics",
+      "100 AI Extractions / month",
+      "Native Tailwind Support",
+      "Custom Headers/Footers",
       "25MB File Limit",
       "30 Days Retention",
-      "AI Extraction Included",
       "Webhooks Included",
     ],
   },
@@ -44,13 +44,11 @@ const tiers = [
     // sub: "Enterprise solutions",
     features: [
       "20,000 conversions/month",
-      "SLA guarantee",
-      "24/7 phone support",
-      "Custom integrations",
+      "1,000 AI Extractions / month",
+      "Ghost Mode (Private)",
       "50MB File Limit",
       "Unlimited Retention",
-      "Custom Headers/Footers",
-      "Webhooks Included",
+      "Everything in Starter",
     ],
   },
   {
@@ -59,13 +57,11 @@ const tiers = [
     price: "Custom",
     // sub: "Enterprise solutions",
     features: [
-      "Unlimited Retention",
-      "Custom Headers/Footers",
-      "Webhooks Included",
-      "Unlimited Conversions",
+      "Unlimited Conversions / year",
+      "10,000 AI Extractions / month",
+      "IP Whitelisting Support",
       "100MB+ File Limit",
-      "Priority SLA Support",
-      "Webhooks Included",
+      "Everything in Pro",
     ],
   },
 ];
@@ -138,7 +134,14 @@ export function Pricing() {
                           className="flex items-center gap-3 text-sm"
                         >
                           <Check className="w-4 h-4 text-blue-400 shrink-0" />
-                          <span>{f}</span>
+                          <span
+                            className={cn(
+                              f.startsWith("Everything in") &&
+                                "font-bold text-white",
+                            )}
+                          >
+                            {f}
+                          </span>
                         </li>
                       ))}
                     </ul>

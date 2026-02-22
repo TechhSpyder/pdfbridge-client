@@ -105,18 +105,18 @@ function SidebarContent({ isSmallScreen, setSidebarOpen }: any) {
                 href={link.href}
                 onClick={() => isSmallScreen && setSidebarOpen(false)}
                 className={cn(
-                  "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 group",
+                  "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 group select-none active:scale-[0.97]",
                   isActive
-                    ? "bg-blue-600/10 text-blue-400 border border-blue-500/20"
+                    ? "bg-blue-600/10 text-blue-400 border border-blue-500/20 shadow-[0_0_15px_rgba(37,99,235,0.1)]"
                     : "text-slate-400 hover:text-white hover:bg-white/5 border border-transparent",
                 )}
               >
                 <Icon
                   className={cn(
-                    "h-4 w-4 transition-colors",
+                    "h-4 w-4 transition-all duration-300 group-hover:scale-110",
                     isActive
                       ? "text-blue-400"
-                      : "text-slate-500 group-hover:text-slate-300",
+                      : "text-slate-500 group-hover:text-slate-300 group-hover:translate-x-0.5",
                   )}
                 />
                 {link.label}

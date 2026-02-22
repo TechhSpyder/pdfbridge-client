@@ -13,17 +13,17 @@ export const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const baseStyles =
-    "px-4 py-2 rounded-md font-medium transition-all text-sm cursor-pointer active:scale-105 outline-none duration-200 flex items-center justify-center disabled:cursor-not-allowed disabled:opacity-50";
+    "px-4 py-2 rounded-md font-medium transition-all text-sm cursor-pointer active:scale-95 outline-none duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] flex items-center justify-center disabled:cursor-not-allowed disabled:opacity-50 select-none";
 
   const variants = {
     primary:
-      "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:shadow-md",
+      "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:-translate-y-0.5 active:translate-y-0",
     secondary:
-      "bg-transparent border border-slate-700 text-white hover:bg-slate-800",
+      "bg-transparent border border-slate-700 text-white hover:bg-slate-800 hover:border-slate-600",
     outline:
-      "bg-transparent border border-blue-600 text-blue-600 hover:bg-blue-50",
+      "bg-transparent border border-blue-600/50 text-blue-400 hover:bg-blue-600/10 hover:border-blue-500",
     destructive:
-      "bg-destructive border border-destructive text-white hover:bg-destructive/80",
+      "bg-red-600/10 border border-red-600/20 text-red-500 hover:bg-red-600 hover:text-white hover:shadow-[0_0_20px_rgba(220,38,38,0.2)]",
   };
 
   const sizes = {

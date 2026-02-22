@@ -32,7 +32,7 @@ export const useApiClient = () => {
       const error = await response
         .json()
         .catch(() => ({ error: "Unknown error" }));
-      throw new Error(error.error || "Request failed");
+      throw new Error(error.message || error.error || "Request failed");
     }
 
     return response.json();

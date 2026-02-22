@@ -342,6 +342,28 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
 
   return (
     <div className="w-full max-w-md space-y-8 animate-in fade-in zoom-in duration-500">
+      <div className="flex justify-center mb-6">
+        <Link
+          href="/"
+          className="group flex items-center gap-2 text-xs font-medium text-slate-500 hover:text-white transition-all duration-300 px-3 py-1.5 rounded-full border border-white/5 hover:border-white/10 bg-white/5"
+        >
+          <svg
+            className="w-3 h-3 transition-transform group-hover:-translate-x-0.5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M10 19l-7-7m0 0l7-7m-7 7h18"
+            />
+          </svg>
+          Back to home
+        </Link>
+      </div>
+
       <div className="text-center">
         <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
           {isSignIn ? "Welcome Back" : "Create Account"}

@@ -82,7 +82,12 @@ export function PublicPlayground() {
         body: JSON.stringify({ url, testMode: true }),
       });
 
-      if (!res.ok) throw new Error("Sandbox busy. Please try again.");
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(
+          errData.message || errData.error || "Sandbox busy. Please try again.",
+        );
+      }
 
       const data = await res.json();
       setJobId(data.jobId);
@@ -210,14 +215,12 @@ export function PublicPlayground() {
                     </div>
 
                     <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                      <a
-                        href={pdfUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-colors font-bold text-sm"
+                      <button
+                        onClick={() => window.open(pdfUrl, "_blank")}
+                        className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-colors font-bold text-sm cursor-pointer"
                       >
                         View Temporary Link <ExternalLink className="w-4 h-4" />
-                      </a>
+                      </button>
                       <Link href="/sign-up">
                         <Button className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 rounded-xl px-6 py-3 h-auto font-bold text-sm">
                           Sign Up to Remove Watermark

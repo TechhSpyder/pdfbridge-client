@@ -45,7 +45,7 @@ export const useConversionStats = (refetchInterval?: number) => {
   const api = useApiClient();
   return useQuery({
     queryKey: ["conversion-stats"],
-    queryFn: () => api.get("/api/v1/stats/conversions"),
+    queryFn: () => api.get("/api/v1/me/stats"),
     refetchInterval,
   });
 };

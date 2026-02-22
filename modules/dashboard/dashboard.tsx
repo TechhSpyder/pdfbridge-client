@@ -22,6 +22,7 @@ import { useMe } from "../hooks/queries";
 import { toast } from "sonner";
 import dynamic from "next/dynamic";
 import { useClipboard } from "../hooks/use-copy-to-clipboard";
+import { cn } from "@/utils";
 
 const RecentConversionsList = dynamic(
   () =>
@@ -59,40 +60,52 @@ export function DashboardPage() {
         ) < 60000
       : false;
 
-  // if (!clerkLoaded || beLoading) {
-  //   return (
-  //     <div className="flex h-[60vh] flex-col items-center justify-center space-y-4">
-  //       <div className="relative">
-  //         <div className="absolute inset-0 blur-2xl bg-blue-500/20 rounded-full animate-pulse" />
-  //         <Loader2 className="h-10 w-10 animate-spin text-blue-500 relative z-10" />
-  //       </div>
-  //       <p className="text-slate-400 font-medium animate-pulse text-center">
-  //         Synchronizing your developer workspace...
-  //       </p>
-  //     </div>
-  //   );
-  // }
   const isLoading = !clerkLoaded || beLoading;
 
   if (error) {
+    const isRateLimited =
+      error.message?.toLowerCase().includes("rate limit") ||
+      error.message?.toLowerCase().includes("ip");
+    const isAuthError =
+      error.message?.toLowerCase().includes("unauthorized") ||
+      error.message?.toLowerCase().includes("session");
+
     return (
-      <div className="flex h-[60vh] items-center justify-center p-6">
-        <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-8 text-center backdrop-blur-md max-w-md shadow-2xl">
-          <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
-            <AlertCircle className="h-8 w-8 text-red-500" />
+      <div className="flex h-[60vh] items-center justify-center p-6 text-center animate-in fade-in duration-500">
+        <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-8 backdrop-blur-md max-w-md shadow-2xl relative overflow-hidden group">
+          <div
+            className={cn(
+              "w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 transition-transform group-hover:scale-110 duration-500",
+              isRateLimited ? "bg-orange-500/10" : "bg-red-500/10",
+            )}
+          >
+            {isRateLimited ? (
+              <Activity className="h-10 w-10 text-orange-500" />
+            ) : (
+              <AlertCircle className="h-10 w-10 text-red-500" />
+            )}
           </div>
           <h2 className="text-2xl font-bold text-white mb-3">
-            Connection Error
+            {isRateLimited
+              ? "Rate Limit Exceeded"
+              : isAuthError
+                ? "Authentication Required"
+                : "Connection Error"}
           </h2>
           <p className="text-slate-400 mb-8 leading-relaxed">
-            We couldn't connect to your backend environment. This usually
-            happens during synchronization.
+            {error.message ||
+              "We couldn't connect to your backend environment. This usually happens during synchronization."}
           </p>
           <Button
             onClick={() => window.location.reload()}
-            className="w-full bg-red-500 hover:bg-red-600 shadow-lg shadow-red-500/20"
+            className={cn(
+              "w-full shadow-lg h-12 text-sm font-bold",
+              isRateLimited
+                ? "bg-orange-500 hover:bg-orange-600 shadow-orange-500/20"
+                : "bg-red-500 hover:bg-red-600 shadow-red-500/20",
+            )}
           >
-            Retry Connection
+            {isRateLimited ? "Try Again Later" : "Retry Connection"}
           </Button>
         </div>
       </div>
@@ -152,9 +165,9 @@ export function DashboardPage() {
             </h1>
           )}
 
-          <p className="mt-3 text-lg text-slate-400 max-w-2xl">
-            Manage your PDF infrastructure and monitor API performance across
-            your applications.
+          <p className="mt-2 text-slate-400 max-w-2xl text-sm md:text-base">
+            Your document infrastructure is active. Monitor performance, manage
+            API keys, and track conversions in real-time.
           </p>
         </div>
         <div className="flex gap-3">
@@ -170,28 +183,63 @@ export function DashboardPage() {
         </div>
       </div>
 
-      {/* Usage Analytics Graph */}
-      <div className="rounded-3xl border border-white/5 bg-slate-900/30 p-4 md:p-8 backdrop-blur-sm">
-        <div className="flex md:items-center justify-between mb-8 max-sm:flex-col gap-3">
-          <div className="space-y-1">
-            <h2 className="text-xl font-bold text-white">Conversion Trends</h2>
-            <p className="text-sm text-slate-500">
-              Daily conversion volume for this billing cycle
-            </p>
+      <div className="flex items-stretch gap-6 justify-between max-md:flex-col">
+        {/* Usage Analytics Graph */}
+        <div className="rounded-2xl border border-white/15 bg-slate-900/30 p-4 md:p-8 backdrop-blur-sm md:w-[60%] w-full">
+          <div className="flex md:items-center justify-between mb-8 max-sm:flex-col gap-3">
+            <div className="space-y-1">
+              <h2 className="text-xl font-bold text-white">
+                Conversion Trends
+              </h2>
+              <p className="text-sm text-slate-500">
+                Daily conversion volume for this billing cycle
+              </p>
+            </div>
+            <div className="flex bg-black/40 rounded-lg p-1 border border-white/5 justify-end">
+              <button className="px-3 py-1 text-[10px] font-bold text-white bg-blue-600 rounded-md shadow-lg cursor-pointer transition-all active:scale-95">
+                7 Days
+              </button>
+              <button
+                onClick={() => toast.info("30-day analytics unlocking in V1.1")}
+                className="px-3 py-1 text-[10px] font-bold text-slate-500 hover:text-slate-300 cursor-pointer transition-all active:scale-95"
+              >
+                30 Days
+              </button>
+            </div>
           </div>
-          <div className="flex bg-black/40 rounded-lg p-1 border border-white/5 justify-end">
-            <button className="px-3 py-1 text-[10px] font-bold text-white bg-blue-600 rounded-md shadow-lg cursor-pointer transition-all active:scale-95">
-              7 Days
-            </button>
-            <button
-              onClick={() => toast.info("30-day analytics unlocking in V1.1")}
-              className="px-3 py-1 text-[10px] font-bold text-slate-500 hover:text-slate-300 cursor-pointer transition-all active:scale-95"
-            >
-              30 Days
-            </button>
+          <UsageGraph />
+        </div>
+        {/* Recent Activity List */}
+        <div className="lg:col-span-2 bg-slate-900/50 border-white/15 backdrop-blur-sm space-y-6 border p-4 rounded-2xl flex-1">
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-emerald-800/20">
+                  <Activity className="h-5 w-5 text-emerald-400" />
+                </div>
+                <h2 className="text-xl font-bold text-white">
+                  Recent Conversions
+                </h2>
+              </div>
+
+              <span className="hidden md:inline text-[10px] text-slate-500 font-medium">
+                Updates automatically as jobs complete
+              </span>
+            </div>
+            <div className="flex items-center gap-4">
+              <Link
+                href="/dashboard/usage"
+                className="text-xs font-semibold text-blue-400 hover:underline"
+              >
+                View All
+              </Link>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto scrollbar-hide">
+            <RecentConversionsList />
           </div>
         </div>
-        <UsageGraph />
       </div>
 
       {/* Primary Stats Grid */}
@@ -333,19 +381,21 @@ export function DashboardPage() {
       {/* Upgrade Prompts */}
       <UsageAlert usagePercentage={usagePercentage} />
 
-      <div className="grid gap-8 lg:grid-cols-5">
+      <div className="flex items-stretch gap-6 w-full">
         {/* API Playground Section */}
-        <div className="lg:col-span-3 space-y-6">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-slate-800/50">
-              <Terminal className="h-5 w-5 text-blue-400" />
+        <div className="w-full flex gap-6 max-lg:flex-col">
+          <div className="lg:w-1/2 space-y-2.5 w-full">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-slate-800/50">
+                <Terminal className="h-5 w-5 text-blue-400" />
+              </div>
+              <h2 className="text-xl font-bold text-white">API Playground</h2>
             </div>
-            <h2 className="text-xl font-bold text-white">API Playground</h2>
-          </div>
 
-          <ApiPlayground />
-          <div className="hidden sm:block">
-            <div className="flex items-center gap-3 pt-6">
+            <ApiPlayground />
+          </div>
+          <div className="lg:w-1/2 space-y-2.5 w-full">
+            <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-orange-800/20">
                 <Code2 className="h-5 w-5 text-orange-400" />
               </div>
@@ -354,38 +404,6 @@ export function DashboardPage() {
               </h2>
             </div>
             <IntegrationSnippets />
-          </div>
-        </div>
-
-        {/* Recent Activity List */}
-        <div className="lg:col-span-2 bg-slate-900/50 backdrop-blur-sm space-y-6 border border-muted p-4 rounded-lg">
-          <div className="flex items-center justify-between">
-            <div className="flex flex-col gap-3">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-emerald-800/20">
-                  <Activity className="h-5 w-5 text-emerald-400" />
-                </div>
-                <h2 className="text-xl font-bold text-white">
-                  Recent Conversions
-                </h2>
-              </div>
-
-              <span className="hidden md:inline text-[10px] text-slate-500 font-medium">
-                Updates automatically as jobs complete
-              </span>
-            </div>
-            <div className="flex items-center gap-4">
-              <Link
-                href="/dashboard/usage"
-                className="text-xs font-semibold text-blue-400 hover:underline"
-              >
-                View All
-              </Link>
-            </div>
-          </div>
-
-          <div className="overflow-x-auto scrollbar-hide">
-            <RecentConversionsList />
           </div>
         </div>
       </div>

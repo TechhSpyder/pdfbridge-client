@@ -2,7 +2,15 @@ import { useConversions } from "@/modules/hooks/queries";
 import { cn } from "@/utils";
 import * as Dialog from "@radix-ui/react-dialog";
 import { AnimatePresence, motion } from "framer-motion";
-import { Activity, Brain, Copy, Download, Loader2, X } from "lucide-react";
+import {
+  Activity,
+  Brain,
+  Copy,
+  Download,
+  Loader2,
+  X,
+  AlertCircle,
+} from "lucide-react";
 import Link from "next/link";
 import { Highlight, themes } from "prism-react-renderer";
 import React, { useEffect, useState } from "react";
@@ -10,7 +18,7 @@ import { toast } from "sonner";
 
 export function RecentConversionsList() {
   const [pollInterval, setPollInterval] = useState<number | undefined>(30000);
-  const { data, isLoading } = useConversions(1, 5, pollInterval);
+  const { data, isLoading, error } = useConversions(1, 5, pollInterval);
   const conversions = data?.conversions || [];
 
   const hasPending = conversions.some((c: any) => c.status === "PENDING");
@@ -40,6 +48,23 @@ export function RecentConversionsList() {
     );
   }
 
+  if (error) {
+    return (
+      <div className="rounded-2xl border border-red-500/10 bg-red-500/5 p-6 text-center">
+        <AlertCircle className="h-6 w-6 text-red-500 mx-auto mb-2" />
+        <p className="text-slate-400 text-xs">
+          Failed to load recent activity.
+        </p>
+        <button
+          onClick={() => window.location.reload()}
+          className="text-blue-400 text-[10px] mt-2 font-bold hover:underline"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
   if (conversions.length === 0) {
     return (
       <div className="rounded-2xl border border-white/5 bg-slate-900/50 backdrop-blur-sm p-6 text-center min-h-[300px] flex flex-col items-center justify-center">
@@ -54,17 +79,28 @@ export function RecentConversionsList() {
   }
 
   return (
-    <div className="space-y-3">
+    <div
+      data-lenis-prevent
+      className="space-y-3 max-h-72 overflow-y-auto scrollbar-hide"
+    >
       {conversions.map((conv: any) => (
         <div
           key={conv.id}
-          className="p-4 rounded-xl bg-black/20 border border-white/5 flex items-center justify-between group hover:border-blue-500/20 transition-all"
+          onClick={() => handleViewAiData(conv)}
+          className={cn(
+            "p-4 rounded-xl bg-black/20 border border-white/5 flex items-center justify-between group transition-all duration-300 active:scale-[0.98] select-none",
+            conv.aiMetadata
+              ? "cursor-pointer hover:bg-white/5 hover:border-blue-500/30 hover:shadow-[0_8px_30px_rgba(0,0,0,0.3)]"
+              : "cursor-default",
+          )}
         >
           <div className="flex flex-col min-w-0">
             <span className="text-xs font-bold text-white truncate max-w-[150px]">
-              {conv.url && conv.url.startsWith("http")
-                ? new URL(conv.url).hostname
-                : "HTML Payload"}
+              {conv.isGhostMode
+                ? "Ghost Mode (Private)"
+                : conv.url && conv.url.startsWith("http")
+                  ? new URL(conv.url).hostname
+                  : "HTML Payload"}
             </span>
             <span className="text-[10px] text-slate-500">
               {new Date(conv.createdAt).toLocaleString()}
@@ -94,9 +130,14 @@ export function RecentConversionsList() {
                 >
                   {conv.isTestMode ? "TEST" : "LIVE"}
                 </span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-500">
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                   Ready
                 </span>
+                {conv.isGhostMode && (
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                    Ghost
+                  </span>
+                )}
               </div>
             )}
 

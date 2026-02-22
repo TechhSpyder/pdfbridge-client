@@ -1,6 +1,7 @@
 "use client";
 
 import { useConversions, useWebhookLogs } from "@/modules/hooks/queries";
+import { cn } from "@/utils";
 import { Button } from "@/modules/app/button";
 import {
   FileText,
@@ -17,6 +18,8 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
+import Title from "@/modules/app/title";
 
 export function UsagePage() {
   const [page, setPage] = useState(1);
@@ -113,29 +116,57 @@ export function UsagePage() {
     document.body.removeChild(link);
   };
 
-  // if (isLoading) {
-  //   return (
-  //     <div className="flex h-[60vh] flex-col items-center justify-center space-y-4">
-  //       <Clock className="h-8 w-8 animate-spin text-blue-500" />
-  //       <p className="text-slate-500 text-sm animate-pulse">
-  //         Loading conversion history...
-  //       </p>
-  //     </div>
-  //   );
-  // }
+  if (error) {
+    const isRateLimited =
+      error.message?.toLowerCase().includes("rate limit") ||
+      error.message?.toLowerCase().includes("ip");
+
+    return (
+      <div className="flex h-[60vh] flex-col items-center justify-center p-6 text-center">
+        <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-8 backdrop-blur-md max-w-md shadow-2xl">
+          <div
+            className={cn(
+              "w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6",
+              isRateLimited ? "bg-orange-500/10" : "bg-red-500/10",
+            )}
+          >
+            {isRateLimited ? (
+              <Activity className="h-8 w-8 text-orange-500" />
+            ) : (
+              <XCircle className="h-8 w-8 text-red-500" />
+            )}
+          </div>
+          <h2 className="text-2xl font-bold text-white mb-3">
+            {isRateLimited ? "Rate Limited" : "History Unavailable"}
+          </h2>
+          <p className="text-slate-400 mb-8 leading-relaxed">
+            {error.message ||
+              "We couldn't retrieve your conversion history. Please check your network and try again."}
+          </p>
+          <Button
+            onClick={() => window.location.reload()}
+            className={cn(
+              "w-full shadow-lg",
+              isRateLimited
+                ? "bg-orange-500 hover:bg-orange-600 shadow-orange-500/20"
+                : "bg-red-500 hover:bg-red-600 shadow-red-500/20",
+            )}
+          >
+            Retry Connection
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-            <FileText className="h-8 w-8 text-blue-500" />
-            Usage & History
-          </h1>
-          <p className="mt-1 text-slate-400 text-sm">
-            A complete log of your PDF generation history and API performance.
-          </p>
-        </div>
+        <Title
+          title="Usage & History"
+          description="A complete log of your PDF generation history and API performance."
+          icon={<FileText className="h-8 w-8 text-blue-500" />}
+        />
 
         <div className="flex flex-wrap gap-2">
           <div className="flex bg-slate-900/80 border border-white/5 p-1 rounded-xl">
@@ -315,7 +346,7 @@ export function UsagePage() {
                             <Button
                               variant="secondary"
                               size="sm"
-                              className="h-8 w-8 p-0"
+                              className="h-8 p-0 text-white w-full"
                               onClick={() => setSelectedJobId(job.id)}
                               title="Inspect Webhooks"
                             >
@@ -323,20 +354,20 @@ export function UsagePage() {
                             </Button>
                           )}
                           {job.success && job.url && (
-                            <a
+                            <Link
                               href={job.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-block"
+                              className="inline-block text-white"
                             >
                               <Button
                                 variant="secondary"
                                 size="sm"
-                                className="h-8 w-8 p-0"
+                                className="h-8 p-0 w-full"
                               >
-                                <Download className="h-3.5 w-3.5" />
+                                <Download className="h-3.5 w-3.5 text-white" />
                               </Button>
-                            </a>
+                            </Link>
                           )}
                         </div>
                       </td>
@@ -560,7 +591,20 @@ function WebhookInspector({
                     Response Payload
                   </label>
                   <pre className="p-4 bg-black/60 rounded-xl text-[11px] text-slate-400 font-mono overflow-x-auto border border-white/5 shadow-inner">
-                    {log.responseBody || "Empty response from server."}
+                    {(() => {
+                      if (!log.responseBody)
+                        return "Empty response from server.";
+                      try {
+                        // Check if it's already an object or a JSON string
+                        const obj =
+                          typeof log.responseBody === "string"
+                            ? JSON.parse(log.responseBody)
+                            : log.responseBody;
+                        return JSON.stringify(obj, null, 2);
+                      } catch (e) {
+                        return log.responseBody;
+                      }
+                    })()}
                   </pre>
                 </div>
               </div>

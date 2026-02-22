@@ -8,13 +8,14 @@ import { toast } from "sonner";
 
 export function ApiPlayground() {
   const [url, setUrl] = useState("https://example.com");
+  const [webhookUrl, setWebhookUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [mode, setMode] = useState<"live" | "test">("test");
   const [extractMetadata, setExtractMetadata] = useState(false);
   const api = useApiClient();
 
   const { data: userData } = useMe();
-  const allowAi = userData?.user?.plan?.allowAi;
+  const allowAi = userData?.plan?.allowAi;
 
   const handleTest = async () => {
     if (extractMetadata && !allowAi && mode === "live") {
@@ -32,6 +33,7 @@ export function ApiPlayground() {
         url,
         testMode: mode === "test",
         extractMetadata: mode === "live" && extractMetadata && allowAi,
+        webhookUrl: webhookUrl || undefined,
       });
       toast.success("Conversion queued successfully!", {
         id: tId,
@@ -41,12 +43,24 @@ export function ApiPlayground() {
             : "PDF will appear in Recent Activity momentarily.",
       });
     } catch (e: any) {
-      // Use the message from the API if available
-      const errorMessage = e.message || "Failed to initiate conversion";
-      toast.error(errorMessage, {
-        id: tId,
-        description: "Please check your limits or configuration.",
-      });
+      const isRateLimited =
+        e.message?.toLowerCase().includes("rate limit") ||
+        e.message?.toLowerCase().includes("ip");
+      const isQuotaError =
+        e.message?.toLowerCase().includes("quota") ||
+        e.message?.toLowerCase().includes("credit");
+
+      toast.error(
+        isRateLimited
+          ? "Slow down!"
+          : isQuotaError
+            ? "Monthly limit reached"
+            : "Failed to initiate conversion",
+        {
+          id: tId,
+          description: e.message || "Please check your network and try again.",
+        },
+      );
     } finally {
       setLoading(false);
     }
@@ -64,12 +78,12 @@ export function ApiPlayground() {
               <button
                 key={m}
                 onClick={() => setMode(m)}
-                className={`px-3 py-1 text-[9px] font-bold uppercase rounded-md transition-all cursor-pointer ${
+                className={`px-3 py-1 text-[9px] font-bold uppercase rounded-md transition-all duration-300 cursor-pointer active:scale-90 ${
                   mode === m
                     ? m === "test"
-                      ? "bg-orange-500 text-white shadow-lg shadow-orange-500/20"
-                      : "bg-blue-600 text-white shadow-lg shadow-blue-500/20"
-                    : "text-slate-500 hover:text-slate-300"
+                      ? "bg-orange-500 text-white shadow-[0_0_15px_rgba(249,115,22,0.4)]"
+                      : "bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.4)]"
+                    : "text-slate-500 hover:text-slate-300 hover:bg-white/5"
                 }`}
               >
                 {m} Mode
@@ -77,7 +91,7 @@ export function ApiPlayground() {
             ))}
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex max-md:flex-col gap-2.5">
           <input
             type="text"
             value={url}
@@ -88,10 +102,13 @@ export function ApiPlayground() {
           <Button
             onClick={handleTest}
             disabled={loading}
-            className={cn("max-sm:text-xs", {
-              "bg-linear-to-r from-orange-500 to-orange-600! hover:bg-orange-500":
-                mode === "test",
-            })}
+            className={cn(
+              "max-sm:text-xs transition-transform hover:-translate-y-0.5 active:translate-y-0 shadow-xl",
+              {
+                "bg-linear-to-r from-orange-500 to-orange-600! hover:shadow-orange-500/20 shadow-lg":
+                  mode === "test",
+              },
+            )}
           >
             {loading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -99,6 +116,19 @@ export function ApiPlayground() {
               `Run ${mode === "test" ? "Test" : "Live"}`
             )}
           </Button>
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">
+            Webhook URL (Optional)
+          </label>
+          <input
+            type="text"
+            value={webhookUrl}
+            onChange={(e) => setWebhookUrl(e.target.value)}
+            className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors"
+            placeholder="https://webhook.site/your-unique-id"
+          />
         </div>
 
         <div className="flex items-center justify-between pt-2">
@@ -164,7 +194,7 @@ export function ApiPlayground() {
           {JSON.stringify(
             {
               url,
-              // options: { format: "A4" },
+              webhookUrl: webhookUrl || undefined,
               testMode: mode === "test",
               extractMetadata: mode === "live" && extractMetadata,
             },
