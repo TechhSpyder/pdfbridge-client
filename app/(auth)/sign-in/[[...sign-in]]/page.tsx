@@ -1,5 +1,21 @@
-import { AuthCard } from "@/modules/auth/auth-card";
+import dynamic from "next/dynamic";
 import { Metadata } from "next";
+
+const AuthCard = dynamic(
+  () => import("@/modules/auth/auth-card").then((mod) => mod.AuthCard),
+  {
+    loading: () => (
+      <div className="w-full max-w-md h-[400px] flex items-center justify-center rounded-3xl border border-white/5 bg-white/5 backdrop-blur-sm">
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-12 w-12 rounded-full border-t-2 border-b-2 border-blue-500 animate-spin" />
+          <p className="text-slate-500 text-sm animate-pulse">
+            Loading secure portal...
+          </p>
+        </div>
+      </div>
+    ),
+  },
+);
 
 export const metadata: Metadata = {
   title: "Sign In",
