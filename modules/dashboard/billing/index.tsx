@@ -16,6 +16,7 @@ import {
   ExternalLink as ExternalLinkIcon,
   Receipt,
   XCircle,
+  Activity,
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
@@ -117,14 +118,44 @@ export function BillingPage() {
   const provider = defaultProvider;
 
   if (plansError) {
+    const isRateLimited =
+      plansError.message?.toLowerCase().includes("rate limit") ||
+      plansError.message?.toLowerCase().includes("ip");
+
     return (
-      <div className="flex h-[60vh] flex-col items-center justify-center space-y-4 text-center">
-        <HelpCircle className="h-12 w-12 text-red-500" />
-        <h2 className="text-xl font-bold text-white">Pricing Unavailable</h2>
-        <p className="text-slate-400">
-          We're having trouble retrieving current plan details. Please refresh
-          or contact support.
-        </p>
+      <div className="flex h-[60vh] flex-col items-center justify-center p-6 text-center">
+        <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-8 backdrop-blur-md max-w-md shadow-2xl">
+          <div
+            className={cn(
+              "w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6",
+              isRateLimited ? "bg-orange-500/10" : "bg-red-500/10",
+            )}
+          >
+            {isRateLimited ? (
+              <Activity className="h-8 w-8 text-orange-500" />
+            ) : (
+              <HelpCircle className="h-8 w-8 text-red-500" />
+            )}
+          </div>
+          <h2 className="text-2xl font-bold text-white mb-3">
+            {isRateLimited ? "Rate Limited" : "Pricing Unavailable"}
+          </h2>
+          <p className="text-slate-400 mb-8 leading-relaxed">
+            {plansError.message ||
+              "We're having trouble retrieving current plan details. Please refresh or contact support."}
+          </p>
+          <Button
+            onClick={() => window.location.reload()}
+            className={cn(
+              "w-full shadow-lg",
+              isRateLimited
+                ? "bg-orange-500 hover:bg-orange-600 shadow-orange-500/20"
+                : "bg-red-500 hover:bg-red-600 shadow-red-500/20",
+            )}
+          >
+            Retry Connection
+          </Button>
+        </div>
       </div>
     );
   }

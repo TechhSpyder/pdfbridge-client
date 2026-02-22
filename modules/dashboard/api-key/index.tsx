@@ -12,11 +12,10 @@ import {
   AlertTriangle,
   ShieldCheck,
   Zap,
-  ArrowLeft,
-  Trash,
 } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
-import Link from "next/link";
+import Title from "@/modules/app/title";
+import { toast } from "sonner";
 
 export function ApiKeysPage() {
   const { user } = useUser();
@@ -29,12 +28,19 @@ export function ApiKeysPage() {
 
   const handleRotate = async () => {
     if (!showConfirm) return;
+    const tId = toast.loading(`Rotating ${showConfirm} key...`);
     try {
       const response: any = await rotateMutation.mutateAsync(showConfirm);
       setNewKey({ key: response.apiKey, type: showConfirm });
       setShowConfirm(null);
-    } catch (error) {
+      toast.success("Key rotated successfully", { id: tId });
+    } catch (error: any) {
       console.error("Rotation failed:", error);
+      toast.error("Rotation failed", {
+        id: tId,
+        description:
+          error.message || "Please check your network and try again.",
+      });
     }
   };
 
@@ -57,16 +63,11 @@ export function ApiKeysPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="flex items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-            <Key className="h-8 w-8 text-emerald-500" />
-            API Key Management
-          </h1>
-          <p className="mt-1 text-slate-400 text-sm">
-            Your secret keys grant access to the PDFBridge API. Keep them secure
-            and never share them.
-          </p>
-        </div>
+        <Title
+          title="API Key Management"
+          description="Your secret keys grant access to the PDFBridge API. Keep them secure and never share them."
+          icon={<Key className="h-8 w-8 text-emerald-500" />}
+        />
       </div>
 
       {newKey ? (

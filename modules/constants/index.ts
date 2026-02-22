@@ -42,6 +42,9 @@ export const PLAN_METADATA: any = {
   Starter: {
     features: [
       "2,000 Conversions / month",
+      "100 AI Extractions / month",
+      "Native Tailwind Support",
+      "Custom Headers/Footers",
       "25MB File Limit",
       "30 Days Retention",
       "Webhooks Included",
@@ -52,21 +55,21 @@ export const PLAN_METADATA: any = {
   Pro: {
     features: [
       "20,000 Conversions / month",
+      "1,000 AI Extractions / month",
+      "Ghost Mode (Private)",
       "50MB File Limit",
       "Unlimited Retention",
-      "Custom Headers/Footers",
-      "Webhooks Included",
+      "Everything in Starter",
     ],
     color: "emerald",
   },
   Enterprise: {
     features: [
-      "Unlimited Conversions",
+      "Unlimited Conversions / year",
+      "10,000 AI Extractions / month",
+      "IP Whitelisting Support",
       "100MB+ File Limit",
-      "Custom Headers/Footers",
-      "Dedicated Infrastructure",
-      "Priority SLA Support",
-      "Webhooks Included",
+      "Everything in Pro",
     ],
     color: "blue",
   },

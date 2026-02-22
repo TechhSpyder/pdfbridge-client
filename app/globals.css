@@ -411,6 +411,26 @@ body {
   overflow-x: hidden;
 }
 
+/* Global Cursor Polish */
+
+a,
+button,
+select,
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+[role="button"],
+.cursor-pointer {
+  cursor: pointer !important;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+a:active,
+button:active:not(:disabled),
+[role="button"]:active {
+  transform: scale(0.96);
+}
+
 .skeleton-el {
   @apply bg-accent/20 rounded-lg w-full min-h-[20px] p-1.5 text-sm;
   background-size: 30px 100%;
@@ -431,6 +451,29 @@ body {
 
 .scrollbar-hide::-webkit-scrollbar {
   display: none; /* Chrome, Safari and Opera */
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  transition: background 0.3s ease;
+}
+
+.custom-scrollbar:hover::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(59, 130, 246, 0.5);
 }
 
 .prose table {

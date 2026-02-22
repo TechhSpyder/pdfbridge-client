@@ -41,7 +41,7 @@ export function GlowCard({
       ref={cardRef}
       onMouseMove={handleMouseMove}
       className={cn(
-        "group relative overflow-hidden h-full rounded-2xl border border-muted bg-background p-6 transition-shadow hover:shadow-lg",
+        "group relative overflow-hidden h-full rounded-2xl border border-muted bg-background p-6 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] hover:scale-[1.01] hover:border-white/20 active:scale-[0.99]",
         className,
       )}
       style={{

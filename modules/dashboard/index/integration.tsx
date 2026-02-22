@@ -30,7 +30,7 @@ export function IntegrationSnippets() {
     python: `import requests
  
 res = requests.post(
-    "https://api.pdfbridge.xyx/v1/convert",
+    "https://api.pdfbridge.xyz/v1/convert",
     headers={"X-API-Key": "${k}"},
     json={"url": "https://google.com"}
 )`,

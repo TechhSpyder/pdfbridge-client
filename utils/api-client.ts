@@ -30,7 +30,7 @@ export const useApiClient = () => {
         return;
       }
 
-      throw new Error(error.error || "Request failed");
+      throw new Error(error.message || error.error || "Request failed");
     }
 
     return response.json();

@@ -115,7 +115,15 @@ export function PlanCard({
                 <div className="mt-1 shrink-0 w-4 h-4 rounded-full bg-slate-800 flex items-center justify-center border border-white/5">
                   <Check className="h-3 w-3 text-emerald-500" />
                 </div>
-                <span className="text-sm text-slate-400">{feature}</span>
+                <span
+                  className={cn(
+                    "text-sm text-slate-400",
+                    feature.startsWith("Everything in") &&
+                      "font-bold text-white",
+                  )}
+                >
+                  {feature}
+                </span>
               </li>
             ))}
             {!metadata.features && (

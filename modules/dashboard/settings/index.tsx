@@ -16,6 +16,7 @@ import {
 import Link from "next/link";
 import { useUpdateSettings } from "@/modules/hooks/queries";
 import { toast } from "sonner";
+import Title from "@/modules/app/title";
 
 export function SettingsPage() {
   const { data: userData, isLoading: userLoading } = useMe();
@@ -26,21 +27,19 @@ export function SettingsPage() {
       await updateSettingsMutation.mutateAsync({ [key]: value });
       toast.success("Preferences updated");
     } catch (e: any) {
-      toast.error(e.message);
+      toast.error("Failed to update preferences", {
+        description: e.message || "Please check your network and try again.",
+      });
     }
   };
 
   return (
     <div className="max-w-5xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
-      <div>
-        <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-          <Settings className="h-8 w-8 text-slate-400" />
-          Settings & Billing
-        </h1>
-        <p className="mt-1 text-slate-400 text-sm">
-          Manage your account security, profile, and subscription preferences.
-        </p>
-      </div>
+      <Title
+        title="Settings & Billing"
+        description="Manage your account security, profile, and subscription preferences."
+        icon={<Settings className="h-8 w-8 text-slate-400" />}
+      />
 
       <div className="grid gap-8 lg:grid-cols-2">
         <div className="lg:col-span-2 space-y-12">

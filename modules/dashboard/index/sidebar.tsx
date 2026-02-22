@@ -105,18 +105,18 @@ function SidebarContent({ isSmallScreen, setSidebarOpen }: any) {
                 href={link.href}
                 onClick={() => isSmallScreen && setSidebarOpen(false)}
                 className={cn(
-                  "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 group",
+                  "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 group select-none active:scale-[0.97]",
                   isActive
-                    ? "bg-blue-600/10 text-blue-400 border border-blue-500/20"
+                    ? "bg-blue-600/10 text-blue-400 border border-blue-500/20 shadow-[0_0_15px_rgba(37,99,235,0.1)]"
                     : "text-slate-400 hover:text-white hover:bg-white/5 border border-transparent",
                 )}
               >
                 <Icon
                   className={cn(
-                    "h-4 w-4 transition-colors",
+                    "h-4 w-4 transition-all duration-300 group-hover:scale-110",
                     isActive
                       ? "text-blue-400"
-                      : "text-slate-500 group-hover:text-slate-300",
+                      : "text-slate-500 group-hover:text-slate-300 group-hover:translate-x-0.5",
                   )}
                 />
                 {link.label}
@@ -180,6 +180,7 @@ function SidebarContent({ isSmallScreen, setSidebarOpen }: any) {
                   signOut();
                   if (isSmallScreen) setSidebarOpen(false);
                 }}
+                role="button"
                 className="flex w-full items-center border-t border-t-muted pt-4 md:hidden cursor-pointer gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-red-400 hover:bg-red-400/10 transition-all duration-200 group border border-transparent hover:border-red-500/20"
               >
                 <LogOut className="h-4 w-4 text-slate-500 group-hover:text-red-400 transition-colors" />
@@ -189,7 +190,11 @@ function SidebarContent({ isSmallScreen, setSidebarOpen }: any) {
               <div className="md:flex hidden">
                 <Popover open={open} onOpenChange={setOpen}>
                   <PopoverTrigger className="w-full rounded-lg">
-                    <div className="flex items-center cursor-pointer gap-3 px-3 py-2 text-slate-400 hover:text-secondary-foreground transition-all duration-200 hover:bg-white/5 border border-transparent rounded-lg">
+                    <div
+                      role="button"
+                      tabIndex={0}
+                      className="flex items-center cursor-pointer gap-3 px-3 py-2 text-slate-400 hover:text-secondary-foreground transition-all duration-200 hover:bg-white/5 border border-transparent rounded-lg"
+                    >
                       <div className="h-8 w-8 rounded-full overflow-hidden border border-border">
                         <Image
                           src={user.imageUrl || ""}
