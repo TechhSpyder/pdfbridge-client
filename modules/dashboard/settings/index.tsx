@@ -153,7 +153,7 @@ export function SettingsPage() {
                   conversions and delete all your API keys permanently.
                 </p>
                 <SmartContactLink
-                  email="support@pdfbridge.xyz"
+                  email="hello@techhspyder.com"
                   isButton
                   className="w-full text-xs h-9 border-red-500/20 text-red-500 hover:bg-red-500/10 hover:border-red-500/40 transition-colors cursor-pointer border rounded-md flex items-center justify-center font-bold"
                 >

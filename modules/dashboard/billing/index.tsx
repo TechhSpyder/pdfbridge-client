@@ -463,7 +463,7 @@ export function BillingPage() {
 
             <div className="p-8 rounded-3xl border border-muted bg-slate-900/40 space-y-6 flex flex-col justify-center">
               <SmartContactLink
-                email="sales@pdfbridge.xyz"
+                email="hello@techhspyder.com"
                 className="flex items-center gap-4 p-4 rounded-2xl bg-black/40 border border-white/5 group cursor-pointer transition-all hover:border-blue-500/30 text-left"
               >
                 <HelpCircle className="h-6 w-6 text-slate-500 group-hover:text-blue-400 transition-colors" />
@@ -479,7 +479,7 @@ export function BillingPage() {
               </SmartContactLink>
 
               <SmartContactLink
-                email="support@pdfbridge.xyz"
+                email="hello@techhspyder.com"
                 className="flex items-center gap-4 p-4 rounded-2xl bg-black/40 border border-white/5 group cursor-pointer transition-all hover:border-emerald-500/30 text-left"
               >
                 <ShieldCheck className="h-6 w-6 text-slate-500 group-hover:text-emerald-400 transition-colors" />

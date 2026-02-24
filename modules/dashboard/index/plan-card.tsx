@@ -150,7 +150,7 @@ export function PlanCard({
               </div>
             ) : isEnterprise ? (
               <SmartContactLink
-                email="support@pdfbridge.xyz"
+                email="hello@techhspyder.com"
                 isButton
                 className="w-full h-12 shadow-2xl active:scale-95 transition-all text-sm font-black bg-slate-700 hover:bg-slate-600 rounded-md py-2 px-4 flex items-center justify-center text-white"
               >

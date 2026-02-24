@@ -73,7 +73,7 @@ export const metadata: Metadata = {
     images: [
       "https://res.cloudinary.com/duv0exsir/image/upload/v1769535362/branded_og_image_pdfbridge_1769534994459_qn8iyg.jpg",
     ],
-    creator: "@pdfbridge",
+    creator: "@TechhSpyder",
   },
   icons: {
     icon: [
