@@ -75,7 +75,10 @@ export default function BlogEditor({ post, onClose }: EditorProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-xl p-4 md:p-8 animate-in fade-in duration-300">
+    <div
+      data-lenis-prevent
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-xl p-4 md:p-8 animate-in fade-in duration-300"
+    >
       <div className="w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col bg-slate-950 border border-white/10 rounded-3xl shadow-2xl">
         {/* Editor Header */}
         <div className="flex items-center justify-between p-6 border-b border-white/5">
@@ -244,7 +247,10 @@ export default function BlogEditor({ post, onClose }: EditorProps) {
             </div>
           ) : (
             <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 h-full overflow-hidden">
-              <div className="lg:col-span-2 h-full overflow-y-auto p-8 custom-scrollbar space-y-8">
+              <div
+                data-lenis-prevent
+                className="lg:col-span-2 h-full overflow-y-auto p-8 custom-scrollbar space-y-8"
+              >
                 {/* Main Content */}
                 <div className="space-y-3">
                   <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">
@@ -273,7 +279,10 @@ export default function BlogEditor({ post, onClose }: EditorProps) {
                   />
                 </div>
               </div>
-              <div className="lg:col-span-1 h-full overflow-y-auto p-8 border-l border-white/5 bg-slate-900/10 space-y-8 custom-scrollbar">
+              <div
+                data-lenis-prevent
+                className="lg:col-span-1 h-full overflow-y-auto p-8 border-l border-white/5 bg-slate-900/10 space-y-8 custom-scrollbar"
+              >
                 {/* Sidebar Config */}
                 <div className="p-6 rounded-3xl bg-slate-900/30 border border-white/5 space-y-6">
                   <h3 className="text-sm font-black uppercase tracking-widest text-slate-400">

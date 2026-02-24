@@ -17,7 +17,7 @@ import {
   useUser,
 } from "@clerk/nextjs";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 import { SmartContactLink } from "./smart-contact-link";
 
@@ -49,6 +49,7 @@ export function Navbar() {
   const pathname = usePathname();
   const { user } = useUser();
   const { signOut } = useClerk();
+  const router = useRouter();
   const isHidden =
     pathname.startsWith("/dashboard") ||
     pathname.startsWith("/sign-in") ||
@@ -58,6 +59,11 @@ export function Navbar() {
     NAV_ITEMS.filter((i) => i.type === "scroll").map((i) => i.id),
   );
   const scrollTo = (id: string) => {
+    if (pathname !== "/") {
+      router.push(`/#${id}`);
+      setOpen(false);
+      return;
+    }
     lenis?.scrollTo(`#${id}`, {
       offset: -80,
       duration: 1.2,
@@ -206,7 +212,7 @@ export function Navbar() {
                 </div>
 
                 <SmartContactLink
-                  email="info@pdfbridge.xyz"
+                  email="hello@techhspyder.com"
                   className={cn(
                     "flex items-center gap-3 px-3 py-2 text-slate-400 w-full hover:text-white hover:bg-white/5 border border-transparent rounded-lg text-sm font-medium transition-all duration-200 group",
                   )}

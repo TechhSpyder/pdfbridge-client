@@ -26,14 +26,7 @@ const Terms: FC = () => {
 
       <p className="mb-4">
         PDFBridge (“the Service”) is a software product operated by{" "}
-        <strong>Francis Bello</strong> under the brand{" "}
-        <strong>TechhSpyder</strong>.
-      </p>
-
-      <p className="mb-6">
-        Until <strong>TechhSpyder Product Studio Limited</strong> is officially
-        registered, all legal obligations, liabilities, and responsibilities
-        relating to the Service remain with <strong>Francis Bello</strong>.
+        <strong>TechhSpyder Product Studio Ltd.</strong>
       </p>
 
       <section className="mb-6">
@@ -131,8 +124,8 @@ const Terms: FC = () => {
         <h2 className="text-xl font-semibold mb-2">5. Intellectual Property</h2>
         <ul className="list-disc list-inside">
           <li>
-            All software, code, branding, and materials are owned by Francis
-            Bello under TechhSpyder
+            All software, code, branding, and materials are owned by TechhSpyder
+            Product Studio Ltd.
           </li>
           <li>
             Users are granted a limited, non-exclusive, non-transferable, and

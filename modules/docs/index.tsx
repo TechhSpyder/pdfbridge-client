@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { GlowCard } from "../app/glow-card";
 import {
   Book,
@@ -105,6 +106,26 @@ export function Documentation({
               {section.title}
             </button>
           ))}
+
+          <div className="pt-6 mt-6 border-t border-white/5 space-y-1">
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-3 mb-2">
+              Product
+            </p>
+            <Link
+              href="/#features"
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-white/5 transition-all"
+            >
+              <Layout className="h-4 w-4" />
+              Features
+            </Link>
+            <Link
+              href="/#pricing"
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-white/5 transition-all"
+            >
+              <Layout className="h-4 w-4" />
+              Pricing
+            </Link>
+          </div>
         </nav>
       </aside>
 

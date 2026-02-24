@@ -238,7 +238,7 @@ function SidebarContent({ isSmallScreen, setSidebarOpen }: any) {
                     </div>
 
                     <SmartContactLink
-                      email="info@pdfbridge.xyz"
+                      email="hello@techhspyder.com"
                       className={cn(
                         "flex items-center gap-3 px-3 py-2 text-slate-400 w-full hover:text-white hover:bg-white/5 border border-transparent rounded-lg text-sm font-medium transition-all duration-200 group",
                       )}

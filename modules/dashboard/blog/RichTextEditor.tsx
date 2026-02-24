@@ -318,8 +318,7 @@ export default function RichTextEditor({
       </div>
 
       {/* Editor Content */}
-
-      <EditorContent editor={editor} className="overflow-auto" />
+      <EditorContent editor={editor} />
 
       <style jsx global>{`
         .ProseMirror table {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useScrollAnimation } from "@/modules/hooks/use-scroll-animation";
+import Link from "next/link";
 
 export function CTA() {
   const { ref, isVisible } = useScrollAnimation();
@@ -38,12 +39,12 @@ export function CTA() {
             isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"
           }`}
         >
-          <a
-            href="/signup"
+          <Link
+            href="/sign-up"
             className="relative inline-flex items-center justify-center rounded-xl bg-blue-600 px-10 py-4 text-lg font-medium text-white shadow-lg transition-all hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-background animate-pulse"
           >
             Build Your First PDF Now
-          </a>
+          </Link>
         </div>
       </div>
     </section>
