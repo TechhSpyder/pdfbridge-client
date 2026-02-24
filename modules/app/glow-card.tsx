@@ -69,7 +69,7 @@ export function GlowCard({
           <p className="mt-1 text-sm text-muted-foreground">{sub}</p>
         </div>
 
-        <p className="mt-2 text-sm text-muted-foreground">{description}</p>
+        <p className="my-2 text-sm text-muted-foreground">{description}</p>
         {content}
       </div>
     </div>

@@ -1,6 +1,7 @@
 {
   "name": "pdfbridge-client",
   "version": "0.1.0",
+  "author": "TechhSpyder Product Studio Ltd.",
   "private": true,
   "scripts": {
     "dev": "next dev --webpack",

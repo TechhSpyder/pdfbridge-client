@@ -2,7 +2,8 @@
 
 import { GlowCard } from "@/modules/app/glow-card";
 import { useScrollAnimation } from "@/modules/hooks/use-scroll-animation";
-import { Zap, ShieldCheck, Globe } from "lucide-react";
+import { Zap, ShieldCheck, Globe, ChartColumnStacked } from "lucide-react";
+import Link from "next/link";
 
 const features = [
   {
@@ -23,6 +24,12 @@ const features = [
       "If a browser can see it, we can print it. Full support for modern CSS, JavaScript, and web fonts.",
     icon: <Globe className="h-6 w-6" />,
   },
+  {
+    title: "Proven Alternative",
+    description:
+      "Switching from PDFShift or other PDF APIs? See our honest comparison and migration guide.",
+    icon: <ChartColumnStacked className="h-6 w-6" />,
+  },
 ];
 
 export function WhyPdfBridge() {
@@ -30,7 +37,7 @@ export function WhyPdfBridge() {
 
   return (
     <section id="features" ref={ref} className="py-24 bg-background">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Heading */}
         <div
           className={`mx-auto max-w-2xl text-center transition-all duration-700 ${
@@ -47,7 +54,7 @@ export function WhyPdfBridge() {
         </div>
 
         {/* Feature Cards */}
-        <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {features.map((feature, index) => (
             <div
               key={feature.title}
@@ -62,6 +69,16 @@ export function WhyPdfBridge() {
                 title={feature.title}
                 description={feature.description}
                 icon={feature.icon}
+                content={
+                  feature.title === "Proven Alternative" && (
+                    <Link
+                      href="/insights/pdfshift-alternative"
+                      className="text-sm mt-3 underline font-medium"
+                    >
+                      Compare PDFBridge vs PDFShift →
+                    </Link>
+                  )
+                }
               />
             </div>
           ))}

@@ -26,9 +26,9 @@ const Privacy: FC = () => {
       </p>
 
       <p className="mb-4">
-        PDFBridge is operated by <strong>Francis Bello</strong>, under the brand{" "}
-        <strong>TechhSpyder</strong>. This Privacy Policy explains how I
-        collect, use, and protect your data.
+        PDFBridge is operated by{" "}
+        <strong>TechhSpyder Product Studio Ltd.</strong>. This Privacy Policy
+        explains how we collect, use, and protect your data.
       </p>
 
       <section className="mb-6">
@@ -85,7 +85,7 @@ const Privacy: FC = () => {
           <li>Legal authorities when required</li>
         </ul>
         <p>
-          I do <strong>not</strong> sell your data.
+          We do <strong>not</strong> sell your data.
         </p>
         <p className="mt-2">
           Where PDFBridge processes personal data on behalf of customers, such

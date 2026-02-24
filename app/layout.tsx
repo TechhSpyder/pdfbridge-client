@@ -45,14 +45,18 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
+  alternates: {
+    canonical: "https://pdfbridge.xyz",
+  },
   openGraph: {
     title: "PDFBridge | Modern API for PDF Generation",
-    description: "The developer's bridge to perfect PDFs.",
+    description:
+      "The high-performance bridge between your code and perfect documents. Support for Tailwind, AI extraction, and Zero-Storage privacy.",
     url: "https://pdfbridge.xyz",
     siteName: "PDFBridge",
     images: [
       {
-        url: "https://res.cloudinary.com/duv0exsir/image/upload/v1769535362/branded_og_image_pdfbridge_1769534994459_qn8iyg.jpg", // We should generate this later if it doesn't exist
+        url: "https://res.cloudinary.com/duv0exsir/image/upload/v1769535362/branded_og_image_pdfbridge_1769534994459_qn8iyg.jpg",
         width: 1200,
         height: 630,
         alt: "PDFBridge - Modern PDF Generation API",
@@ -65,7 +69,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "PDFBridge | Modern API for PDF Generation",
     description:
-      "Generate high-quality PDFs from URLs and HTML with a single API call.",
+      "Generate high-quality PDFs from URLs and HTML with a single API call. Tailwind-Native & AI-Powered.",
     images: [
       "https://res.cloudinary.com/duv0exsir/image/upload/v1769535362/branded_og_image_pdfbridge_1769534994459_qn8iyg.jpg",
     ],

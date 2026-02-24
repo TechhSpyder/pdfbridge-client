@@ -14,37 +14,19 @@ export function Footer() {
             <h4 className="text-sm font-semibold">Product</h4>
             <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
               <li>
-                <a href="/features" className="hover:text-foreground">
+                <Link href="/#features" className="hover:text-foreground">
                   Features
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="/pricing" className="hover:text-foreground">
+                <Link href="/#pricing" className="hover:text-foreground">
                   Pricing
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="/docs" className="hover:text-foreground">
-                  API
-                </a>
-              </li>
-              <li>
-                <a href="/security" className="hover:text-foreground">
-                  Security
-                </a>
-              </li>
-              <li>
-                <a href="/docs/changelog" className="hover:text-foreground">
-                  Changelog
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/docs/migration-guides"
-                  className="hover:text-foreground"
-                >
-                  Migration Guides
-                </a>
+                <Link href="/docs" className="hover:text-foreground">
+                  API Docs
+                </Link>
               </li>
             </ul>
           </div>
@@ -54,19 +36,19 @@ export function Footer() {
             <h4 className="text-sm font-semibold">Company</h4>
             <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
               <li>
-                <a href="/about" className="hover:text-foreground">
-                  About
-                </a>
+                <Link href="/insights" className="hover:text-foreground">
+                  Journal & Insights
+                </Link>
               </li>
               <li>
-                <a href="/blog" className="hover:text-foreground">
-                  Blog
-                </a>
+                <Link href="/changelog" className="hover:text-foreground">
+                  Changelog
+                </Link>
               </li>
               <li>
-                <a href="/contact" className="hover:text-foreground">
+                <Link href="/contact" className="hover:text-foreground">
                   Contact
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -76,19 +58,19 @@ export function Footer() {
             <h4 className="text-sm font-semibold">Legal</h4>
             <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
               <li>
-                <a href="/privacy" className="hover:text-foreground">
+                <Link href="/privacy" className="hover:text-foreground">
                   Privacy Policy
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="/terms" className="hover:text-foreground">
+                <Link href="/terms" className="hover:text-foreground">
                   Terms of Service
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="/dpa" className="hover:text-foreground">
+                <Link href="/dpa" className="hover:text-foreground">
                   DPA
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -113,13 +95,15 @@ export function Footer() {
             © {new Date().getFullYear()} PDFBridge. All rights reserved.
           </span>
           <div>
-            <p>Owned and operated by Francis Bello</p>
+            <p>Owned and operated by TechhSpyder Product Studio Ltd.</p>
             <p>
               Contact:{" "}
-              <SmartContactLink
-                email="info@pdfbridge.xyz"
+              <Link
+                href="/contact"
                 className="hover:text-foreground font-semibold underline decoration-blue-500/30 underline-offset-4"
-              />
+              >
+                Support Desk
+              </Link>
             </p>
           </div>
           <span>Built for developers.</span>
