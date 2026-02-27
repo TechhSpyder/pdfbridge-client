@@ -78,7 +78,7 @@ export function BillingPage() {
   }, []);
 
   const Loaders = userLoading || plansLoading;
-  const intervals = userData.billingInterval === "year" ? "Annual" : "Monthly";
+  const intervals = userData?.billingInterval === "year" ? "Annual" : "Monthly";
   useEffect(() => {
     const reference = searchParams.get("reference");
     const success = searchParams.get("success");
@@ -112,7 +112,8 @@ export function BillingPage() {
         description: "Your new limits are now active across the edge network.",
       });
     }
-  }, [searchParams, verifyMutation, refetch]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   const defaultProvider = userData?.region === "NG" ? "paystack" : "paddle";
   const provider = defaultProvider;
@@ -446,16 +447,16 @@ export function BillingPage() {
                 </p>
               </div>
               <div className="flex gap-4 pt-4 grayscale opacity-50 flex-wrap">
-                <div className="px-3 py-1 rounded border border-white/10 text-[10px] font-bold text-slate-500">
+                <div className="px-3 py-1 rounded border border-white/10 text-[10px] font-bold text-slate-400">
                   VISA
                 </div>
-                <div className="px-3 py-1 rounded border border-white/10 text-[10px] font-bold text-slate-500">
+                <div className="px-3 py-1 rounded border border-white/10 text-[10px] font-bold text-slate-400">
                   MASTERCARD
                 </div>
-                <div className="px-3 py-1 rounded border border-white/10 text-[10px] font-bold text-slate-500">
+                <div className="px-3 py-1 rounded border border-white/10 text-[10px] font-bold text-slate-400">
                   APPLE PAY
                 </div>
-                <div className="px-3 py-1 rounded border border-white/10 text-[10px] font-bold text-slate-500">
+                <div className="px-3 py-1 rounded border border-white/10 text-[10px] font-bold text-slate-400">
                   BANK TRANSFER
                 </div>
               </div>
@@ -463,7 +464,7 @@ export function BillingPage() {
 
             <div className="p-8 rounded-3xl border border-muted bg-slate-900/40 space-y-6 flex flex-col justify-center">
               <SmartContactLink
-                email="hello@techhspyder.com"
+                email="sales@techhspyder.com"
                 className="flex items-center gap-4 p-4 rounded-2xl bg-black/40 border border-white/5 group cursor-pointer transition-all hover:border-blue-500/30 text-left"
               >
                 <HelpCircle className="h-6 w-6 text-slate-500 group-hover:text-blue-400 transition-colors" />
@@ -479,7 +480,7 @@ export function BillingPage() {
               </SmartContactLink>
 
               <SmartContactLink
-                email="hello@techhspyder.com"
+                email="support@techhspyder.com"
                 className="flex items-center gap-4 p-4 rounded-2xl bg-black/40 border border-white/5 group cursor-pointer transition-all hover:border-emerald-500/30 text-left"
               >
                 <ShieldCheck className="h-6 w-6 text-slate-500 group-hover:text-emerald-400 transition-colors" />

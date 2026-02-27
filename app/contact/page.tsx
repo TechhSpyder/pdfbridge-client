@@ -85,11 +85,11 @@ export default function ContactPage() {
                   developer tips.
                 </p>
                 <Link
-                  href="https://x.com/TechhSpyder"
+                  href="https://x.com/pdfbridge"
                   target="_blank"
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white font-bold text-sm tracking-wide transition-all hover:bg-white/10"
                 >
-                  @TechhSpyder
+                  @pdfbridge
                 </Link>
               </div>
             }

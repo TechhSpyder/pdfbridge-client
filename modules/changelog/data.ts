@@ -69,7 +69,7 @@ export const CHANGELOG_DATA: ChangelogEntry[] = [
       },
       {
         type: "feature",
-        text: "AI Metadata Extraction: Gemini-powered structured data extraction from PDFs.",
+        text: "Intelligent PDF Analysis: Gemini-powered structured data extraction from PDFs.",
       },
       {
         type: "feature",

@@ -103,7 +103,7 @@ const DPA: FC = () => {
           <li>Render (application hosting)</li>
           <li>Redis (caching and queues)</li>
           <li>Paystack and Paddle (payment processing)</li>
-          <li>Google (AI metadata extraction)</li>
+          <li>Google (Intelligent PDF analysis)</li>
         </ul>
         <p className="mt-2">
           Sub-processors are subject to contractual obligations consistent with

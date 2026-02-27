@@ -12,6 +12,9 @@ import Underline from "@tiptap/extension-underline";
 import TextAlign from "@tiptap/extension-text-align";
 import Highlight from "@tiptap/extension-highlight";
 import { common, createLowlight } from "lowlight";
+import React, { useState } from "react";
+import { Dialog } from "@/modules/app/dialog";
+import { Button } from "@/modules/app/button";
 
 import {
   Bold,
@@ -71,10 +74,13 @@ export default function RichTextEditor({
   content,
   onChange,
 }: RichTextEditorProps) {
+  const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
+  const [linkUrl, setLinkUrl] = useState("");
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
-        codeBlock: false, // Disable default code block to use lowlight
+        codeBlock: false,
       }),
       Table.configure({
         resizable: true,
@@ -110,10 +116,35 @@ export default function RichTextEditor({
     },
   });
 
+  const handleLinkConfirm = () => {
+    if (linkUrl) {
+      editor?.chain().focus().setLink({ href: linkUrl }).run();
+    } else {
+      editor?.chain().focus().unsetLink().run();
+    }
+    setIsLinkDialogOpen(false);
+    setLinkUrl("");
+  };
+
+  const openLinkDialog = () => {
+    if (editor) {
+      setLinkUrl(editor.getAttributes("link").href || "");
+      setIsLinkDialogOpen(true);
+    }
+  };
+
   if (!editor) return null;
 
   return (
     <div className="w-full bg-black/20 border border-white/5 rounded-2xl focus-within:border-blue-500/30 transition-all">
+      <LinkDialog
+        open={isLinkDialogOpen}
+        onOpenChange={setIsLinkDialogOpen}
+        url={linkUrl}
+        setUrl={setLinkUrl}
+        onConfirm={handleLinkConfirm}
+      />
+
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-1 p-2 bg-slate-900/50 border-b border-white/5 sticky top-0 z-10">
         <MenuButton
@@ -233,16 +264,9 @@ export default function RichTextEditor({
           <CodeIcon size={16} />
         </MenuButton>
         <MenuButton
-          onClick={() => {
-            const url = window.prompt("Enter URL");
-            if (url) {
-              editor.chain().focus().setLink({ href: url }).run();
-            } else if (url === "") {
-              editor.chain().focus().unsetLink().run();
-            }
-          }}
+          onClick={openLinkDialog}
           active={editor.isActive("link")}
-          title="Add Link"
+          title="Link"
         >
           <LinkIcon size={16} />
         </MenuButton>
@@ -268,18 +292,7 @@ export default function RichTextEditor({
         >
           <Redo size={16} />
         </MenuButton>
-        <MenuButton
-          onClick={() => editor.chain().focus().addRowAfter().run()}
-          title="Add Row After"
-        >
-          <TableIcon size={14} className="rotate-270 opacity-100" />
-        </MenuButton>
-        <MenuButton
-          onClick={() => editor.chain().focus().addRowBefore().run()}
-          title="Add Row Before"
-        >
-          <TableIcon size={14} className="rotate-270 opacity-100" />
-        </MenuButton>
+
         {editor.isActive("table") && (
           <>
             <div className="w-px h-6 bg-white/5 mx-1" />
@@ -373,5 +386,58 @@ export default function RichTextEditor({
         }
       `}</style>
     </div>
+  );
+}
+
+function LinkDialog({
+  open,
+  onOpenChange,
+  url,
+  setUrl,
+  onConfirm,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  url: string;
+  setUrl: (url: string) => void;
+  onConfirm: () => void;
+}) {
+  return (
+    <Dialog.Root open={open} onOpenChange={onOpenChange}>
+      <Dialog.Content className="max-w-md">
+        <Dialog.Header>
+          <Dialog.Title>Insert Link</Dialog.Title>
+        </Dialog.Header>
+        <Dialog.Body className="items-start gap-4">
+          <div className="w-full space-y-2">
+            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+              URL
+            </label>
+            <input
+              autoFocus
+              type="url"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && onConfirm()}
+              className="w-full bg-black/40 border border-white/5 text-slate-300 rounded-xl p-4 text-sm focus:outline-none focus:border-blue-500/50 transition-colors"
+              placeholder="https://example.com"
+            />
+          </div>
+        </Dialog.Body>
+        <Dialog.Footer className="gap-3">
+          <Dialog.Close>
+            <Button variant="secondary" className="h-11 px-6">
+              Cancel
+            </Button>
+          </Dialog.Close>
+          <Button
+            onClick={onConfirm}
+            className="h-11 px-8 bg-blue-600 hover:bg-blue-500 text-white font-bold shadow-xl shadow-blue-600/20"
+          >
+            Apply
+          </Button>
+        </Dialog.Footer>
+      </Dialog.Content>
+    </Dialog.Root>
   );
 }
