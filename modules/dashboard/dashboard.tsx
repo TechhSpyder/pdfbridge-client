@@ -26,11 +26,13 @@ import { cn } from "@/utils";
 
 const RecentConversionsList = dynamic(
   () =>
-    import("./index/recent-converion").then((mod) => mod.RecentConversionsList),
+    import("./index/recent-conversion").then(
+      (mod) => mod.RecentConversionsList,
+    ),
   { ssr: false },
 );
 const ApiPlayground = dynamic(
-  () => import("./index/api-playgorund").then((mod) => mod.ApiPlayground),
+  () => import("./index/api-playground").then((mod) => mod.ApiPlayground),
   { ssr: false },
 );
 const IntegrationSnippets = dynamic(
@@ -116,6 +118,20 @@ export function DashboardPage() {
   const usageLimit = userData?.plan?.limit || 5;
   const usagePercentage = Math.min((usageCount / usageLimit) * 100, 100);
 
+  const aiTemplateCount = userData?.usage?.aiTemplateCount || 0;
+  const aiTemplateLimit = userData?.plan?.aiTemplateLimit || 0;
+  const aiTemplatePercentage =
+    aiTemplateLimit > 0
+      ? Math.min((aiTemplateCount / aiTemplateLimit) * 100, 100)
+      : 0;
+
+  const aiExtractionCount = userData?.usage?.aiCount || 0;
+  const aiExtractionLimit = userData?.plan?.aiLimit || 0;
+  const aiExtractionPercentage =
+    aiExtractionLimit > 0
+      ? Math.min((aiExtractionCount / aiExtractionLimit) * 100, 100)
+      : 0;
+
   const getDaysUntilReset = () => {
     const anchorDate = userData?.planStartedAt || userData?.createdAt;
     if (!anchorDate) return 0;
@@ -157,12 +173,24 @@ export function DashboardPage() {
           {isLoading ? (
             <div className="w-full h-10 skeleton-el animate-pulse!" />
           ) : (
-            <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
-              {isNewUser ? "Welcome, " : "Welcome back, "}
-              <span className="text-blue-500">
-                {clerkUser?.firstName || "Developer"}
-              </span>
-            </h1>
+            <div className="flex flex-col">
+              <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+                {isNewUser ? "Welcome, " : "Welcome back, "}
+                <span className="text-blue-500">
+                  {clerkUser?.firstName || "Developer"}
+                </span>
+              </h1>
+              {userData?.organizationName && (
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-[10px] font-bold text-slate-500 bg-slate-800/50 px-2 py-0.5 rounded-sm uppercase tracking-wider">
+                    Workspace
+                  </span>
+                  <span className="text-slate-300 text-sm font-medium">
+                    {userData.organizationName}
+                  </span>
+                </div>
+              )}
+            </div>
           )}
 
           <p className="mt-2 text-slate-400 max-w-2xl text-sm md:text-base">
@@ -243,137 +271,249 @@ export function DashboardPage() {
       </div>
 
       {/* Primary Stats Grid */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="flex flex-col gap-6">
         {isLoading ? (
-          Array.from({ length: 3 }).map((_, i) => (
-            <div
-              key={i}
-              className="rounded-2xl border border-muted bg-background h-[200px] md:h-[320px] p-4 md:p-8 backdrop-blur-sm animate-pulse"
-              style={{
-                background: "rgba(15,23,42,0.7)",
-                backdropFilter: "blur(12px)",
-                border: "1px solid rgba(255,255,255,0.1)",
-              }}
-            />
-          ))
+          <>
+            <div className="grid gap-6 md:grid-cols-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="rounded-2xl border border-muted bg-background h-[200px] md:h-[320px] p-4 md:p-8 backdrop-blur-sm animate-pulse"
+                  style={{
+                    background: "rgba(15,23,42,0.7)",
+                    backdropFilter: "blur(12px)",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                  }}
+                />
+              ))}
+            </div>
+            <div className="grid gap-6 md:grid-cols-2">
+              {Array.from({ length: 2 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="rounded-2xl border border-muted bg-background h-[200px] md:h-[320px] p-4 md:p-8 backdrop-blur-sm animate-pulse"
+                  style={{
+                    background: "rgba(15,23,42,0.7)",
+                    backdropFilter: "blur(12px)",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                  }}
+                />
+              ))}
+            </div>
+          </>
         ) : (
           <>
-            <GlowCard
-              title="Monthly Requests"
-              sub={`${usageCount} / ${usageLimit}`}
-              icon={<Activity className="h-5 w-5 text-blue-500" />}
-              content={
-                <div className="mt-4 space-y-3">
-                  <div className="h-2.5 w-full overflow-hidden rounded-full bg-white/5">
-                    <div
-                      className="h-full bg-linear-to-r from-blue-600 to-blue-400 transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(37,99,235,0.5)]"
-                      style={{ width: `${usagePercentage}%` }}
-                    ></div>
-                  </div>
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="text-slate-500 font-medium">
-                      Reset in {daysUntilReset}{" "}
-                      {daysUntilReset === 1 ? "day" : "days"}
-                    </span>
-                    <span className="text-blue-400 font-bold">
-                      {Math.round(usagePercentage)}% utilized
-                    </span>
-                  </div>
-                </div>
-              }
-            />
-
-            <GlowCard
-              title="Secret Keys"
-              sub="Dual Mode (Live & Test)"
-              icon={<Key className="h-5 w-5 text-emerald-500" />}
-              content={
-                <div className="mt-4 space-y-3">
-                  <div className="p-2.5 rounded-lg bg-black/40 border border-white/5 flex items-center justify-between group/key">
-                    <div className="flex flex-col">
-                      <span className="text-[8px] uppercase font-bold text-slate-500">
-                        Live
-                      </span>
-                      <code className="text-[10px] font-mono text-slate-400 truncate pr-2">
-                        {liveKeyHint}
-                      </code>
+            <div className="grid gap-6 md:grid-cols-3">
+              <GlowCard
+                title="Monthly Requests"
+                sub={`${usageCount} / ${usageLimit}`}
+                icon={<Activity className="h-5 w-5 text-blue-500" />}
+                content={
+                  <div className="mt-4 space-y-3">
+                    <div className="h-2.5 w-full overflow-hidden rounded-full bg-white/5">
+                      <div
+                        className="h-full bg-linear-to-r from-blue-600 to-blue-400 transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(37,99,235,0.5)]"
+                        style={{ width: `${usagePercentage}%` }}
+                      ></div>
                     </div>
-                    <button
-                      onClick={() => {
-                        liveClipboard.copy(
-                          liveKeyFull,
-                          "Live key copied to clipboard.",
-                        );
-                      }}
-                      className="p-1 hover:bg-white/10 rounded transition text-slate-500 hover:text-white"
-                    >
-                      {liveClipboard.copied ? (
-                        <Check className="h-3 w-3 text-emerald-500" />
-                      ) : (
-                        <Copy className="h-3 w-3" />
-                      )}
-                    </button>
-                  </div>
-
-                  <div className="p-2.5 rounded-lg bg-black/40 border flex items-center justify-between group/key border-orange-500/10">
-                    <div className="flex flex-col">
-                      <span className="text-[8px] uppercase font-bold text-orange-500/70">
-                        Test
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="text-slate-500 font-medium">
+                        Reset in {daysUntilReset}{" "}
+                        {daysUntilReset === 1 ? "day" : "days"}
                       </span>
-                      <code className="text-[10px] font-mono text-slate-400 truncate pr-2">
-                        {testKeyHint}
-                      </code>
+                      <span className="text-blue-400 font-bold">
+                        {Math.round(usagePercentage)}% utilized
+                      </span>
                     </div>
-                    <button
-                      onClick={() => {
-                        testClipboard.copy(
-                          testKeyFull,
-                          "Test key copied to clipboard.",
-                        );
-                      }}
-                      className="p-1 hover:bg-white/10 rounded transition text-slate-500 hover:text-white"
-                    >
-                      {testClipboard.copied ? (
-                        <Check className="h-3 w-3 text-orange-500" />
-                      ) : (
-                        <Copy className="h-3 w-3" />
-                      )}
-                    </button>
                   </div>
+                }
+              />
 
-                  <Link href="/dashboard/api-keys" className="block pt-1">
-                    <Button
-                      variant="outline"
-                      className="w-full text-[10px] h-8 gap-2 border-emerald-500/20 hover:border-emerald-500/40 text-emerald-400"
-                    >
-                      Manage & Rotate <ExternalLink className="h-2.5 w-2.5" />
-                    </Button>
-                  </Link>
-                </div>
-              }
-            />
-
-            <GlowCard
-              title="Current Plan"
-              sub={userData?.plan?.name || "Standard Free"}
-              icon={<Zap className="h-5 w-5 text-amber-500" />}
-              content={
-                <div className="mt-4 space-y-4">
-                  <div className="flex items-center gap-2 text-xs text-slate-400">
-                    <Check className="h-3.5 w-3.5 text-emerald-500" />
-                    {userData?.plan?.limit.toLocaleString()} conversions / mo
+              <GlowCard
+                title="AI Templates"
+                sub={
+                  aiTemplateLimit > 0
+                    ? `${aiTemplateCount} / ${aiTemplateLimit}`
+                    : "Pro Feature"
+                }
+                icon={<Zap className="h-5 w-5 text-indigo-500" />}
+                content={
+                  <div className="mt-4 space-y-3">
+                    {aiTemplateLimit > 0 ? (
+                      <>
+                        <div className="h-2.5 w-full overflow-hidden rounded-full bg-white/5">
+                          <div
+                            className="h-full bg-linear-to-r from-indigo-600 to-purple-400 transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(99,102,241,0.5)]"
+                            style={{ width: `${aiTemplatePercentage}%` }}
+                          ></div>
+                        </div>
+                        <div className="flex justify-between items-center text-xs">
+                          <span className="text-slate-500 font-medium">
+                            AI-generated template layouts
+                          </span>
+                          <span className="text-indigo-400 font-bold">
+                            {Math.round(aiTemplatePercentage)}%
+                          </span>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="flex justify-between items-center text-xs bg-indigo-500/10 p-3 rounded-lg border border-indigo-500/20">
+                        <span className="text-slate-400 font-medium">
+                          Generate precise, smart layouts using natural
+                          language.
+                        </span>
+                        <Link
+                          href="/dashboard/billing"
+                          className="text-indigo-400 font-bold hover:underline whitespace-nowrap ml-4"
+                        >
+                          Upgrade
+                        </Link>
+                      </div>
+                    )}
                   </div>
-                  <Link href="/dashboard/billing" className="block">
-                    <Button
-                      variant="outline"
-                      className="w-full text-xs h-9 border-blue-500/20 text-blue-400 hover:bg-blue-500/10"
-                    >
-                      View Details & Billing
-                    </Button>
-                  </Link>
-                </div>
-              }
-            />
+                }
+              />
+
+              <GlowCard
+                title="Current Plan"
+                sub={userData?.plan?.name || "Standard Free"}
+                icon={<Zap className="h-5 w-5 text-amber-500" />}
+                content={
+                  <div className="mt-4 space-y-4">
+                    <div className="flex items-center gap-2 text-xs text-slate-400">
+                      <Check className="h-3.5 w-3.5 text-emerald-500" />
+                      {userData?.plan?.limit.toLocaleString()} conversions / mo
+                    </div>
+                    <Link href="/dashboard/billing" className="block">
+                      <Button
+                        variant="outline"
+                        className="w-full text-xs h-9 border-blue-500/20 text-blue-400 hover:bg-blue-500/10"
+                      >
+                        View Details & Billing
+                      </Button>
+                    </Link>
+                  </div>
+                }
+              />
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-2">
+              <GlowCard
+                title="Secret Keys"
+                sub="Dual Mode (Live & Test)"
+                icon={<Key className="h-5 w-5 text-emerald-500" />}
+                content={
+                  <div className="mt-4 space-y-3">
+                    <div className="flex sm:items-center gap-3.5 max-sm:flex-col">
+                      <div className="p-2.5 rounded-lg sm:w-1/2 bg-black/40 border border-white/5 flex items-center justify-between group/key">
+                        <div className="flex flex-col">
+                          <span className="text-[8px] uppercase font-bold text-slate-500">
+                            Live
+                          </span>
+                          <code className="text-[10px] font-mono text-slate-400 truncate pr-2">
+                            {liveKeyHint}
+                          </code>
+                        </div>
+                        <button
+                          onClick={() => {
+                            liveClipboard.copy(
+                              liveKeyFull,
+                              "Live key copied to clipboard.",
+                            );
+                          }}
+                          className="p-1 hover:bg-white/10 rounded transition text-slate-500 hover:text-white"
+                        >
+                          {liveClipboard.copied ? (
+                            <Check className="h-3 w-3 text-emerald-500" />
+                          ) : (
+                            <Copy className="h-3 w-3" />
+                          )}
+                        </button>
+                      </div>
+
+                      <div className="p-2.5 rounded-lg sm:w-1/2 bg-black/40 border flex items-center justify-between group/key border-orange-500/10">
+                        <div className="flex flex-col">
+                          <span className="text-[8px] uppercase font-bold text-orange-500/70">
+                            Test
+                          </span>
+                          <code className="text-[10px] font-mono text-slate-400 truncate pr-2">
+                            {testKeyHint}
+                          </code>
+                        </div>
+                        <button
+                          onClick={() => {
+                            testClipboard.copy(
+                              testKeyFull,
+                              "Test key copied to clipboard.",
+                            );
+                          }}
+                          className="p-1 hover:bg-white/10 rounded transition text-slate-500 hover:text-white"
+                        >
+                          {testClipboard.copied ? (
+                            <Check className="h-3 w-3 text-orange-500" />
+                          ) : (
+                            <Copy className="h-3 w-3" />
+                          )}
+                        </button>
+                      </div>
+                    </div>
+
+                    <Link href="/dashboard/api-keys" className="block pt-1">
+                      <Button
+                        variant="outline"
+                        className="w-full text-[10px] h-8 gap-2 border-emerald-500/20 hover:border-emerald-500/40 text-emerald-400"
+                      >
+                        Manage & Rotate <ExternalLink className="h-2.5 w-2.5" />
+                      </Button>
+                    </Link>
+                  </div>
+                }
+              />
+              <GlowCard
+                title="AI Extracted Data"
+                sub={
+                  aiExtractionLimit > 0
+                    ? `${aiExtractionCount} / ${aiExtractionLimit}`
+                    : "Pro Feature"
+                }
+                icon={<Zap className="h-5 w-5 text-fuchsia-500" />}
+                content={
+                  <div className="mt-4 space-y-3">
+                    {aiExtractionLimit > 0 ? (
+                      <>
+                        <div className="h-2.5 w-full overflow-hidden rounded-full bg-white/5">
+                          <div
+                            className="h-full bg-linear-to-r from-fuchsia-600 to-pink-400 transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(217,70,239,0.5)]"
+                            style={{ width: `${aiExtractionPercentage}%` }}
+                          ></div>
+                        </div>
+                        <div className="flex justify-between items-center text-xs">
+                          <span className="text-slate-500 font-medium">
+                            Intelligent metadata extractions
+                          </span>
+                          <span className="text-fuchsia-400 font-bold">
+                            {Math.round(aiExtractionPercentage)}%
+                          </span>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="flex justify-between items-center text-xs bg-fuchsia-500/10 p-3 rounded-lg border border-fuchsia-500/20">
+                        <span className="text-slate-400 font-medium">
+                          Automatically extract structured JSON data from your
+                          PDFs.
+                        </span>
+                        <Link
+                          href="/dashboard/billing"
+                          className="text-fuchsia-400 font-bold hover:underline whitespace-nowrap ml-4"
+                        >
+                          Upgrade
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                }
+              />
+            </div>
           </>
         )}
       </div>

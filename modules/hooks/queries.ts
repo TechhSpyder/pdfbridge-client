@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApiClient } from "@/app/api/api-client";
+import { toast } from "sonner";
 
 export const useMe = () => {
   const api = useApiClient();
@@ -108,6 +109,98 @@ export const useUpdateSettings = () => {
     }) => api.patch("/api/v1/user/me/settings", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["me"] });
+    },
+  });
+};
+
+export const useGenerateTemplate = () => {
+  const api = useApiClient();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { prompt: string }) =>
+      api.post("/api/v1/templates/generate", data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["me"] });
+    },
+  });
+};
+
+export const useTemplates = () => {
+  const api = useApiClient();
+  return useQuery({
+    queryKey: ["templates"],
+    queryFn: () => api.get("/api/v1/templates"),
+  });
+};
+
+export const useTemplate = (id: string) => {
+  const api = useApiClient();
+  return useQuery({
+    queryKey: ["templates", id],
+    queryFn: () => api.get(`/api/v1/templates/${id}`),
+    enabled: !!id,
+  });
+};
+
+export const useSaveTemplate = () => {
+  const api = useApiClient();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: {
+      name: string;
+      html: string;
+      css?: string;
+      variables?: string[];
+      prompt?: string;
+    }) => api.post("/api/v1/templates", data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["templates"] });
+    },
+  });
+};
+
+export const useUpdateTemplate = (id: string) => {
+  const api = useApiClient();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: {
+      name?: string;
+      html?: string;
+      css?: string;
+      variables?: string[];
+    }) => api.put(`/api/v1/templates/${id}`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["templates"] });
+      queryClient.invalidateQueries({ queryKey: ["templates", id] });
+    },
+  });
+};
+
+export const useDeleteTemplate = () => {
+  const api = useApiClient();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.delete(`/api/v1/templates/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["templates"] });
+    },
+  });
+};
+
+export const useUpdateIpWhitelist = () => {
+  const api = useApiClient();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (ips: string[]) =>
+      api.patch(`/api/v1/organizations/whitelist`, { ipWhitelist: ips }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["me"] });
+      toast.success("IP Whitelist updated");
+    },
+    onError: (err: any) => {
+      toast.error("Failed to update IP Whitelist", {
+        description: err.response?.data?.error || err.message,
+      });
     },
   });
 };

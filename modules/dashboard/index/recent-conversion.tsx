@@ -204,7 +204,7 @@ export function RecentConversionsList() {
                           </div>
                           <div>
                             <h2 className="text-sm font-bold text-white uppercase tracking-wider">
-                              AI Extraction Insights
+                              Intelligent PDF Analysis Insights
                             </h2>
                             <p className="text-[10px] text-slate-500">
                               Extracted via Gemini 1.5 Flash (BETA)

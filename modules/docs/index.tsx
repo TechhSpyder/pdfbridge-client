@@ -13,81 +13,146 @@ import {
   Info,
   Code2,
   Cpu,
+  Users,
+  ChevronDown,
+  ChevronRight,
+  Sparkles,
 } from "lucide-react";
 import { Highlight, themes } from "prism-react-renderer";
 import { useActiveSection } from "../hooks/use-active-section";
 import { useEffect } from "react";
 
-const SECTIONS = [
-  { id: "intro", title: "Introduction", icon: <Book className="h-4 w-4" /> },
-  { id: "auth", title: "Authentication", icon: <Key className="h-4 w-4" /> },
+const DOCUMENTATION_GROUPS = [
   {
-    id: "usage",
-    title: "Usage & Credits",
-    icon: <Info className="h-4 w-4" />,
+    title: "Getting Started",
+    items: [
+      {
+        id: "intro",
+        title: "Introduction",
+        icon: <Book className="h-4 w-4" />,
+      },
+      {
+        id: "auth",
+        title: "Authentication",
+        icon: <Key className="h-4 w-4" />,
+      },
+      {
+        id: "usage",
+        title: "Usage & Credits",
+        icon: <Info className="h-4 w-4" />,
+      },
+    ],
   },
   {
-    id: "convert",
-    title: "Convert PDF",
-    icon: <FileCode className="h-4 w-4" />,
+    title: "Core API",
+    items: [
+      {
+        id: "convert",
+        title: "Convert PDF",
+        icon: <FileCode className="h-4 w-4" />,
+      },
+      {
+        id: "bulk",
+        title: "Bulk Conversion",
+        icon: <Cpu className="h-4 w-4" />,
+      },
+      {
+        id: "templates",
+        title: "Dynamic Templates",
+        icon: <Sparkles className="h-4 w-4 text-indigo-400" />,
+      },
+      {
+        id: "options",
+        title: "Options Reference",
+        icon: <Layout className="h-4 w-4" />,
+      },
+    ],
   },
-  { id: "bulk", title: "Bulk Conversion", icon: <Cpu className="h-4 w-4" /> },
   {
-    id: "options",
-    title: "Options Reference",
-    icon: <Layout className="h-4 w-4" />,
+    title: "Advanced Features",
+    items: [
+      {
+        id: "tailwind",
+        title: "Tailwind-Native",
+        icon: <Code2 className="h-4 w-4" />,
+      },
+      {
+        id: "ai",
+        title: "Intelligent PDF Analysis",
+        icon: <Cpu className="h-4 w-4" />,
+      },
+      { id: "ghost", title: "Ghost Mode", icon: <Info className="h-4 w-4" /> },
+    ],
   },
   {
-    id: "tailwind",
-    title: "Tailwind-Native",
-    icon: <Code2 className="h-4 w-4" />,
+    title: "Integrations & Teams",
+    items: [
+      {
+        id: "team",
+        title: "Team Management",
+        icon: <Users className="h-4 w-4" />,
+      },
+      {
+        id: "n8n",
+        title: "n8n Integration",
+        icon: <Webhook className="h-4 w-4" />,
+      },
+      {
+        id: "webhooks",
+        title: "Webhooks",
+        icon: <Webhook className="h-4 w-4" />,
+      },
+    ],
   },
   {
-    id: "ai",
-    title: "AI Metadata",
-    icon: <Cpu className="h-4 w-4" />,
+    title: "SDKs & Client Libraries",
+    items: [
+      {
+        id: "node-sdk",
+        title: "Node.js SDK",
+        icon: <Terminal className="h-4 w-4" />,
+      },
+      {
+        id: "python-sdk",
+        title: "Python SDK",
+        icon: <Terminal className="h-4 w-4" />,
+      },
+    ],
   },
-  {
-    id: "n8n",
-    title: "n8n Integration",
-    icon: <Webhook className="h-4 w-4" />,
-  },
-  { id: "webhooks", title: "Webhooks", icon: <Webhook className="h-4 w-4" /> },
-  { id: "ghost", title: "Ghost Mode", icon: <Info className="h-4 w-4" /> },
 ];
 
-export function Documentation({
-  noContainer = false,
+const SECTIONS = DOCUMENTATION_GROUPS.flatMap((g) => g.items);
+
+function SidebarGroup({
+  group,
+  activeSection,
+  setActiveSection,
+  isExpanded,
+  onToggle,
 }: {
-  noContainer?: boolean;
+  group: any;
+  activeSection: string;
+  setActiveSection: (id: string) => void;
+  isExpanded: boolean;
+  onToggle: () => void;
 }) {
-  const [activeSection, setActiveSection] = useState("intro");
-  const [copiedBaseUrl, setCopiedBaseUrl] = useState(false);
+  return (
+    <div className="mb-4">
+      <button
+        onClick={onToggle}
+        className="w-full flex items-center justify-between px-3 py-1.5 text-[10px] font-bold text-slate-500 uppercase tracking-widest hover:text-white transition-colors"
+      >
+        {group.title}
+        {isExpanded ? (
+          <ChevronDown className="h-3 w-3" />
+        ) : (
+          <ChevronRight className="h-3 w-3" />
+        )}
+      </button>
 
-  const sectionIds = SECTIONS.map((s) => s.id);
-  const activeId = useActiveSection(sectionIds);
-
-  useEffect(() => {
-    if (activeId) {
-      setActiveSection(activeId);
-    }
-  }, [activeId]);
-
-  const copyBaseUrl = () => {
-    navigator.clipboard.writeText("https://api.pdfbridge.xyz/api/v1");
-    setCopiedBaseUrl(true);
-    setTimeout(() => setCopiedBaseUrl(false), 2000);
-  };
-
-  const content = (
-    <div className="flex flex-col lg:flex-row gap-12 items-start">
-      {/* Sidebar Navigation */}
-      <aside className="w-full lg:w-64 shrink-0 lg:sticky top-24">
-        <nav className="sticky top-24 space-y-1">
-          <p className="text-xs font-bold text-slate-500 uppercase tracking-widest px-3 mb-4">
-            Documentation
-          </p>
-          {SECTIONS.map((section) => (
+      {isExpanded && (
+        <div className="space-y-1 mt-2">
+          {group.items.map((section: any) => (
             <button
               key={section.id}
               onClick={() => {
@@ -102,9 +167,73 @@ export function Documentation({
                   : "text-slate-400 hover:text-white hover:bg-white/5 border border-transparent cursor-pointer"
               }`}
             >
-              {section.icon}
+              <div
+                className={
+                  activeSection === section.id
+                    ? "text-blue-500"
+                    : "text-slate-500"
+                }
+              >
+                {section.icon}
+              </div>
               {section.title}
             </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function Documentation({
+  noContainer = false,
+}: {
+  noContainer?: boolean;
+}) {
+  const [activeSection, setActiveSection] = useState("intro");
+  const [expandedGroupId, setExpandedGroupId] = useState<string | null>(
+    DOCUMENTATION_GROUPS[0].title,
+  );
+  const [copiedBaseUrl, setCopiedBaseUrl] = useState(false);
+
+  const sectionIds = SECTIONS.map((s) => s.id);
+  const activeId = useActiveSection(sectionIds);
+
+  useEffect(() => {
+    if (activeId) {
+      setActiveSection(activeId);
+      // Auto-expand group that contains activeId
+      const group = DOCUMENTATION_GROUPS.find((g) =>
+        g.items.some((i) => i.id === activeId),
+      );
+      if (group) setExpandedGroupId(group.title);
+    }
+  }, [activeId]);
+
+  const copyBaseUrl = () => {
+    navigator.clipboard.writeText("https://api.pdfbridge.xyz/api/v1");
+    setCopiedBaseUrl(true);
+    setTimeout(() => setCopiedBaseUrl(false), 2000);
+  };
+
+  const content = (
+    <div className="flex flex-col lg:flex-row gap-12 items-start">
+      {/* Sidebar Navigation */}
+      <aside className="w-full lg:w-64 shrink-0 lg:sticky top-24">
+        <nav className="sticky top-24 space-y-1">
+          {DOCUMENTATION_GROUPS.map((group) => (
+            <SidebarGroup
+              key={group.title}
+              group={group}
+              activeSection={activeSection}
+              setActiveSection={setActiveSection}
+              isExpanded={expandedGroupId === group.title}
+              onToggle={() =>
+                setExpandedGroupId(
+                  expandedGroupId === group.title ? null : group.title,
+                )
+              }
+            />
           ))}
 
           <div className="pt-6 mt-6 border-t border-white/5 space-y-1">
@@ -144,8 +273,16 @@ export function Documentation({
           </h1>
           <p>
             PDFBridge is a powerful API for developers who need scale, security,
-            and precision. All generated PDFs are stored for **7 days** before
-            being automatically purged, unless **Ghost Mode** is used.
+            and precision. All generated PDFs are stored according to your{" "}
+            <Link
+              href="/dashboard/billing"
+              className="text-blue-400 hover:underline"
+            >
+              plan&apos;s retention policy
+            </Link>{" "}
+            (ranging from 7 to 30+ days) before being automatically purged,
+            unless <span className="font-bold text-white">Ghost Mode</span> is
+            used.
           </p>
           <GlowCard
             title="Base URL / API Versioning"
@@ -346,6 +483,58 @@ export function Documentation({
           </div>
         </section>
 
+        {/* Dynamic Templates */}
+        <section id="templates" className="scroll-mt-24 space-y-6">
+          <h2 className="text-3xl font-bold text-white flex items-center gap-4">
+            <Sparkles className="text-indigo-500" /> Dynamic Templates
+          </h2>
+          <p className="text-slate-400 leading-relaxed">
+            PDFBridge supports dynamic content injection using{" "}
+            <strong className="text-white">Handlebars-style</strong> variables.
+            You can define placeholders like{" "}
+            <code className="text-indigo-400 font-mono">{"{{name}}"}</code> in
+            your HTML and provide values at conversion time.
+          </p>
+          <div className="grid md:grid-cols-2 gap-4">
+            <GlowCard
+              title="Variable Syntax"
+              sub="Double-curly braces"
+              content={
+                <p className="text-xs text-slate-500 leading-relaxed mt-2">
+                  Use{" "}
+                  <code className="text-indigo-400">{"{{variable_name}}"}</code>{" "}
+                  anywhere in your HTML. Supports dot notation for nested
+                  objects (e.g.,{" "}
+                  <code className="text-indigo-400">{"{{user.name}}"}</code>).
+                </p>
+              }
+            />
+            <GlowCard
+              title="Ad-hoc Usage"
+              sub="No template required"
+              content={
+                <p className="text-xs text-slate-500 leading-relaxed mt-2">
+                  Pass variables directly with your raw HTML. The engine
+                  automatically detects and merges them before rendering.
+                </p>
+              }
+            />
+          </div>
+          <div className="space-y-4">
+            <h4 className="font-bold text-white text-sm">Example Payload</h4>
+            <CodeBlock
+              code={`{
+  "html": "<h1>Hello {{name}}!</h1><p>Invoice #{{inv_id}}</p>",
+  "variables": {
+    "name": "Jane Doe",
+    "inv_id": "99342"
+  }
+}`}
+              language="json"
+            />
+          </div>
+        </section>
+
         {/* Options Reference */}
         <section id="options" className="scroll-mt-24 space-y-8">
           <h2 className="text-3xl font-bold text-white flex items-center gap-4">
@@ -423,6 +612,7 @@ export function Documentation({
               }
             />
             <GlowCard
+              className="md:col-span-2"
               title="Header & Footer"
               sub="HTML Templates & Placeholders"
               content={
@@ -519,13 +709,42 @@ export function Documentation({
           </div>
         </section>
 
-        {/* AI Metadata */}
-        <section id="ai" className="scroll-mt-24 space-y-6">
+        {/* Team Management */}
+        <section id="team" className="scroll-mt-24 space-y-6">
           <h2 className="text-3xl font-bold text-white flex items-center gap-4">
-            <Cpu className="text-purple-400" /> AI Metadata Layer
+            <Users className="text-blue-400" /> Team Management
           </h2>
           <p className="text-slate-400 leading-relaxed">
-            PDFBridge uses <strong>Gemini 1.5 Flash</strong> to automatically
+            Collaborate with your team seamlessly. Invite members, manage roles,
+            and share templates across your organization.
+          </p>
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="p-4 rounded-xl border border-white/5 bg-white/5 space-y-2">
+              <h4 className="font-bold text-white text-sm">
+                Role-Based Access
+              </h4>
+              <p className="text-xs text-slate-500">
+                Owners have full billing and seat control, while Members can
+                create and manage templates.
+              </p>
+            </div>
+            <div className="p-4 rounded-xl border border-white/5 bg-white/5 space-y-2">
+              <h4 className="font-bold text-white text-sm">Shared Resources</h4>
+              <p className="text-xs text-slate-500">
+                All templates and API keys are shared within the organization,
+                ensuring consistent output.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Intelligent PDF Analysis */}
+        <section id="ai" className="scroll-mt-24 space-y-6">
+          <h2 className="text-3xl font-bold text-white flex items-center gap-4">
+            <Cpu className="text-purple-400" /> Intelligent PDF Analysis
+          </h2>
+          <p className="text-slate-400 leading-relaxed">
+            PDFBridge uses high-performance intelligent engines to automatically
             analyze and extract structured JSON data from your generated PDFs.
             Perfect for auto-tagging, data entry automation, and content
             summarization.
@@ -559,7 +778,7 @@ export function Documentation({
             content={
               <div className="space-y-4 mt-4 text-sm text-slate-400">
                 <p>
-                  AI Metadata extraction is exclusive to our{" "}
+                  Intelligent PDF analysis is exclusive to our{" "}
                   <strong>Paid Plans</strong> (Starter, Pro, Enterprise).
                 </p>
                 <div className="p-3 rounded-lg bg-orange-500/10 border border-orange-500/20 text-orange-200 text-xs">
@@ -612,8 +831,8 @@ export function Documentation({
                 </p>
                 <p>
                   The node supports all core API features, including
-                  Tailwind-Native rendering, AI Metadata extraction, and custom
-                  formatting options, making it the ideal choice for
+                  Tailwind-Native rendering, Intelligent PDF analysis, and
+                  custom formatting options, making it the ideal choice for
                   enterprise-grade automation.
                 </p>
               </div>
@@ -785,6 +1004,62 @@ if (crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(digest))) {
               </div>
             }
           />
+        </section>
+        {/* Node.js SDK */}
+        <section id="node-sdk" className="scroll-mt-24 space-y-6">
+          <h2 className="text-3xl font-bold text-white flex items-center gap-4">
+            <Terminal className="text-blue-400" /> Node.js SDK
+          </h2>
+          <p className="text-slate-400 leading-relaxed">
+            The official PDFBridge SDK for Node.js and TypeScript. Built with
+            Type-safety and performance in mind.
+          </p>
+          <CodeBlock code={`npm install @pdfbridge/node`} language="bash" />
+          <div className="space-y-4">
+            <h4 className="font-bold text-white text-sm">Quick Start</h4>
+            <CodeBlock
+              code={`import { PDFBridge } from '@pdfbridge/node';
+
+const pb = new PDFBridge('pk_live_...');
+
+async function generate() {
+  const { jobId } = await pb.convert({
+    html: '<h1>Hello World</h1>',
+    variables: { name: 'Dev' }
+  });
+  
+  console.log('Conversion started:', jobId);
+}`}
+              language="typescript"
+            />
+          </div>
+        </section>
+
+        {/* Python SDK */}
+        <section id="python-sdk" className="scroll-mt-24 space-y-6">
+          <h2 className="text-3xl font-bold text-white flex items-center gap-4">
+            <Terminal className="text-emerald-400" /> Python SDK
+          </h2>
+          <p className="text-slate-400 leading-relaxed">
+            Integrate PDFBridge into your Python applications with ease.
+          </p>
+          <CodeBlock code={`pip install pdfbridge-python`} language="bash" />
+          <div className="space-y-4">
+            <h4 className="font-bold text-white text-sm">Example Usage</h4>
+            <CodeBlock
+              code={`from pdfbridge import PDFBridge
+
+pb = PDFBridge("pk_live_...")
+
+response = pb.convert(
+    url="https://example.com",
+    filename="output.pdf"
+)
+
+print(f"Job ID: {response['jobId']}")`}
+              language="python"
+            />
+          </div>
         </section>
       </main>
     </div>

@@ -58,7 +58,7 @@ function SidebarContent({ isSmallScreen, setSidebarOpen }: any) {
 
   return (
     <>
-      <div className="p-6 border-b border-muted h-20 flex items-center justify-between">
+      <div className="p-6 border-b border-b-white/15 h-20 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3">
           <Image
             src="/webp/pdfbridge_logo.webp"
@@ -88,7 +88,7 @@ function SidebarContent({ isSmallScreen, setSidebarOpen }: any) {
               (user?.publicMetadata?.userRole as string) ||
               "";
             const primaryEmail = user?.primaryEmailAddress?.emailAddress || "";
-            const allowedEmails = ["admin@pdfbridge.xyz"]; // Fallback or sync with actions
+            const allowedEmails = ["hello@techhspyder.com"]; // Fallback or sync with actions
             return (
               userRole === "platform-owner" ||
               allowedEmails.includes(primaryEmail.toLowerCase())
@@ -313,7 +313,7 @@ export function Sidebar() {
             <motion.div
               ref={ref}
               key="sidebar"
-              className="z-150 w-64 bg-sidebar border-r border-muted flex flex-col fixed inset-y-0 left-0"
+              className="z-150 w-64 bg-sidebar border-r border-white/15 flex flex-col fixed inset-y-0 left-0"
               initial="hidden"
               animate="visible"
               exit="exit"
@@ -329,7 +329,7 @@ export function Sidebar() {
       </AnimatePresence>
 
       {/* Desktop Sidebar (Always CSS visible, never flashes) */}
-      <div className="hidden lg:flex z-40 w-64 bg-sidebar border-r border-muted flex-col sticky top-0 h-screen shrink-0">
+      <div className="hidden lg:flex z-40 w-64 bg-sidebar border-r border-white/15 flex-col sticky top-0 h-screen shrink-0">
         <SidebarContent isSmallScreen={false} setSidebarOpen={setSidebarOpen} />
       </div>
     </>

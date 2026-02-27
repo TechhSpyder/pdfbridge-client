@@ -24,7 +24,7 @@ async function verifyAdmin() {
 
     const allowedEmails = process.env.ADMIN_EMAILS?.toLowerCase().split(
       ",",
-    ) || ["admin@pdfbridge.xyz", "bellofrancis87@gmail.com"];
+    ) || ["admin@techhspyder.com", "bellofrancis87@gmail.com"];
     const isAllowed =
       allowedEmails.includes(primaryEmail.toLowerCase()) ||
       userRole === "platform-owner";

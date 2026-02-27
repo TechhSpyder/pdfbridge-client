@@ -14,7 +14,9 @@ const tiers = [
     price: "$0",
     sub: "Perfect for getting started",
     features: [
-      "5 Conversions / month",
+      "50 Conversions / month",
+      "1 AI Template / month",
+      "1 Team Seat",
       "Basic API access",
       "Community support",
       "10MB File Limit",
@@ -29,7 +31,8 @@ const tiers = [
     // sub: "For scaling teams",
     features: [
       "2,000 conversions/month",
-      "100 AI Extractions / month",
+      "100 Intelligent PDF Analyses / month",
+      "Up to 5 Team Seats",
       "Native Tailwind Support",
       "Custom Headers/Footers",
       "25MB File Limit",
@@ -44,7 +47,8 @@ const tiers = [
     // sub: "Enterprise solutions",
     features: [
       "20,000 conversions/month",
-      "1,000 AI Extractions / month",
+      "1,000 Intelligent PDF Analyses / month",
+      "Up to 20 Team Seats",
       "Ghost Mode (Private)",
       "50MB File Limit",
       "Unlimited Retention",
@@ -58,7 +62,7 @@ const tiers = [
     // sub: "Enterprise solutions",
     features: [
       "Unlimited Conversions / year",
-      "10,000 AI Extractions / month",
+      "10,000 Intelligent PDF Analyses / month",
       "IP Whitelisting Support",
       "100MB+ File Limit",
       "Everything in Pro",

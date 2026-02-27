@@ -8,7 +8,7 @@ type GlowCardProps = {
 
   description?: string;
   icon?: React.ReactNode;
-  sub?: string;
+  sub?: React.ReactNode;
   content?: React.ReactNode;
   titleClass?: string;
   className?: string;

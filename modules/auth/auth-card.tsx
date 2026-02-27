@@ -224,7 +224,7 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
           router.push("/dashboard");
         } else {
           // Handle other statuses more gracefully instead of a vague hardcoded string
-          console.log("Clerk sign-in status:", result.status);
+          console.log("Authentication status:", result.status);
           if (result.status === "needs_first_factor") {
             setError(
               "Authentication incomplete. Please check your credentials.",
@@ -259,7 +259,7 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
         });
 
         // For simplicity, we assume no verification is needed or we use common flows.
-        // If verification is needed, Clerk's pre-built component is often better,
+        // If verification is needed, a custom verification portal is provided.
         // but for a "bespoke" look we can redirect to a verification page.
         if (result.status === "complete") {
           toast.success("Account created! Welcome to PDFBridge.");

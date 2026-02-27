@@ -46,12 +46,12 @@ export const metadata: Metadata = {
     telephone: false,
   },
   alternates: {
-    canonical: "https://pdfbridge.xyz",
+    canonical: "/",
   },
   openGraph: {
     title: "PDFBridge | Modern API for PDF Generation",
     description:
-      "The high-performance bridge between your code and perfect documents. Support for Tailwind, AI extraction, and Zero-Storage privacy.",
+      "The high-performance bridge between your code and perfect documents. Support for Tailwind, Intelligent PDF Analysis, and Zero-Storage privacy.",
     url: "https://pdfbridge.xyz",
     siteName: "PDFBridge",
     images: [
