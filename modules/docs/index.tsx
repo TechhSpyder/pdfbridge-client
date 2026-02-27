@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Link from "next/link";
 import { GlowCard } from "../app/glow-card";
 import {
   Book,
