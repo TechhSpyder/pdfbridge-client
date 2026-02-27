@@ -76,6 +76,35 @@ export function InviteClient({ token }: { token: string }) {
     },
   });
 
+  // 3. Decline the invite
+  const declineMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetch(`${apiBase}/api/v1/invites/decline`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ token }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Failed to decline invite");
+      }
+
+      return res.json();
+    },
+    onSuccess: () => {
+      toast.success("Invitation declined.");
+      router.push("/");
+    },
+    onError: (err: any) => {
+      toast.error("Error declining invitation", {
+        description: err.message,
+      });
+    },
+  });
+
   // Automatically attempt to accept if already logged in and token is valid.
   // Actually, better to explicitly make them click so they know what org they are joining.
 
@@ -203,13 +232,29 @@ export function InviteClient({ token }: { token: string }) {
               <div className="pt-4 space-y-3">
                 <Button
                   onClick={() => acceptMutation.mutate()}
-                  disabled={acceptMutation.isPending}
+                  disabled={
+                    acceptMutation.isPending || declineMutation.isPending
+                  }
                   className="w-full h-12 bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition-all shadow-xl shadow-emerald-500/20"
                 >
                   {acceptMutation.isPending
                     ? "Joining..."
                     : "Accept Invitation"}
                 </Button>
+
+                <Button
+                  variant="outline"
+                  onClick={() => declineMutation.mutate()}
+                  disabled={
+                    acceptMutation.isPending || declineMutation.isPending
+                  }
+                  className="w-full h-12 border-red-500/50 text-red-500 hover:bg-red-500/10"
+                >
+                  {declineMutation.isPending
+                    ? "Declining..."
+                    : "Decline Invitation"}
+                </Button>
+
                 <Button
                   variant="outline"
                   onClick={() =>
