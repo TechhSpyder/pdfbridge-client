@@ -15,19 +15,27 @@ export const CHANGELOG_DATA: ChangelogEntry[] = [
     date: "March 3, 2026",
     title: "The Public Debut",
     description:
-      "PDFBridge officially moves out of early access. We are now open for public developers with infrastructure-grade reliability.",
+      "PDFBridge officially moves out of early access. We are now open for public developers with infrastructure-grade reliability, intelligent data extraction, and enterprise-grade security.",
     changes: [
       {
         type: "feature",
-        text: "Public API (v1) officially stable and production-ready.",
-      },
-      {
-        type: "improvement",
-        text: "Migrated to Railway's high-availability 'Always-On' tier for sub-200ms cold starts.",
+        text: "Intelligent Document Parsing: Native AI integration to instantly extract structured JSON metadata from generated PDFs.",
       },
       {
         type: "feature",
-        text: "Global Status Page launched at status.pdfbridge.xyz.",
+        text: "Smart Templates: Define dynamic, reusable PDF templates and inject variables at conversion time.",
+      },
+      {
+        type: "feature",
+        text: "Ghost Mode: Privacy-first Enterprise rendering. Bypass our storage buckets entirely for zero data retention.",
+      },
+      {
+        type: "feature",
+        text: "Tailwind Native Engine: Full support for resolving Tailwind CSS utilities directly in HTML payloads.",
+      },
+      {
+        type: "improvement",
+        text: "Migrated to Railway's high-availability tier for sub-200ms cold starts.",
       },
     ],
   },

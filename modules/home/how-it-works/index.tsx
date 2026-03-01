@@ -20,9 +20,9 @@ const steps = [
   },
   {
     step: "03",
-    title: "Download your PDF",
+    title: "Download PDF & Extract JSON",
     description:
-      "Receive a persistent, globally available Cloudflare R2 link instantly.",
+      "Receive a persistent Cloudflare R2 link instantly, alongside AI-extracted JSON metadata ready for your database.",
     icon: Download,
   },
 ];

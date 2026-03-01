@@ -65,9 +65,9 @@ export function Hero() {
             </div>
 
             <p className="text-xl text-slate-400 max-w-lg leading-relaxed">
-              The high-performance API for developers who need reliable,
-              scalable, and secure HTML-to-PDF conversion without the
-              infrastructure headache.
+              The high-performance API for developers who need reliable
+              HTML-to-PDF conversion, AI-powered document parsing, and
+              enterprise security—without the infrastructure headache.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
@@ -152,6 +152,32 @@ export function Hero() {
                   </div>
                   <div className="text-xs text-white font-semibold">
                     Job #8234 Processed
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* AI Floater */}
+            <motion.div
+              animate={{ y: [0, 8, 0] }}
+              transition={{
+                duration: 5,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 1,
+              }}
+              className="absolute -bottom-10 -left-10 bg-slate-900/80 backdrop-blur-md border border-white/10 p-4 rounded-2xl shadow-2xl hidden xl:block"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                  <Sparkles className="w-4 h-4 text-blue-400" />
+                </div>
+                <div>
+                  <div className="text-[10px] text-blue-400/80 uppercase font-bold tracking-widest">
+                    AI Extracted
+                  </div>
+                  <div className="text-xs text-white font-mono mt-1 bg-black/50 p-1.5 rounded-md border border-white/5">
+                    {`{ "total": "$450.00" }`}
                   </div>
                 </div>
               </div>

@@ -1,0 +1,124 @@
+# PDFBridge
+**The high-performance API for generating pixel-perfect PDFs from URLs and HTML.**
+
+## Overview
+PDFBridge is a scalable, developer-friendly REST API designed to render modern web frameworks (React, Vue, Next.js) and complex CSS (Tailwind, animations) perfectly into PDF documents. It completely replaces the need to manage heavy Puppeteer or Playwright instances on your own servers.
+
+## Key Features
+- **Tailwind & React Support**: Fully evaluates JavaScript and modern CSS before rendering the print layout.
+- **AI Smart Templates**: Generate dynamic, reusable proposal and document templates using natural language, complete with context-aware variables.
+- **AI Document Parsing**: Automatically extract structured JSON data (summaries, entities, key-value pairs) directly from generated PDFs without building a separate OCR pipeline.
+- **Ghost Mode**: Zero data retention. Bypasses AWS S3 storage entirely for maximum enterprise security.
+- **Concurrency & Batch Processing**: Queue thousands of URLs instantly with the `convert/bulk` endpoint.
+- **Webhooks**: Reliable exponential-backoff webhooks for receiving asynchronous PDF statuses.
+
+## API Documentation
+Base URL: `https://api.pdfbridge.xyz/api/v1`
+
+### Authentication
+Include your API Key in the `Authorization` header: 
+`Authorization: Bearer pk_live_YOUR_KEY`
+
+---
+
+### Endpoint: 1. Generate PDF from URL
+`POST /convert`
+
+**Request Body (JSON):**
+```json
+{
+  "url": "https://example.com/invoice/123",
+  "filename": "invoice-123.pdf",
+  "isGhostMode": true,
+  "extractMetadata": true,
+  "options": {
+    "landscape": false,
+    "format": "A4",
+    "printBackground": true
+  }
+}
+```
+**Response (202 Accepted):**
+```json
+{
+  "message": "Job queued",
+  "jobId": "uuid-string-here",
+  "statusUrl": "https://api.pdfbridge.xyz/api/v1/jobs/uuid-string-here"
+}
+```
+
+---
+
+### Endpoint: 2. Check Job Status
+`GET /jobs/:id`
+
+**Response (200 OK):**
+```json
+{
+  "status": "done",
+  "result": {
+    "url": "https://download-link-to-your.pdf",
+    "aiMetadata": {
+      "totalAmount": 150.00,
+      "invoiceNumber": "INV-123",
+      "summary": "Monthly server hosting fees."
+    }
+  }
+}
+```
+*(Status enum: `queued`, `processing`, `done`, `failed`)*
+
+---
+
+### Endpoint: 3. Bulk Conversion
+`POST /convert/bulk`
+
+**Request Body (JSON):**
+```json
+{
+  "jobs": [
+    { "url": "https://example.com/1" },
+    { "url": "https://example.com/2", "isGhostMode": true }
+  ]
+}
+```
+**Response (202 Accepted):**
+```json
+{
+  "message": "2 jobs queued",
+  "jobs": [
+    {
+      "jobId": "uuid-1",
+      "statusUrl": "https://api.pdfbridge.xyz/api/v1/jobs/uuid-1"
+    }
+  ]
+}
+```
+
+## Additional Resources
+- Website: https://pdfbridge.xyz
+- Dashboard: https://pdfbridge.xyz/dashboard
+
+---
+
+### Endpoint: 4. Generate PDF from HTML (Templates)
+`POST /convert/html`
+
+**Request Body (JSON):**
+```json
+{
+  "html": "<html><body><h1>Invoice {{id}}</h1></body></html>",
+  "filename": "generated.pdf",
+  "options": {
+    "format": "A4"
+  }
+}
+```
+
+## AI & Intelligent Processing
+PDFBridge integrates advanced AI models to handle document intelligence beyond simple rendering:
+
+- **AI Document Extraction**: Extract structured JSON data (dates, line items, totals) from any PDF or image using the `/analyze` endpoint.
+- **Smart OCR**: High-fidelity text recognition for scanned documents with layout preservation.
+- **AI Layout Generation**: Describe a document in natural language, and PDFBridge will generate the corresponding HTML/Tailwind code for rendering.
+- **Auto-Tagging**: AI-powered generation of accessible (WCAG/Section 508) PDF tags for screen readers.
