@@ -1012,23 +1012,33 @@ if (crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(digest))) {
           </h2>
           <p className="text-slate-400 leading-relaxed">
             The official PDFBridge SDK for Node.js and TypeScript. Built with
-            Type-safety and performance in mind.
+            Zod runtime type-safety and performance in mind.
           </p>
-          <CodeBlock code={`npm install @pdfbridge/node`} language="bash" />
+          <CodeBlock
+            code={`npm install @techhspyder/pdfbridge-node`}
+            language="bash"
+          />
           <div className="space-y-4">
             <h4 className="font-bold text-white text-sm">Quick Start</h4>
             <CodeBlock
-              code={`import { PDFBridge } from '@pdfbridge/node';
+              code={`import { PDFBridge } from '@techhspyder/pdfbridge-node';
 
-const pb = new PDFBridge('pk_live_...');
+// Automatically loads PDFBRIDGE_API_KEY from environment 
+// or pass it explicitly: new PDFBridge({ apiKey: "..." })
+const pdf = new PDFBridge();
 
-async function generate() {
-  const { jobId } = await pb.convert({
-    html: '<h1>Hello World</h1>',
-    variables: { name: 'Dev' }
+async function run() {
+  // Option 1: Generate & Wait for completion
+  const result = await pdf.generateAndWait({
+    url: 'https://example.com'
   });
-  
-  console.log('Conversion started:', jobId);
+  console.log('PDF URL:', result.pdfUrl);
+
+  // Option 2: Ghost Mode (Renders as raw ArrayBuffer)
+  const buffer = await pdf.generate({
+    html: '<h1>Strictly Confidential</h1>',
+    ghostMode: true
+  });
 }`}
               language="typescript"
             />

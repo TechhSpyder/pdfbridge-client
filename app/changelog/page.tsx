@@ -38,12 +38,12 @@ export default function ChangelogPage() {
             Want to stay updated?
           </h3>
           <p className="text-slate-400 text-sm">
-            Follow our founder on{" "}
+            Follow our Company on{" "}
             <Link
-              href="https://x.com/pdfbridge"
+              href="https://x.com/techhspyder"
               className="text-blue-400 hover:underline"
             >
-              X (@pdfbridge)
+              X (@techhspyder)
             </Link>{" "}
             for real-time build updates.
           </p>

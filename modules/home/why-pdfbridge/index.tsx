@@ -2,7 +2,14 @@
 
 import { GlowCard } from "@/modules/app/glow-card";
 import { useScrollAnimation } from "@/modules/hooks/use-scroll-animation";
-import { Zap, ShieldCheck, Globe, ChartColumnStacked } from "lucide-react";
+import {
+  Zap,
+  ShieldCheck,
+  Globe,
+  ChartColumnStacked,
+  Bot,
+  Activity,
+} from "lucide-react";
 import Link from "next/link";
 
 const features = [
@@ -13,9 +20,9 @@ const features = [
     icon: <Zap className="h-6 w-6" />,
   },
   {
-    title: "Enterprise Grade",
+    title: "Ghost Mode Security",
     description:
-      "Built-in URL sandboxing and secure request handling keep your data safe and your infrastructure isolated.",
+      "Pass `isGhostMode: true` to bypass storage buckets entirely. Your raw binary streams directly back to you for zero data retention.",
     icon: <ShieldCheck className="h-6 w-6" />,
   },
   {
@@ -25,10 +32,22 @@ const features = [
     icon: <Globe className="h-6 w-6" />,
   },
   {
+    title: "AI Parsing & Templates",
+    description:
+      "Instantly extract structured JSON metadata from generated documents, or build dynamic Reusable Templates via natural language.",
+    icon: <Bot className="h-6 w-6" />,
+  },
+  {
     title: "Proven Alternative",
     description:
       "Switching from PDFShift or other PDF APIs? See our honest comparison and migration guide.",
     icon: <ChartColumnStacked className="h-6 w-6" />,
+  },
+  {
+    title: "Webhook Reliability",
+    description:
+      "Built-in webhook notifications with automatic exponential backoff ensure your systems stay in sync, even during downtime.",
+    icon: <Activity className="h-6 w-6" />,
   },
 ];
 
@@ -54,7 +73,7 @@ export function WhyPdfBridge() {
         </div>
 
         {/* Feature Cards */}
-        <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {features.map((feature, index) => (
             <div
               key={feature.title}
