@@ -109,7 +109,7 @@ export function BuiltForDevelopers() {
           }`}
         >
           <h2 className="text-3xl font-semibold tracking-tight">
-            Integrate in minutes, not days
+            Integrate in Minutes, Not Days
           </h2>
           <p className="mt-4 text-muted-foreground">
             Simple API calls in the language you already use.

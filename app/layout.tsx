@@ -94,7 +94,9 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
-        <body className={`${inter.variable} antialiased`}>
+        <body
+          className={`${inter.variable} antialiased overflow-x-hidden w-full`}
+        >
           <Navbar />
           <Providers>{children}</Providers>
           <SpeedInsights />

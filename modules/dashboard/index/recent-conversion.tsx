@@ -94,29 +94,34 @@ export function RecentConversionsList() {
               : "cursor-default",
           )}
         >
-          <div className="flex flex-col min-w-0">
-            <span className="text-xs font-bold text-white truncate max-w-[150px]">
+          <div className="flex flex-col min-w-0 gap-0.5">
+            <span className="text-sm font-bold text-white truncate max-w-[150px] sm:max-w-xs">
               {conv.isGhostMode
                 ? "Ghost Mode (Private)"
                 : conv.url && conv.url.startsWith("http")
                   ? new URL(conv.url).hostname
                   : "HTML Payload"}
             </span>
-            <span className="text-[10px] text-slate-500">
-              {new Date(conv.createdAt).toLocaleString()}
+            <span className="text-[11px] font-medium text-slate-400">
+              {new Date(conv.createdAt).toLocaleString(undefined, {
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
             </span>
           </div>
           <div className="flex items-center gap-2">
             {conv.status === "PENDING" ? (
               <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-yellow-500/10 text-yellow-500 border border-yellow-500/20">
-                Pending
+                Processing
               </span>
             ) : conv.status === "EXPIRED" ? (
               <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-orange-500/10 text-orange-500 border border-orange-500/20">
                 Expired
               </span>
             ) : conv.status === "FAILED" || !conv.success ? (
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-500/10 text-red-500">
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-500/10 text-red-500 border border-red-500/20">
                 Failed
               </span>
             ) : (
@@ -125,16 +130,16 @@ export function RecentConversionsList() {
                   className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
                     conv.isTestMode
                       ? "bg-orange-500/10 text-orange-500 border-orange-500/20"
-                      : "bg-blue-500/10 text-blue-500 border-blue-500/20"
+                      : "bg-blue-500/10 text-blue-400 border-blue-500/20"
                   }`}
                 >
-                  {conv.isTestMode ? "TEST" : "LIVE"}
+                  {conv.isTestMode ? "Test" : "Live"}
                 </span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                <span className="hidden sm:inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                   Ready
                 </span>
                 {conv.isGhostMode && (
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-fuchsia-500/10 text-fuchsia-400 border border-fuchsia-500/20">
                     Ghost
                   </span>
                 )}

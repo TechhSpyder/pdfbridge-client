@@ -22,7 +22,7 @@ export function CTA() {
             isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
           }`}
         >
-          Ready to automate your document workflow?
+          Ready to Automate Your Document Workflow?
         </h2>
 
         <p
