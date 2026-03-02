@@ -3,8 +3,18 @@
 import { ArrowRight, Sparkles, ShieldCheck, Zap } from "lucide-react";
 import { Button } from "../../app/button";
 import { useScrollAnimation } from "../../hooks/use-scroll-animation";
-import TransformationAnimation from "./index/TransformationAnimation";
+import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
+
+const TransformationAnimation = dynamic(
+  () => import("./index/TransformationAnimation"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full aspect-square max-w-[500px] mx-auto opacity-0" />
+    ),
+  },
+);
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";

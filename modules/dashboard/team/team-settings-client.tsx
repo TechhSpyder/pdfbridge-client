@@ -37,6 +37,7 @@ export function TeamSettingsClient() {
       return res.data;
     },
     enabled: !!orgId,
+    refetchInterval: 5000,
   });
 
   const inviteMutation = useMutation({

@@ -214,7 +214,7 @@ export function InviteClient({ token }: { token: string }) {
                   variant="outline"
                   className="w-full bg-black/40 border-white/10 text-white hover:bg-white/5 h-12"
                   onClick={() =>
-                    openSignIn({ redirectUrl: `/invite/${token}` })
+                    openSignIn({ fallbackRedirectUrl: `/invite/${token}`, forceRedirectUrl: `/invite/${token}` })
                   }
                 >
                   Log In
@@ -222,7 +222,7 @@ export function InviteClient({ token }: { token: string }) {
                 <Button
                   className="w-full bg-blue-600 hover:bg-blue-500 text-white shadow-xl shadow-blue-500/10 h-12"
                   onClick={() =>
-                    openSignUp({ redirectUrl: `/invite/${token}` })
+                    openSignUp({ fallbackRedirectUrl: `/invite/${token}`, forceRedirectUrl: `/invite/${token}` })
                   }
                 >
                   Create Account
@@ -258,7 +258,7 @@ export function InviteClient({ token }: { token: string }) {
                 <Button
                   variant="outline"
                   onClick={() =>
-                    openSignUp({ redirectUrl: `/invite/${token}` })
+                    openSignUp({ fallbackRedirectUrl: `/invite/${token}`, forceRedirectUrl: `/invite/${token}` })
                   }
                   className="w-full text-xs text-slate-500 hover:text-white border-transparent bg-transparent"
                 >
