@@ -16,7 +16,7 @@ export function Hero() {
   return (
     <section
       ref={contentRef}
-      className="relative min-h-[90vh] flex items-center overflow-hidden py-20 sm:py-32 w-full"
+      className="relative min-h-[90svh] lg:min-h-[90vh] flex items-center overflow-hidden py-20 sm:py-32 w-full"
     >
       {/* Premium Background Elements */}
       <div className="absolute inset-0 z-0">
@@ -57,7 +57,7 @@ export function Hero() {
 
               <h1 className="text-5xl sm:text-6xl lg:text-6xl font-black tracking-tight leading-[1.1]">
                 Generate <br />
-                <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-400 via-indigo-400 to-cyan-400">
+                <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-300 via-indigo-300 to-cyan-400">
                   Pixel-Perfect
                 </span>
                 <br /> PDFs.

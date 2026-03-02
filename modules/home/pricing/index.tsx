@@ -30,7 +30,7 @@ const tiers = [
     price: "$10",
     // sub: "For scaling teams",
     features: [
-      "2,000 conversions/month",
+      "2,000 Conversions / month",
       "100 Intelligent PDF Analyses / month",
       "Up to 5 Team Seats",
       "Native Tailwind Support",
@@ -46,7 +46,7 @@ const tiers = [
     price: "$30",
     // sub: "Enterprise solutions",
     features: [
-      "20,000 conversions/month",
+      "20,000 Conversions / month",
       "1,000 Intelligent PDF Analyses / month",
       "Up to 20 Team Seats",
       "Ghost Mode (Private)",

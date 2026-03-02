@@ -575,8 +575,8 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
 
       <div className="mt-8 space-y-6">
         {/* Social Buttons */}
-        {/* <div className="grid grid-cols-2 gap-4">
-          <button
+        <div className="grid grid-cols-1 gap-4">
+          {/* <button
             onClick={() => handleSocialSignIn("oauth_google")}
             disabled={loadingGoogle || loadingGithub}
             className="flex w-full items-center justify-center gap-3 cursor-pointer rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -604,11 +604,11 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
               </svg>
             )}
             <span>Google</span>
-          </button>
+          </button> */}
           <button
             onClick={() => handleSocialSignIn("oauth_github")}
             disabled={loadingGoogle || loadingGithub}
-            className="flex w-full items-center justify-center cursor-pointer gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex w-full items-center justify-center cursor-pointer gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10 disabled:opacity-70 disabled:cursor-not-allowed"
           >
             {loadingGithub ? (
               <Loader2 className="h-5 w-5 animate-spin" />
@@ -617,7 +617,7 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
             )}
             <span>GitHub</span>
           </button>
-        </div> */}
+        </div>
 
         {/* <div className="relative flex items-center py-4">
           <div className="grow border-t border-white/10"></div>

@@ -45,7 +45,7 @@ export default function ChangelogPage() {
             >
               X (@techhspyder)
             </Link>{" "}
-            for real-time build updates.
+            for real-time product updates.
           </p>
         </div>
       </div>

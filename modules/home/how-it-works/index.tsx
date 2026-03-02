@@ -40,7 +40,7 @@ export function HowItWorks() {
           }`}
         >
           <h2 className="text-3xl font-semibold tracking-tight">
-            How it works
+            How It Works
           </h2>
           <p className="mt-4 text-muted-foreground">
             Generate production-ready PDFs in three simple steps.

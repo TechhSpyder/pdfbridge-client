@@ -103,9 +103,9 @@ export function ApiPlayground() {
 
   return (
     <div className="rounded-2xl border border-muted bg-slate-900/50 backdrop-blur-sm overflow-hidden">
-      <div className="p-6 space-y-4">
+      <div className="p-6 space-y-5">
         <div className="flex items-center justify-between">
-          <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">
+          <label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">
             Source URL
           </label>
           <div className="flex bg-black/40 p-1 rounded-lg border border-white/5 gap-1">

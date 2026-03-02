@@ -278,12 +278,7 @@ export function DashboardPage() {
               {Array.from({ length: 3 }).map((_, i) => (
                 <div
                   key={i}
-                  className="rounded-2xl border border-muted bg-background h-[200px] md:h-[320px] p-4 md:p-8 backdrop-blur-sm animate-pulse"
-                  style={{
-                    background: "rgba(15,23,42,0.7)",
-                    backdropFilter: "blur(12px)",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                  }}
+                  className="rounded-2xl border border-white/5 bg-slate-900/20 h-[200px] md:h-[320px] p-4 md:p-8 backdrop-blur-sm animate-pulse"
                 />
               ))}
             </div>
@@ -291,12 +286,7 @@ export function DashboardPage() {
               {Array.from({ length: 2 }).map((_, i) => (
                 <div
                   key={i}
-                  className="rounded-2xl border border-muted bg-background h-[200px] md:h-[320px] p-4 md:p-8 backdrop-blur-sm animate-pulse"
-                  style={{
-                    background: "rgba(15,23,42,0.7)",
-                    backdropFilter: "blur(12px)",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                  }}
+                  className="rounded-2xl border border-white/5 bg-slate-900/20 h-[200px] md:h-[320px] p-4 md:p-8 backdrop-blur-sm animate-pulse"
                 />
               ))}
             </div>
