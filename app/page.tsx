@@ -1,26 +1,26 @@
-import { Hero } from "@/modules/home";
+import { Hero } from "@/modules/home/hero";
 import dynamic from "next/dynamic";
 import { Metadata } from "next";
 
 const SocialProof = dynamic(() =>
-  import("@/modules/home").then((mod) => mod.SocialProof),
+  import("@/modules/home/social-proof").then((mod) => mod.SocialProof),
 );
 const WhyPdfBridge = dynamic(() =>
-  import("@/modules/home").then((mod) => mod.WhyPdfBridge),
+  import("@/modules/home/why-pdfbridge").then((mod) => mod.WhyPdfBridge),
 );
 const HowItWorks = dynamic(() =>
-  import("@/modules/home").then((mod) => mod.HowItWorks),
+  import("@/modules/home/how-it-works").then((mod) => mod.HowItWorks),
 );
 const BuiltForDevelopers = dynamic(() =>
-  import("@/modules/home").then((mod) => mod.BuiltForDevelopers),
+  import("@/modules/home/built-for-developers").then((mod) => mod.BuiltForDevelopers),
 );
 const Pricing = dynamic(() =>
-  import("@/modules/home").then((mod) => mod.Pricing),
+  import("@/modules/home/pricing").then((mod) => mod.Pricing),
 );
-const FAQ = dynamic(() => import("@/modules/home").then((mod) => mod.FAQ));
-const CTA = dynamic(() => import("@/modules/home").then((mod) => mod.CTA));
+const FAQ = dynamic(() => import("@/modules/home/faq").then((mod) => mod.FAQ));
+const CTA = dynamic(() => import("@/modules/home/cta").then((mod) => mod.CTA));
 const Footer = dynamic(() =>
-  import("@/modules/home").then((mod) => mod.Footer),
+  import("@/modules/home/footer").then((mod) => mod.Footer),
 );
 
 export const metadata: Metadata = {
@@ -29,9 +29,7 @@ export const metadata: Metadata = {
     "Generate high-fidelity PDFs from HTML, URLs, and React components. 99.9% Uptime, lightning-fast rendering, and developer-first documentation.",
 };
 
-const PublicPlayground = dynamic(() =>
-  import("@/modules/home").then((mod) => mod.PublicPlayground),
-);
+import { PublicPlaygroundWrapper as PublicPlayground } from "@/modules/home/hero/PublicPlaygroundWrapper";
 
 export default function Home() {
   return (
