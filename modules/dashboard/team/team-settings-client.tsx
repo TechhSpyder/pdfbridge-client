@@ -141,7 +141,7 @@ export function TeamSettingsClient() {
               <GlowCard
                 className="md:col-span-2"
                 title="Invite New Member"
-                sub="Send an invite link to their email"
+                sub="Send a secure invite link to their email (valid for 7 days)."
                 icon={<UserPlus className="h-5 w-5 text-blue-500" />}
                 content={
                   <div className="mt-6">
@@ -196,8 +196,8 @@ export function TeamSettingsClient() {
               <h3 className="text-lg font-bold text-white flex items-center gap-2">
                 <Clock className="h-5 w-5 text-amber-500" /> Pending Invites
               </h3>
-              <div className="rounded-xl border border-white/10 overflow-hidden bg-slate-900/50 backdrop-blur-sm">
-                <table className="w-full text-left text-sm">
+              <div className="rounded-xl border border-white/10 overflow-x-auto overflow-y-hidden bg-slate-900/50 backdrop-blur-sm scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+                <table className="w-full text-left text-sm min-w-[600px]">
                   <thead className="bg-white/5 border-b border-white/10 text-xs uppercase text-slate-400">
                     <tr>
                       <th className="px-6 py-4 font-medium">Email</th>
@@ -253,8 +253,8 @@ export function TeamSettingsClient() {
             <h3 className="text-lg font-bold text-white flex items-center gap-2">
               <Users className="h-5 w-5 text-emerald-500" /> Active Members
             </h3>
-            <div className="rounded-xl border border-white/10 overflow-hidden bg-slate-900/50 backdrop-blur-sm">
-              <table className="w-full text-left text-sm">
+            <div className="rounded-xl border border-white/10 overflow-x-auto overflow-y-hidden bg-slate-900/50 backdrop-blur-sm scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+              <table className="w-full text-left text-sm min-w-[600px]">
                 <thead className="bg-white/5 border-b border-white/10 text-xs uppercase text-slate-400">
                   <tr>
                     <th className="px-6 py-4 font-medium">User</th>
