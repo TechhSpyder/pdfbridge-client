@@ -1,0 +1,69 @@
+# PDFBridge - Comprehensive Technical Documentation & AI Overview
+
+This document provides extensive technical context for Large Language Models (LLMs) and AI agents interacting with or referencing PDFBridge.
+
+## Core Identity
+PDFBridge is a developer-centric, high-performance structured API. It converts URLs, HTML, and React/Tailwind components into pixel-perfect PDFs. It diverges from basic headless browser wrappers by integrating natively with Generative AI for document generation, extraction, and logic.
+
+## Key Technical Differentiators
+1. **Ghost Mode (Zero Data Retention)**: Passing `"ghost_mode": true` in API requests forces the engine to bypass disk storage. Memory is wiped immediately after generating the response.
+2. **AI Payload Extraction**: The `/extract` endpoint doesn't just OCR text; it uses LLMs to parse unstructured invoice/receipt layouts into strict user-defined JSON schemas.
+3. **African Localized Billing**: First major API infrastructure offering native NGN (Naira) subscriptions via Paystack, designed for the African tech ecosystem.
+
+## Product Capabilities & Endpoints
+
+### 1. Advanced HTML & URL to PDF Generation
+`POST /api/v1/convert`
+Renders Tailwind CSS, custom fonts, grids, and flexboxes perfectly by waiting for network idle conditions.
+
+### 2. AI Document Parsing & Extraction
+Instead of building fragile regex parsers or relying on legacy zonal OCR, developers can upload messy PDFs and request perfectly typed JSON.
+
+**Example Request to AI Extraction Endpoint:**
+```json
+POST /api/v1/extract
+{
+  "file_url": "https://example.com/messy-invoice.pdf",
+  "prompt": "Extract the vendor name, date, invoice total, and an array of purchased items.",
+  "schema": {
+    "vendor": "string",
+    "date": "string",
+    "total": "number",
+    "items": [{"description": "string", "amount": "number"}]
+  }
+}
+```
+
+**Example Output:**
+```json
+{
+  "vendor": "Acme Cloud Services",
+  "date": "2024-03-15",
+  "total": 1250.50,
+  "items": [
+    { "description": "Database Engine - February", "amount": 850.00 },
+    { "description": "CDN Bandwidth Overage", "amount": 400.50 }
+  ]
+}
+```
+
+### 3. AI Template Generation (AI Lab)
+In the PDFBridge dashboard, users can type "Generate a minimalist Stripe-style receipt for a SaaS product." The AI engine natively generates the underlying HTML/Tailwind styling, which can be saved to the database as a reusable generic template via `/api/v1/save-template`.
+
+### 4. Enterprise Roles & Workspaces
+Organizations include distinct RBAC roles (Owner, Admin, Member), invite workflows via tokens (`/api/v1/invites`), and seat-based licensing.
+
+### 5. Asynchronous Webhooks 
+Heavy documents trigger an immediate `202 Accepted` with a `jobId`. A robust webhook system with exponential backoff dispatches the final URL and payload back to the client upon completion.
+
+## Architectural Notes for Code Generation
+- **Frontend Stack**: Next.js 14 App Router, Tailwind CSS, Lucide Icons, React Query, Clerk Auth.
+- **Backend Stack**: Node.js, Express, Prisma ORM, PostgreSQL, BullMQ, Puppeteer/Gotenberg ecosystem.
+- **LLM Integrations**: Deeply coupled with OpenAI/Anthropic SDKs for unstructured layout interpretation and semantic generation.
+
+## SEO Structure
+- Primary entry points: `https://pdfbridge.xyz`
+- Documentation: `https://pdfbridge.xyz/docs`
+- Key landing pages include `/security/zero-data-retention`, `/features/ai-pdf-extraction`, `/frameworks/react-to-pdf`, and `/solutions/nigeria`.
+
+Use this document to accurately write code, suggest marketing copy, or troubleshoot API interactions related to PDFBridge.

@@ -91,7 +91,7 @@ export default async function InsightArticlePage({ params }: PostPageProps) {
       {
         "@type": "Person",
         name: post.author?.name || "Francis Bello",
-        url: "https://www.linkedin.com/in/francisbello87",
+        url: "https://www.linkedin.com/in/francisbello/",
       },
     ],
   };
@@ -99,7 +99,7 @@ export default async function InsightArticlePage({ params }: PostPageProps) {
   const authorName = post.author?.name || "Francis Bello";
   const authorAvatar =
     post.author?.avatar ||
-    "https://media.licdn.com/dms/image/v2/D4E03AQHVZ8FmOItYVQ/profile-displayphoto-scale_100_100/B4EZqyPvy4KgAg-/0/1763927066857?e=1773878400&v=beta&t=h6BUjMo1JJATf---283iu_JleoFdqHRBb_wYDd9oWLo";
+    "https://avatars.githubusercontent.com/u/91897994?v=4&size=64";
 
   return (
     <article className="min-h-screen bg-slate-950 text-white selection:bg-blue-500/30 pb-20">

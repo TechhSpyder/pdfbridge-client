@@ -15,6 +15,15 @@ const isPublicRoute = createRouteMatcher([
   "/terms(.*)",
   "/changelog(.*)",
   "/contact(.*)",
+  "/security(.*)",
+  "/features(.*)",
+  "/frameworks(.*)",
+  "/solutions(.*)",
+  "/(.*)\\.txt",
+  "/(.*)\\.xml",
+  "/sitemap(.*)",
+  "/robots(.*)",
+  "/llms(.*)",
 ]);
 
 const RETURNING_COOKIE = "pdfbridge_returning";
