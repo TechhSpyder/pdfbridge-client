@@ -125,7 +125,7 @@ export default function ZeroDataRetentionPage() {
             <Link href="/sign-up" className="px-8 py-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition-all shadow-lg shadow-emerald-500/25 flex items-center gap-2">
               Start Building Securely <ArrowRight size={18} />
             </Link>
-            <Link href="/docs" className="px-8 py-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white font-bold transition-all">
+            <Link href="/docs#ghost" className="px-8 py-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white font-bold transition-all">
               Read Security Docs
             </Link>
           </div>

@@ -37,10 +37,11 @@ type NavItem = ScrollNavItem | LinkNavItem;
 
 const NAV_ITEMS: NavItem[] = [
   { label: "Features", id: "features", type: "scroll" },
+  { label: "AI Overview", href: "/features/ai-overview", type: "link" },
+  { label: "React to PDF", href: "/frameworks/react-to-pdf", type: "link" },
+  { label: "Ghost Mode", href: "/security/zero-data-retention", type: "link" },
   { label: "Pricing", id: "pricing", type: "scroll" },
-  { label: "FAQ", id: "faq", type: "scroll" },
   { label: "Docs", href: "/docs", type: "link" },
-  { label: "Insights", href: "/insights", type: "link" },
 ];
 
 export function Navbar() {
