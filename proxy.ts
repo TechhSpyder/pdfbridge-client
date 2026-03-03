@@ -26,6 +26,7 @@ const isPublicRoute = createRouteMatcher([
   "/robots(.*)",
   "/llms(.*)",
   "/insights(.*)", // This broad rule actually covers all insights subpages
+  "/ingest(.*)",
 ]);
 
 const RETURNING_COOKIE = "pdfbridge_returning";
