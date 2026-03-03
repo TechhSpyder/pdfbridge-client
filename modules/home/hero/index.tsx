@@ -35,7 +35,8 @@ export function Hero() {
           src="/webp/hero_bg_1_1x.webp"
           alt="hero background"
           fill
-          sizes="100vw"
+          sizes="(max-width: 768px) 100vw, (max-width: 1920px) 100vw, 1920px"
+          quality={75}
           priority
           fetchPriority="high"
           loading="eager"

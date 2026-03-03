@@ -78,8 +78,35 @@ export default async function InsightArticlePage({ params }: PostPageProps) {
   const wordCount = post.content.split(/\s+/).length;
   const readTime = Math.max(1, Math.ceil(wordCount / 200));
 
+  const articleSchema = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: post.title,
+    image: post.coverImage ? [post.coverImage] : [],
+    datePublished: new Date(post.createdAt).toISOString(),
+    dateModified: post.updatedAt
+      ? new Date(post.updatedAt).toISOString()
+      : new Date(post.createdAt).toISOString(),
+    author: [
+      {
+        "@type": "Person",
+        name: post.author?.name || "Francis Bello",
+        url: "https://www.linkedin.com/in/francisbello87",
+      },
+    ],
+  };
+
+  const authorName = post.author?.name || "Francis Bello";
+  const authorAvatar =
+    post.author?.avatar ||
+    "https://media.licdn.com/dms/image/v2/D4E03AQHVZ8FmOItYVQ/profile-displayphoto-scale_100_100/B4EZqyPvy4KgAg-/0/1763927066857?e=1773878400&v=beta&t=h6BUjMo1JJATf---283iu_JleoFdqHRBb_wYDd9oWLo";
+
   return (
     <article className="min-h-screen bg-slate-950 text-white selection:bg-blue-500/30 pb-20">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+      />
       {/* Background Decor */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
         <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-blue-600/5 blur-[150px] rounded-full translate-x-1/2 -translate-y-1/2" />
@@ -131,11 +158,8 @@ export default async function InsightArticlePage({ params }: PostPageProps) {
             <div className="flex items-center gap-2 group">
               <div className="h-10 w-10 rounded-full overflow-hidden border border-white/10 group-hover:border-blue-500/50 transition-colors">
                 <Image
-                  src={
-                    post.author?.avatar ||
-                    "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80"
-                  }
-                  alt={post.author?.name || "Admin"}
+                  src={authorAvatar}
+                  alt={authorName}
                   width={40}
                   height={40}
                   className="object-cover"
@@ -144,9 +168,9 @@ export default async function InsightArticlePage({ params }: PostPageProps) {
               </div>
               <div>
                 <span className="block text-slate-400 text-[11px] mb-0.5">
-                  {post.author?.name || "Admin"}
+                  {authorName}
                 </span>
-                <span className="block text-slate-600">Product Engineer</span>
+                <span className="block text-slate-600">Founder & Engineer</span>
               </div>
             </div>
 
@@ -173,19 +197,18 @@ export default async function InsightArticlePage({ params }: PostPageProps) {
       <main className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-16 relative z-10">
         <div className="lg:col-span-8">
           {/* Featured Image */}
-          <div className="aspect-video relative rounded-3xl overflow-hidden border border-white/10 mb-12 shadow-2xl">
-            <Image
-              src={
-                post.coverImage ||
-                "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80"
-              }
-              alt={post.title}
-              fill
-              className="object-cover"
-              priority
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
-            />
-          </div>
+          {post.coverImage && (
+            <div className="aspect-video relative rounded-3xl overflow-hidden border border-white/10 mb-12 shadow-2xl">
+              <Image
+                src={post.coverImage}
+                alt={post.title}
+                fill
+                className="object-cover"
+                priority
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
+              />
+            </div>
+          )}
 
           {/* Article Content */}
           <div className="prose prose-invert prose-blue prose-lg max-w-none prose-headings:font-black prose-headings:tracking-tighter prose-p:font-medium prose-p:text-slate-300 prose-p:leading-relaxed prose-strong:text-white prose-a:text-blue-400 prose-code:text-blue-200">
@@ -251,15 +274,43 @@ export default async function InsightArticlePage({ params }: PostPageProps) {
 
           <hr className="my-16 border-white/5" />
 
+          {/* Internal Links/Dead End Fix */}
+          <div className="mb-16 p-8 rounded-3xl bg-blue-900/10 border border-blue-500/20">
+            <h3 className="text-xl font-black mb-4">
+              Start Generating PDFs Today
+            </h3>
+            <p className="text-slate-400 font-medium mb-6">
+              PDFBridge provides the most scalable HTML-to-PDF infrastructure on
+              the market. Say goodbye to managing headless browsers.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center gap-4">
+              <Link
+                href="/sign-up"
+                className="w-full sm:w-auto px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-center transition-colors shadow-lg shadow-blue-500/20"
+              >
+                Start Building Free
+              </Link>
+              <Link
+                href="/#pricing"
+                className="w-full sm:w-auto px-6 py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white font-bold text-center transition-colors"
+              >
+                View Pricing
+              </Link>
+              <Link
+                href="/docs"
+                className="w-full sm:w-auto px-6 py-3 rounded-xl text-slate-400 hover:text-white font-bold text-center transition-colors"
+              >
+                Read Docs →
+              </Link>
+            </div>
+          </div>
+
           {/* Author Footer Card */}
           <div className="p-8 rounded-3xl bg-slate-900/50 border border-white/5 backdrop-blur-sm flex flex-col md:flex-row gap-8 items-center">
             <div className="h-20 w-20 rounded-2xl overflow-hidden border border-white/10 shrink-0">
               <Image
-                src={
-                  post.author?.avatar ||
-                  "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80"
-                }
-                alt={post.author?.name || "Admin"}
+                src={authorAvatar}
+                alt={authorName}
                 width={80}
                 height={80}
                 className="object-cover"
@@ -268,24 +319,26 @@ export default async function InsightArticlePage({ params }: PostPageProps) {
             </div>
             <div className="flex-1 text-center md:text-left">
               <h4 className="text-lg font-black mb-2">
-                Written by {post.author?.name || "Admin"}
+                Written by {authorName}
               </h4>
               <p className="text-slate-500 text-sm font-medium leading-relaxed mb-4">
                 {post.author?.bio ||
-                  "Exploring the intersection of engineering and design at PDFBridge. Passionate about scalability and reliable document processing."}
+                  "Founder of PDFBridge. I am passionate about simplifying digital infrastructure and building reliable APIs that developers love."}
               </p>
               <div className="flex items-center justify-center md:justify-start gap-4">
                 <Link
-                  href="#"
+                  href="https://twitter.com/francisbello87"
+                  target="_blank"
                   className="text-xs font-black uppercase tracking-widest text-slate-400 hover:text-white transition-colors"
                 >
                   Twitter
                 </Link>
                 <Link
-                  href="#"
+                  href="https://www.linkedin.com/in/francisbello87"
+                  target="_blank"
                   className="text-xs font-black uppercase tracking-widest text-slate-400 hover:text-white transition-colors"
                 >
-                  GitHub
+                  LinkedIn
                 </Link>
               </div>
             </div>
@@ -341,7 +394,7 @@ export default async function InsightArticlePage({ params }: PostPageProps) {
                 PDFBridge.
               </p>
               <Link
-                href="/dashboard"
+                href="/sign-up"
                 className="w-full inline-flex items-center justify-center px-6 py-3 rounded-2xl bg-white text-blue-700 text-xs font-black uppercase tracking-widest hover:bg-slate-50 transition-colors relative z-10"
               >
                 Start for Free

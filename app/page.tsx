@@ -24,16 +24,36 @@ const Footer = dynamic(() =>
 );
 
 export const metadata: Metadata = {
-  title: "Modern PDF Generation API for Developers",
+  title: "PDFBridge — HTML to PDF API | Tailwind, React & AI Extraction",
   description:
     "Generate high-fidelity PDFs from HTML, URLs, and React components. 99.9% Uptime, lightning-fast rendering, and developer-first documentation.",
 };
 
 import { PublicPlaygroundWrapper as PublicPlayground } from "@/modules/home/hero/PublicPlaygroundWrapper";
 
+const softwareSchema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "PDFBridge",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any",
+  "description":
+    "Generate high-fidelity PDFs from HTML, URLs, and React components. Tailwind-Native & AI-Powered.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD",
+  },
+  "url": "https://pdfbridge.xyz",
+};
+
 export default function Home() {
   return (
     <div className="flex flex-col items-center justify-center">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }}
+      />
       <Hero />
       <div id="playground" className="w-full py-10">
         <PublicPlayground />
