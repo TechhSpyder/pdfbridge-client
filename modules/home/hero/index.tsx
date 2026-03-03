@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, Sparkles, ShieldCheck, Zap } from "lucide-react";
+import { ArrowRight, Sparkles, Zap } from "lucide-react";
 import { Button } from "../../app/button";
 import { useScrollAnimation } from "../../hooks/use-scroll-animation";
 import dynamic from "next/dynamic";
@@ -35,7 +35,10 @@ export function Hero() {
           src="/webp/hero_bg_1_1x.webp"
           alt="hero background"
           fill
+          sizes="100vw"
           priority
+          fetchPriority="high"
+          loading="eager"
           className="object-cover opacity-40 mix-blend-luminosity"
         />
         <div className="absolute inset-0 bg-linear-to-b from-transparent via-[#020617]/50 to-[#020617]" />

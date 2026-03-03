@@ -4,15 +4,13 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 // import DOMPurify from "isomorphic-dompurify";
-import {
-  ChevronLeft,
-  Calendar,
-  Tag,
-  Clock,
-  Share2,
-  ArrowRight,
-  BookMarked,
-} from "lucide-react";
+import { ChevronLeft } from "lucide-react";
+import { Calendar } from "lucide-react";
+import { Tag } from "lucide-react";
+import { Clock } from "lucide-react";
+import { Share2 } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { BookMarked } from "lucide-react";
 import sanitizeHtml from "sanitize-html";
 
 export const dynamic = "force-dynamic";
