@@ -240,10 +240,10 @@ export function DashboardPage() {
               </button>
             </div>
           </div>
-          {usageCount === 0 ? (
-            <QuickStartPipeline testKeyFull={testKeyFull} />
-          ) : (
+          {userData?.usage?.hasConversions ? (
             <UsageGraph />
+          ) : (
+            <QuickStartPipeline testKeyFull={testKeyFull} />
           )}
         </div>
         {/* Recent Activity List */}
