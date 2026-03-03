@@ -45,6 +45,9 @@ export async function generateMetadata({
   return {
     title: post.title,
     description: post.description || post.title,
+    alternates: {
+      canonical: `https://pdfbridge.xyz/insights/${slug}`,
+    },
     openGraph: {
       title: post.title,
       description: post.description || post.title,
@@ -176,13 +179,22 @@ export default async function InsightArticlePage({ params }: PostPageProps) {
 
             <div className="h-4 w-px bg-white/10" />
 
-            <div className="flex items-center gap-2">
-              <Calendar size={14} className="text-blue-500" />
-              {new Date(post.createdAt).toLocaleDateString("en-US", {
-                month: "long",
-                day: "numeric",
-                year: "numeric",
-              })}
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <Calendar size={14} className="text-blue-500" />
+                <span className="text-slate-400">
+                  Published <time dateTime={new Date(post.createdAt).toISOString()}>{new Date(post.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</time>
+                </span>
+              </div>
+
+              {post.updatedAt && new Date(post.updatedAt).getTime() !== new Date(post.createdAt).getTime() && (
+                <div className="flex items-center gap-2">
+                  <div className="h-1 w-1 bg-white/20 rounded-full" />
+                  <span className="text-slate-400">
+                    Updated <time dateTime={new Date(post.updatedAt).toISOString()}>{new Date(post.updatedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</time>
+                  </span>
+                </div>
+              )}
             </div>
 
             <div className="flex items-center gap-2">
@@ -235,7 +247,12 @@ export default async function InsightArticlePage({ params }: PostPageProps) {
             />
             <div
               dangerouslySetInnerHTML={{
-                __html: sanitizeHtml(post.content, {
+                __html: sanitizeHtml(
+                  post.content.replace(
+                    /<tbody>\s*(<tr>(?:\s*<th[^>]*>[\s\S]*?<\/th>)+\s*<\/tr>)/gi,
+                    "<thead>$1</thead><tbody>"
+                  ),
+                  {
                   allowedTags: sanitizeHtml.defaults.allowedTags.concat([
                     "img",
                     "table",

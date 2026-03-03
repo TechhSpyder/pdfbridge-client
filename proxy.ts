@@ -9,7 +9,6 @@ const isPublicRoute = createRouteMatcher([
   "/reset-password(.*)",
   "/oauth-callback(.*)",
   "/dpa(.*)",
-  "/insights(.*)",
   "/docs(.*)",
   "/privacy(.*)",
   "/terms(.*)",
@@ -18,12 +17,15 @@ const isPublicRoute = createRouteMatcher([
   "/security(.*)",
   "/features(.*)",
   "/frameworks(.*)",
+  "/for(.*)",
+  "/use-cases(.*)",
   "/solutions(.*)",
   "/(.*)\\.txt",
   "/(.*)\\.xml",
   "/sitemap(.*)",
   "/robots(.*)",
   "/llms(.*)",
+  "/insights(.*)", // This broad rule actually covers all insights subpages
 ]);
 
 const RETURNING_COOKIE = "pdfbridge_returning";

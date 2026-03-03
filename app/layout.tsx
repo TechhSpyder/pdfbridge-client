@@ -4,6 +4,7 @@ import "./globals.css";
 import { Navbar } from "@/modules/app/nav";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Providers } from "@/modules/app/provider";
+import { PostHogProvider } from "@/modules/app/posthog-provider";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
 import Script from "next/script";
@@ -99,10 +100,12 @@ export default function RootLayout({
         <body
           className={`${inter.variable} antialiased overflow-x-hidden w-full`}
         >
-          <Navbar />
-          <Providers>{children}</Providers>
-          <SpeedInsights />
-          <Analytics />
+          <PostHogProvider>
+            <Navbar />
+            <Providers>{children}</Providers>
+            <SpeedInsights />
+            <Analytics />
+          </PostHogProvider>
         </body>
       </html>
     </ClerkProvider>

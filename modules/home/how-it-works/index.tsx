@@ -52,7 +52,7 @@ export function HowItWorks() {
           {steps.map((step, index) => (
             <div
               key={step.step}
-              className={`relative rounded-2xl border border-border bg-background p-6 transition-all duration-700 ease-out ${
+              className={`relative rounded-2xl border border-white/15 bg-background p-6 transition-all duration-700 ease-out ${
                 isVisible
                   ? "translate-y-0 opacity-100"
                   : "translate-y-8 opacity-0"

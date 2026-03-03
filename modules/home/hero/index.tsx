@@ -70,18 +70,21 @@ export function Hero() {
               </motion.div>
 
               <h1 className="text-5xl sm:text-6xl lg:text-6xl font-black tracking-tight leading-[1.1]">
-                Generate <br />
+                Stop Running{" "}
                 <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-300 via-indigo-300 to-cyan-400">
-                  Pixel-Perfect
-                </span>
-                <br /> PDFs.
+                  Puppeteer
+                </span>{" "}
+                in Production.
               </h1>
             </div>
 
             <p className="text-xl text-slate-400 max-w-lg leading-relaxed">
-              The high-performance API for developers who need reliable
-              HTML-to-PDF conversion, AI-powered document parsing, and
-              enterprise security—without the infrastructure headache.
+              Generate pixel-perfect PDFs from your React or Next.js app —
+              without managing headless browser infrastructure.
+            </p>
+            <p className="text-sm text-slate-500 max-w-lg">
+              Built for teams shipping invoices, reports, dashboards, and
+              documents at scale.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
@@ -91,7 +94,7 @@ export function Hero() {
                 onClick={() => router.push("/sign-up")}
                 className="bg-blue-600 hover:bg-blue-700 text-sm text-white px-5 h-14 flex items-center justify-center rounded-2xl shadow-xl shadow-blue-500/20 group"
               >
-                Start Building Free
+                Try 50 Free Conversions
                 <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform duration-200 ease-out" />
               </Button>
               <Link href="/docs" className="block">
@@ -101,10 +104,13 @@ export function Hero() {
                   variant="secondary"
                   className="h-14 px-8 rounded-2xl border-slate-800 hover:bg-slate-900 cursor-pointer w-full sm:w-auto"
                 >
-                  Read Docs
+                  View API Docs →
                 </Button>
               </Link>
             </div>
+            <p className="text-xs text-slate-600 pt-1">
+              No credit card required.
+            </p>
 
             {/* <div className="flex flex-wrap gap-6 text-sm text-slate-500 pt-8 border-t border-slate-800/50">
               <ul className="mt-4 space-y-2 text-sm text-muted-foreground">

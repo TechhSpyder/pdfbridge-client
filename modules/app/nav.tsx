@@ -2,7 +2,7 @@
 
 import { Button } from "./button";
 import { useNavStore } from "../stores";
-import { ChevronDown, LogOut, Menu, MessageCircle, X } from "lucide-react";
+import { ChevronDown, LogOut, Menu, MessageCircle, X, Sparkles, Code2, Shield, Search, BookOpen, LayoutTemplate, FileText, ReceiptText } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLenis } from "lenis/react";
 import { useActiveSection } from "../hooks/use-active-section";
@@ -20,6 +20,7 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 import { SmartContactLink } from "./smart-contact-link";
+import { NavDropdown } from "./nav-dropdown";
 
 type ScrollNavItem = {
   label: string;
@@ -33,15 +34,88 @@ type LinkNavItem = {
   type: "link";
 };
 
-type NavItem = ScrollNavItem | LinkNavItem;
+type DropdownNavItem = {
+  label: string;
+  type: "dropdown";
+  items: {
+    title: string;
+    href: string;
+    description: string;
+    icon: React.ReactNode;
+  }[];
+};
+
+type NavItem = ScrollNavItem | LinkNavItem | DropdownNavItem;
 
 const NAV_ITEMS: NavItem[] = [
-  { label: "Features", id: "features", type: "scroll" },
-  { label: "AI Overview", href: "/features/ai-overview", type: "link" },
-  { label: "React to PDF", href: "/frameworks/react-to-pdf", type: "link" },
-  { label: "Ghost Mode", href: "/security/zero-data-retention", type: "link" },
+  {
+    label: "Features",
+    type: "dropdown",
+    items: [
+      {
+        title: "AI Layout Extraction",
+        href: "/features/ai-overview",
+        description: "Parse PDFs back into structured JSON payloads.",
+        icon: <Sparkles size={18} />,
+      },
+      {
+        title: "Next.js App Router to PDF",
+        href: "/for/nextjs",
+        description: "Native support for Vercel edge functions and server components.",
+        icon: <LayoutTemplate size={18} />,
+      },
+      {
+        title: "React Components to PDF",
+        href: "/frameworks/react-to-pdf",
+        description: "Pixel-perfect conversion for modern frontend frameworks.",
+        icon: <Code2 size={18} />,
+      },
+      {
+        title: "Ghost Mode",
+        href: "/security/zero-data-retention",
+        description: "Zero data retention for enterprise compliance.",
+        icon: <Shield size={18} />,
+      },
+    ],
+  },
   { label: "Pricing", id: "pricing", type: "scroll" },
-  { label: "Docs", href: "/docs", type: "link" },
+  { label: "FAQ", id: "faq", type: "scroll" },
+  {
+    label: "Solutions",
+    type: "dropdown",
+    items: [
+      {
+        title: "Invoice PDF API",
+        href: "/use-cases/invoice-pdf-api",
+        description: "Generate branded, scalable invoices from HTML templates.",
+        icon: <FileText size={18} />,
+      },
+      {
+        title: "Receipt PDF API",
+        href: "/use-cases/receipt-pdf-api",
+        description: "Instant PDF receipts for POS and e-commerce platforms.",
+        icon: <ReceiptText size={18} />,
+      },
+    ],
+  },
+  {
+    label: "Resources",
+    type: "dropdown",
+    items: [
+      {
+        title: "API Documentation",
+        href: "/docs",
+        description: "Integration guides, quickstarts, and endpoint references.",
+        icon: <Code2 size={18} />,
+      },
+      {
+        title: "Insights & Journal",
+        href: "/insights",
+        description: "Technical deep dives and migration guides from the team.",
+        icon: <BookOpen size={18} />,
+      },
+    ],
+  },
 ];
 
 export function Navbar() {
@@ -57,7 +131,7 @@ export function Navbar() {
     pathname.startsWith("/sign-up");
 
   const activeSection = useActiveSection(
-    NAV_ITEMS.filter((i) => i.type === "scroll").map((i) => i.id),
+    NAV_ITEMS.filter((i) => i.type === "scroll").map((i) => (i as ScrollNavItem).id),
   );
   const scrollTo = (id: string) => {
     if (pathname !== "/") {
@@ -111,7 +185,9 @@ export function Navbar() {
         {/* Desktop Nav */}
         <div className="hidden md:flex items-center gap-8">
           {NAV_ITEMS.map((item) =>
-            item.type === "scroll" ? (
+            item.type === "dropdown" ? (
+              <NavDropdown key={item.label} label={item.label} items={item.items} />
+            ) : item.type === "scroll" ? (
               <button
                 key={item.id}
                 onClick={() => scrollTo(item.id)}
@@ -258,30 +334,45 @@ export function Navbar() {
             className="absolute top-16 left-0 w-full bg-background/95 backdrop-blur py-6 shadow-md md:hidden"
           >
             <div className="flex flex-col items-center gap-6">
-              {NAV_ITEMS.map((item) =>
-                item.type === "scroll" ? (
-                  <button
-                    key={item.id}
-                    onClick={() => scrollTo(item.id)}
-                    className={cn(
-                      "text-base font-medium cursor-pointer",
-                      activeSection === item.id
-                        ? "text-foreground"
-                        : "text-muted-foreground",
-                    )}
-                  >
-                    {item.label}
-                  </button>
-                ) : (
+              {NAV_ITEMS.map((item) => {
+                if (item.type === "scroll") {
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => scrollTo(item.id)}
+                      className={cn(
+                        "text-base font-medium cursor-pointer",
+                        activeSection === item.id
+                          ? "text-foreground"
+                          : "text-muted-foreground",
+                      )}
+                    >
+                      {item.label}
+                    </button>
+                  );
+                }
+                if (item.type === "link") {
+                  return (
+                    <Link
+                      key={item.label}
+                      href={item.href}
+                      className="text-base font-medium text-muted-foreground"
+                    >
+                      {item.label}
+                    </Link>
+                  );
+                }
+                // dropdown — flatten sub-items in mobile
+                return item.items.map((sub) => (
                   <Link
-                    key={item.label}
-                    href={item.href}
+                    key={sub.href}
+                    href={sub.href}
                     className="text-base font-medium text-muted-foreground"
                   >
-                    {item.label}
+                    {sub.title}
                   </Link>
-                ),
-              )}
+                ));
+              })}
               <SignedOut>
                 <Link href="/sign-in" onClick={() => setOpen(false)}>
                   <Button variant="outline" size="sm">

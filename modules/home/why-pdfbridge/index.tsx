@@ -22,7 +22,7 @@ const features = [
   {
     title: "Ghost Mode Security",
     description:
-      "Pass `isGhostMode: true` to bypass storage buckets entirely. Your raw binary streams directly back to you for zero data retention.",
+      "Pass `ghostMode: true` to bypass storage buckets entirely. The raw binary streams directly back to you for zero data retention.",
     icon: <ShieldCheck className="h-6 w-6" />,
   },
   {
@@ -64,11 +64,11 @@ export function WhyPdfBridge() {
           }`}
         >
           <h2 className="text-3xl font-semibold tracking-tight">
-            Why PDFBridge?
+            Built for Modern Frontends
           </h2>
           <p className="mt-4 text-muted-foreground">
-            Infrastructure-grade PDF generation built for performance, security,
-            and reliability.
+            Flexbox. CSS Grid. Tailwind. Web fonts. Print backgrounds. Precise
+            page formatting. No fallback templates. Use your existing UI.
           </p>
         </div>
 

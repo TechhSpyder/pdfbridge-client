@@ -56,8 +56,18 @@ export function SocialProof() {
           }`}
         >
           <h2 className="text-3xl font-semibold tracking-tight">
-            Built for teams across industries
+            Production-ready PDF rendering for modern web stacks.
           </h2>
+          <div className="mt-4 flex flex-wrap justify-center gap-2">
+            {["React", "Next.js", "Vue", "Tailwind", "Node"].map((tech) => (
+              <span
+                key={tech}
+                className="px-3 py-1 rounded-full text-xs font-bold border border-border bg-muted text-muted-foreground"
+              >
+                {tech}
+              </span>
+            ))}
+          </div>
           <p className="mt-4 text-muted-foreground">
             Designed to support high-volume, automated PDF generation across
             modern workflows.
@@ -69,7 +79,7 @@ export function SocialProof() {
           {industries.map((item, index) => (
             <div
               key={item.title}
-              className={`rounded-2xl border border-border bg-background p-6 transition-all duration-700 ease-out ${
+              className={`rounded-2xl border border-white/10 bg-background p-6 transition-all duration-700 ease-out ${
                 isVisible
                   ? "translate-y-0 opacity-100"
                   : "translate-y-8 opacity-0"

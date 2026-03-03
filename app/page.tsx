@@ -22,6 +22,12 @@ const CTA = dynamic(() => import("@/modules/home/cta").then((mod) => mod.CTA));
 const Footer = dynamic(() =>
   import("@/modules/home/footer").then((mod) => mod.Footer),
 );
+const Problem = dynamic(() =>
+  import("@/modules/home/problem").then((mod) => mod.Problem),
+);
+const PuppeteerVs = dynamic(() =>
+  import("@/modules/home/puppeteer-vs").then((mod) => mod.PuppeteerVs),
+);
 
 export const metadata: Metadata = {
   title: "PDFBridge — HTML to PDF API | Tailwind, React & AI Extraction",
@@ -59,9 +65,11 @@ export default function Home() {
         <PublicPlayground />
       </div>
       <SocialProof />
+      <Problem />
       <WhyPdfBridge />
       <HowItWorks />
       <BuiltForDevelopers />
+      <PuppeteerVs />
       <Pricing />
       <FAQ />
       <CTA />

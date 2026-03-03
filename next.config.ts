@@ -72,7 +72,7 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://sandbox-cdn.paddle.com https://cdn.paddle.com https://*.hcaptcha.com https://hcaptcha.com",
               "img-src 'self' data: https://challenges.cloudflare.com https://*.paddle.com https://cdn.paddle.com https://*.clerk.com https://images.unsplash.com https://avatars.githubusercontent.com https://res.cloudinary.com https://*.hcaptcha.com https://hcaptcha.com https://global.localizecdn.com",
               "font-src 'self' https://fonts.gstatic.com",
-              "connect-src 'self' http://localhost:3001 http://localhost:3003 https://challenges.cloudflare.com https://*.paddle.com https://api.paddle.com https://sandbox-checkout-service.paddle.com https://checkout-service.paddle.com https://*.clerk.accounts.dev https://*.clerk.com https://clerk.com https://*.pdfbridge.xyz https://pdfbridge-api-1.onrender.com https://vitals.vercel-insights.com https://*.hcaptcha.com https://hcaptcha.com https://*.profitwell.com https://paddlecfe.report-uri.com https://*.ingest.sentry.io https://global.localizecdn.com",
+              "connect-src 'self' http://localhost:3001 http://localhost:3003 https://challenges.cloudflare.com https://*.paddle.com https://api.paddle.com https://sandbox-checkout-service.paddle.com https://checkout-service.paddle.com https://*.clerk.accounts.dev https://*.clerk.com https://clerk.com https://*.pdfbridge.xyz https://pdfbridge-api-1.onrender.com https://vitals.vercel-insights.com https://*.hcaptcha.com https://hcaptcha.com https://*.profitwell.com https://paddlecfe.report-uri.com https://*.ingest.sentry.io https://global.localizecdn.com https://eu.i.posthog.com https://eu-assets.i.posthog.com",
               "frame-src 'self' https://sandbox-buy.paddle.com https://buy.paddle.com https://checkout.paystack.com https://pdfbridge.lemonsqueezy.com https://challenges.cloudflare.com https://*.hcaptcha.com https://hcaptcha.com https://checkout.paddle.com https://*.paddle.com https://*.clerk.accounts.dev https://*.clerk.com https://clerk.com",
               "worker-src 'self' blob:",
               "base-uri 'self'",
@@ -80,6 +80,22 @@ const nextConfig: NextConfig = {
             ].join("; "),
           },
         ],
+      },
+    ];
+  },
+  async rewrites() {
+    return [
+      {
+        source: "/ingest/static/:path*",
+        destination: "https://eu-assets.i.posthog.com/static/:path*",
+      },
+      {
+        source: "/ingest/:path*",
+        destination: "https://eu.i.posthog.com/:path*",
+      },
+      {
+        source: "/ingest/decide",
+        destination: "https://eu.i.posthog.com/decide",
       },
     ];
   },

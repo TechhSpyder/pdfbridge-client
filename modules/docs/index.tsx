@@ -1059,14 +1059,16 @@ async function run() {
             <CodeBlock
               code={`from pdfbridge import PDFBridge
 
-pb = PDFBridge("pk_live_...")
+# Automatically loads PDFBRIDGE_API_KEY from environment
+client = PDFBridge()
 
-response = pb.convert(
-    url="https://example.com",
-    filename="output.pdf"
+# Generate and wait for completion
+status = client.generate_and_wait(
+    url="https://yourapp.com/invoice/123",
+    options={"format": "A4", "printBackground": True}
 )
 
-print(f"Job ID: {response['jobId']}")`}
+print(f"PDF ready: {status.pdfUrl}")`}
               language="python"
             />
           </div>

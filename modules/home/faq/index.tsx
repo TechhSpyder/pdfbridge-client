@@ -86,7 +86,7 @@ export function FAQ() {
             <div
               key={idx}
               className={cn(
-                "border border-border rounded-lg overflow-hidden transition-all",
+                "border border-white/15 rounded-lg overflow-hidden transition-all",
                 isVisible
                   ? "translate-y-0 opacity-100"
                   : "translate-y-6 opacity-0",
