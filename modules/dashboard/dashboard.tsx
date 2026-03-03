@@ -47,6 +47,11 @@ const UsageGraph = dynamic(
   () => import("./index/usage-graph").then((mod) => mod.UsageGraph),
   { ssr: false },
 );
+const QuickStartPipeline = dynamic(
+  () =>
+    import("./index/quickstart-pipeline").then((mod) => mod.QuickStartPipeline),
+  { ssr: false },
+);
 
 export function DashboardPage() {
   const { user: clerkUser, isLoaded: clerkLoaded } = useUser();
@@ -235,7 +240,11 @@ export function DashboardPage() {
               </button>
             </div>
           </div>
-          <UsageGraph />
+          {usageCount === 0 ? (
+            <QuickStartPipeline testKeyFull={testKeyFull} />
+          ) : (
+            <UsageGraph />
+          )}
         </div>
         {/* Recent Activity List */}
         <div className="lg:col-span-2 bg-slate-900/50 border-white/15 backdrop-blur-sm space-y-6 border p-4 rounded-2xl flex-1">
@@ -388,77 +397,82 @@ export function DashboardPage() {
             </div>
 
             <div className="grid gap-6 md:grid-cols-2">
-              <GlowCard
-                title="Secret Keys"
-                sub="Dual Mode (Live & Test)"
-                icon={<Key className="h-5 w-5 text-emerald-500" />}
-                content={
-                  <div className="mt-4 space-y-3">
-                    <div className="flex sm:items-center gap-3.5 max-sm:flex-col">
-                      <div className="p-2.5 rounded-lg sm:w-1/2 bg-black/40 border border-white/5 flex items-center justify-between group/key">
-                        <div className="flex flex-col">
-                          <span className="text-[8px] uppercase font-bold text-slate-500">
-                            Live
-                          </span>
-                          <code className="text-[10px] font-mono text-slate-400 truncate pr-2">
-                            {liveKeyHint}
-                          </code>
-                        </div>
-                        <button
-                          onClick={() => {
-                            liveClipboard.copy(
-                              liveKeyFull,
-                              "Live key copied to clipboard.",
-                            );
-                          }}
-                          className="p-1 hover:bg-white/10 rounded transition text-slate-500 hover:text-white"
-                        >
-                          {liveClipboard.copied ? (
-                            <Check className="h-3 w-3 text-emerald-500" />
-                          ) : (
-                            <Copy className="h-3 w-3" />
-                          )}
-                        </button>
+              <div className="rounded-2xl border border-white/15 bg-slate-900/30 p-6 md:p-8 backdrop-blur-sm shadow-xl relative overflow-hidden flex flex-col">
+                <div className="flex items-center justify-between mb-4 mt-2">
+                  <div>
+                    <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                      <Key className="h-5 w-5 text-emerald-500" />
+                      Secret Keys
+                    </h3>
+                    <p className="text-sm text-slate-500 mt-1">
+                      Dual Mode (Live & Test)
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-4 space-y-3 relative z-10 flex-col flex-1 flex justify-center">
+                  <div className="flex sm:items-center gap-3.5 max-sm:flex-col">
+                    <div className="p-2.5 rounded-lg sm:w-1/2 bg-black/40 border border-white/10 flex items-center justify-between group/key">
+                      <div className="flex flex-col">
+                        <span className="text-[8px] uppercase font-bold text-slate-500">
+                          Live
+                        </span>
+                        <code className="text-[10px] font-mono text-slate-400 truncate pr-2">
+                          {liveKeyHint}
+                        </code>
                       </div>
-
-                      <div className="p-2.5 rounded-lg sm:w-1/2 bg-black/40 border flex items-center justify-between group/key border-orange-500/10">
-                        <div className="flex flex-col">
-                          <span className="text-[8px] uppercase font-bold text-orange-500/70">
-                            Test
-                          </span>
-                          <code className="text-[10px] font-mono text-slate-400 truncate pr-2">
-                            {testKeyHint}
-                          </code>
-                        </div>
-                        <button
-                          onClick={() => {
-                            testClipboard.copy(
-                              testKeyFull,
-                              "Test key copied to clipboard.",
-                            );
-                          }}
-                          className="p-1 hover:bg-white/10 rounded transition text-slate-500 hover:text-white"
-                        >
-                          {testClipboard.copied ? (
-                            <Check className="h-3 w-3 text-orange-500" />
-                          ) : (
-                            <Copy className="h-3 w-3" />
-                          )}
-                        </button>
-                      </div>
-                    </div>
-
-                    <Link href="/dashboard/api-keys" className="block pt-1">
-                      <Button
-                        variant="outline"
-                        className="w-full text-[10px] h-8 gap-2 border-emerald-500/20 hover:border-emerald-500/40 text-emerald-400"
+                      <button
+                        onClick={() =>
+                          liveClipboard.copy(
+                            liveKeyFull,
+                            "Live key copied to clipboard.",
+                          )
+                        }
+                        className="p-1 hover:bg-white/10 rounded transition text-slate-500 hover:text-white cursor-pointer"
                       >
-                        Manage & Rotate <ExternalLink className="h-2.5 w-2.5" />
-                      </Button>
+                        {liveClipboard.copied ? (
+                          <Check className="h-3 w-3 text-emerald-500" />
+                        ) : (
+                          <Copy className="h-3 w-3" />
+                        )}
+                      </button>
+                    </div>
+                    <div className="p-2.5 rounded-lg sm:w-1/2 bg-black/40 border flex items-center justify-between group/key border-white/10">
+                      <div className="flex flex-col">
+                        <span className="text-[8px] uppercase font-bold text-orange-500/70">
+                          Test
+                        </span>
+                        <code className="text-[10px] font-mono text-slate-400 truncate pr-2">
+                          {testKeyHint}
+                        </code>
+                      </div>
+                      <button
+                        onClick={() =>
+                          testClipboard.copy(
+                            testKeyFull,
+                            "Test key copied to clipboard.",
+                          )
+                        }
+                        className="p-1 hover:bg-white/10 rounded transition text-slate-500 hover:text-white cursor-pointer"
+                      >
+                        {testClipboard.copied ? (
+                          <Check className="h-3 w-3 text-emerald-500" />
+                        ) : (
+                          <Copy className="h-3 w-3" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center text-[10px] mt-2 bg-white/5 p-2 rounded-lg">
+                    <p className="text-slate-400">Keep credentials secure.</p>
+                    <Link
+                      href="/dashboard/api-keys"
+                      className="text-emerald-400 font-bold hover:underline"
+                    >
+                      Manage Keys
                     </Link>
                   </div>
-                }
-              />
+                </div>
+              </div>
               <GlowCard
                 title="AI Extracted Data"
                 sub={
@@ -513,27 +527,15 @@ export function DashboardPage() {
 
       <div className="flex items-stretch gap-6 w-full">
         {/* API Playground Section */}
-        <div className="w-full flex gap-6 max-lg:flex-col">
-          <div className="lg:w-1/2 space-y-2.5 w-full">
+        <div className="w-full">
+          <div className="space-y-2.5 w-full">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-slate-800/50">
                 <Terminal className="h-5 w-5 text-blue-400" />
               </div>
               <h2 className="text-xl font-bold text-white">API Playground</h2>
             </div>
-
             <ApiPlayground />
-          </div>
-          <div className="lg:w-1/2 space-y-2.5 w-full">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-orange-800/20">
-                <Code2 className="h-5 w-5 text-orange-400" />
-              </div>
-              <h2 className="text-xl font-bold text-white">
-                Integration Snippets
-              </h2>
-            </div>
-            <IntegrationSnippets />
           </div>
         </div>
       </div>

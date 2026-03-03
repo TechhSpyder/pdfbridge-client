@@ -68,12 +68,22 @@ export function RecentConversionsList() {
   if (conversions.length === 0) {
     return (
       <div className="rounded-2xl border border-white/5 bg-slate-900/50 backdrop-blur-sm p-6 text-center min-h-[300px] flex flex-col items-center justify-center">
-        <div className="h-16 w-16 bg-white/5 rounded-full flex items-center justify-center mb-4 text-slate-600">
+        <div className="h-16 w-16 bg-blue-500/10 rounded-full flex flex-col items-center justify-center mb-4 text-blue-500 shadow-inner border border-blue-500/20">
           <Activity className="h-8 w-8" />
         </div>
-        <p className="text-slate-500 text-sm max-w-[200px] mx-auto leading-relaxed">
-          No conversion attempts recorded in this billing cycle.
+        <h3 className="text-lg font-bold text-white mb-2">No conversions yet</h3>
+        <p className="text-slate-400 text-sm max-w-[250px] mx-auto leading-relaxed mb-6">
+          Your pipeline is completely set up. Send an API request or use the Playground below to generate your first PDF.
         </p>
+        <button
+          onClick={() => {
+            const el = document.getElementById("api-playground-section");
+            if (el) el.scrollIntoView({ behavior: "smooth" });
+          }}
+          className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-all shadow-lg shadow-blue-500/20 active:scale-95"
+        >
+          Open API Playground
+        </button>
       </div>
     );
   }

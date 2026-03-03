@@ -2,10 +2,69 @@ import { Button } from "@/modules/app/button";
 import { useMe, useSaveTemplate } from "@/modules/hooks/queries";
 import { cn } from "@/utils";
 import { useApiClient } from "@/utils/api-client";
-import { Loader2, Sparkles } from "lucide-react";
+import { Loader2, Sparkles, Terminal } from "lucide-react";
 import { useState } from "react";
+import { Highlight, themes } from "prism-react-renderer";
 import { toast } from "sonner";
 import { Dialog } from "@/modules/app/dialog";
+
+function generateSnippet(
+  lang: "node" | "python" | "curl",
+  activeTab: "url" | "html",
+  url: string,
+  html: string,
+  mode: "live" | "test",
+  extractMetadata: boolean,
+  webhookUrl: string,
+  uniqueVariables: string[]
+) {
+  const payload: Record<string, any> = {};
+  if (activeTab === "url") payload.url = url;
+  else payload.html = html || "<h1>Hello World</h1>";
+  if (mode === "test") payload.testMode = true;
+  if (extractMetadata) payload.extractMetadata = true;
+  if (webhookUrl) payload.webhookUrl = webhookUrl;
+  if (uniqueVariables.length > 0 && activeTab === "html") {
+    payload.variables = uniqueVariables.reduce((acc, v) => ({ ...acc, [v]: "value" }), {});
+  }
+
+  const payloadStr = JSON.stringify(payload, null, 2);
+  const endpoint = "https://pdfbridge.xyz/api/v1/convert";
+
+  if (lang === "curl") {
+    return `curl -X POST ${endpoint} \\
+  -H "Authorization: Bearer YOUR_API_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '${payloadStr}'`;
+  }
+
+  if (lang === "python") {
+    return `import requests
+import json
+
+url = "${endpoint}"
+headers = {
+    "Authorization": "Bearer YOUR_API_KEY",
+    "Content-Type": "application/json"
+}
+payload = ${payloadStr.replace(/true/g, "True").replace(/false/g, "False")}
+
+response = requests.post(url, headers=headers, json=payload)
+print(response.json())`;
+  }
+
+  return `const response = await fetch("${endpoint}", {
+  method: "POST",
+  headers: {
+    "Authorization": "Bearer YOUR_API_KEY",
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify(${payloadStr.replace(/\n/g, "\n  ")})
+});
+
+const data = await response.json();
+console.log(data);`;
+}
 
 export function ApiPlayground() {
   const [url, setUrl] = useState("https://example.com");
@@ -17,6 +76,7 @@ export function ApiPlayground() {
   const [saveName, setSaveName] = useState("");
   const [html, setHtml] = useState("");
   const [activeTab, setActiveTab] = useState<"url" | "html">("url");
+  const [snippetLang, setSnippetLang] = useState<"curl" | "node" | "python">("node");
   const api = useApiClient();
   const saveMutation = useSaveTemplate();
 
@@ -102,7 +162,7 @@ export function ApiPlayground() {
   };
 
   return (
-    <div className="rounded-2xl border border-muted bg-slate-900/50 backdrop-blur-sm overflow-hidden">
+    <div id="api-playground-section" className="rounded-2xl border border-muted bg-slate-900/50 backdrop-blur-sm overflow-hidden">
       <div className="p-6 space-y-5">
         <div className="flex items-center justify-between">
           <label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">
@@ -274,31 +334,73 @@ export function ApiPlayground() {
         )}
       </div>
 
-      <div className="p-4 rounded-xl bg-black/60 border border-white/5">
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-[10px] font-bold text-slate-500 uppercase">
-            Request Payload
-          </span>
+      <div className="rounded-xl bg-slate-950 border border-white/10 overflow-hidden shadow-2xl flex flex-col">
+        {/* Term Header */}
+        <div className="flex items-center justify-between border-b border-white/5 bg-slate-900/50">
+          <div className="flex items-center gap-2 px-4 py-3">
+            <Terminal className="h-4 w-4 text-slate-400" />
+            <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">
+              Integration Code
+            </span>
+          </div>
+          <div className="flex gap-1 pr-2">
+            {(["node", "python", "curl"] as const).map((lang) => (
+              <button
+                key={lang}
+                onClick={() => setSnippetLang(lang)}
+                className={cn(
+                  "px-3 py-1.5 text-[10px] font-bold uppercase rounded-md transition-all cursor-pointer",
+                  snippetLang === lang
+                    ? "bg-slate-800/80 text-white"
+                    : "text-slate-500 hover:text-slate-300 hover:bg-white/5"
+                )}
+              >
+                {lang}
+              </button>
+            ))}
+          </div>
         </div>
-        <pre className="text-xs font-mono text-blue-400 overflow-x-auto">
-          {JSON.stringify(
-            {
-              ...(activeTab === "url"
-                ? { url }
-                : {
-                    html:
-                      html.substring(0, 100) + (html.length > 100 ? "..." : ""),
-                  }),
-              webhookUrl: webhookUrl || undefined,
-              testMode: mode === "test",
-              extractMetadata: mode === "live" && extractMetadata,
-              variables:
-                uniqueVariables.length > 0 ? "{ ... detected ... }" : undefined,
-            },
-            null,
-            2,
-          )}
-        </pre>
+        {/* Code Content */}
+        <div className="relative p-0 max-h-[300px] overflow-y-auto custom-scrollbar font-mono text-xs">
+          <Highlight
+            theme={themes.vsDark}
+            language={snippetLang === "node" ? "typescript" : snippetLang === "curl" ? "bash" : "python"}
+            code={generateSnippet(
+              snippetLang,
+              activeTab,
+              url,
+              html,
+              mode,
+              extractMetadata && allowAi,
+              webhookUrl,
+              uniqueVariables
+            )}
+          >
+            {({ className, style, tokens, getLineProps, getTokenProps }) => (
+              <pre className={cn(className, "p-4 m-0 !bg-transparent")} style={style}>
+                {tokens.map((line, i) => (
+                  <div key={i} {...getLineProps({ line, key: i })}>
+                    <span className="inline-block w-6 text-slate-600 select-none opacity-50 text-[10px] mr-4">
+                      {i + 1}
+                    </span>
+                    {line.map((token, key) => (
+                      <span key={key} {...getTokenProps({ token, key })} />
+                    ))}
+                  </div>
+                ))}
+              </pre>
+            )}
+          </Highlight>
+          <button
+            onClick={() => {
+              navigator.clipboard.writeText(generateSnippet(snippetLang, activeTab, url, html, mode, extractMetadata && allowAi, webhookUrl, uniqueVariables));
+              toast.success("Snippet copied to clipboard");
+            }}
+            className="absolute top-4 right-4 p-2 rounded-lg bg-white/5 border border-white/10 text-slate-400 hover:text-white hover:bg-white/10 transition-colors shadow-lg cursor-pointer"
+          >
+            Copy
+          </button>
+        </div>
       </div>
 
       <SaveTemplateDialog
