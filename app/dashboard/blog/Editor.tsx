@@ -453,6 +453,39 @@ export default function BlogEditor({ post, onClose }: EditorProps) {
         </div>
       </div>
       <style jsx global>{`
+        .prose h1 {
+          font-size: 2.25em !important;
+          margin-top: 0 !important;
+          margin-bottom: 0.8em !important;
+          line-height: 1.1 !important;
+          font-weight: 800 !important;
+          color: #ffffff !important;
+        }
+        .prose h2 {
+          font-size: 1.5em !important;
+          margin-top: 2em !important;
+          margin-bottom: 1em !important;
+          line-height: 1.3 !important;
+          font-weight: 700 !important;
+          color: #f8fafc !important;
+        }
+        .prose ul {
+          list-style-type: disc !important;
+          padding-left: 1.5em !important;
+          margin-top: 1.25em !important;
+          margin-bottom: 1.25em !important;
+        }
+        .prose ol {
+          list-style-type: decimal !important;
+          padding-left: 1.5em !important;
+          margin-top: 1.25em !important;
+          margin-bottom: 1.25em !important;
+        }
+        .prose li {
+          margin-top: 0.5em !important;
+          margin-bottom: 0.5em !important;
+          display: list-item !important;
+        }
         .prose table {
           width: 100%;
           border-collapse: collapse;
@@ -461,20 +494,20 @@ export default function BlogEditor({ post, onClose }: EditorProps) {
           line-height: 1.5;
         }
         .prose th {
-          background: rgba(255, 255, 255, 0.05);
+          background: rgba(255, 255, 255, 0.15);
           font-weight: 700;
           text-align: left;
           padding: 0.75rem 1rem;
-          border: 1px solid rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.25);
         }
         .prose td {
           padding: 0.75rem 1rem;
-          border: 1px solid rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.25);
           color: #cbd5e1;
         }
         .prose pre {
-          background: #0d1117 !important;
-          border: 1px solid rgba(255, 255, 255, 0.05) !important;
+          background: #1e293b !important;
+          border: 1px solid rgba(255, 255, 255, 0.2) !important;
           padding: 1.5rem !important;
           border-radius: 1rem !important;
           margin: 2.5rem 0 !important;
@@ -491,7 +524,7 @@ export default function BlogEditor({ post, onClose }: EditorProps) {
         }
         .prose hr {
           border: none !important;
-          border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+          border-top: 2px solid rgba(255, 255, 255, 0.3) !important;
           margin: 4rem 0 !important;
         }
         .prose mark {
