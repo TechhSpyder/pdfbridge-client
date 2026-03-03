@@ -406,7 +406,7 @@ export function ApiPlayground() {
             {({ className, style, tokens, getLineProps, getTokenProps }) => (
               <pre className={cn(className, "p-4 m-0 !bg-transparent")} style={style}>
                 {tokens.map((line, i) => {
-                  const { key, ...lineProps } = getLineProps({ line, key: i });
+                  const { key, ...lineProps } = getLineProps({ line, key: i }) as any;
                   return (
                     <div key={key} {...lineProps}>
                       <span className="inline-block w-6 text-slate-600 select-none opacity-50 text-[10px] mr-4">
@@ -416,7 +416,7 @@ export function ApiPlayground() {
                         const { key: tokenKey, ...tokenProps } = getTokenProps({
                           token,
                           key: keyIdx,
-                        });
+                        }) as any;
                         return <span key={tokenKey} {...tokenProps} />;
                       })}
                     </div>
