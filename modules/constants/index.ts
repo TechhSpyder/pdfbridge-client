@@ -8,15 +8,18 @@ import {
   Sparkles,
   PenTool,
   Users,
+  Activity,
+  Compass,
+  Library,
 } from "lucide-react";
 
 export const NAV_LINKS = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/dashboard/api-keys", label: "API Keys", icon: Key },
   { href: "/dashboard/lab", label: "AI Template Lab", icon: Sparkles },
-  { href: "/dashboard/templates", label: "My Templates", icon: FileText },
-  { href: "/dashboard/usage", label: "Usage", icon: FileText },
-  { href: "/insights", label: "Insights", icon: Sparkles },
+  { href: "/dashboard/templates", label: "My Templates", icon: Library },
+  { href: "/dashboard/usage", label: "Usage", icon: Activity },
+  { href: "/insights", label: "Insights", icon: Compass },
   { href: "/dashboard/blog", label: "Blog Journal", icon: PenTool },
   { href: "/dashboard/docs", label: "Documentation", icon: BookOpen },
   { href: "/dashboard/team", label: "Team Settings", icon: Users },
