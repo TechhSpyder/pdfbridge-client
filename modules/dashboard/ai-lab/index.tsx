@@ -7,19 +7,17 @@ import {
   useSaveTemplate,
 } from "@/modules/hooks/queries";
 import { Button } from "@/modules/app/button";
-import {
-  Sparkles,
-  Send,
-  Code2,
-  Eye,
-  Copy,
-  Check,
-  RotateCcw,
-  Zap,
-  Info,
-  PanelLeftClose,
-  PanelLeftOpen,
-} from "lucide-react";
+import { Sparkles } from "lucide-react";
+import { Send } from "lucide-react";
+import { Code2 } from "lucide-react";
+import { Eye } from "lucide-react";
+import { Copy } from "lucide-react";
+import { Check } from "lucide-react";
+import { RotateCcw } from "lucide-react";
+import { Zap } from "lucide-react";
+import { Info } from "lucide-react";
+import { PanelLeftClose } from "lucide-react";
+import { PanelLeftOpen } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/utils";
 import Title from "@/modules/app/title";

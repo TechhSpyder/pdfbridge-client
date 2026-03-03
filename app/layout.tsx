@@ -11,6 +11,8 @@ import Script from "next/script";
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
+  display: "swap",
+  preload: true,
 });
 export const metadata: Metadata = {
   metadataBase: new URL("https://pdfbridge.xyz"),
