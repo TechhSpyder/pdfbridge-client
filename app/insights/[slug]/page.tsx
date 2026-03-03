@@ -211,7 +211,28 @@ export default async function InsightArticlePage({ params }: PostPageProps) {
           )}
 
           {/* Article Content */}
+          {/* Article Content */}
           <div className="prose prose-invert prose-blue prose-lg max-w-none prose-headings:font-black prose-headings:tracking-tighter prose-p:font-medium prose-p:text-slate-300 prose-p:leading-relaxed prose-strong:text-white prose-a:text-blue-400 prose-code:text-blue-200">
+            <style
+              dangerouslySetInnerHTML={{
+                __html: `
+              .prose h1 { font-size: 2.25em !important; margin-top: 0 !important; margin-bottom: 0.8em !important; line-height: 1.1 !important; font-weight: 800 !important; color: #ffffff !important; }
+              .prose h2 { font-size: 1.5em !important; margin-top: 2em !important; margin-bottom: 1em !important; line-height: 1.3 !important; font-weight: 700 !important; color: #f8fafc !important; }
+              .prose ul { list-style-type: disc !important; padding-left: 1.5em !important; margin-top: 1.25em !important; margin-bottom: 1.25em !important; }
+              .prose ol { list-style-type: decimal !important; padding-left: 1.5em !important; margin-top: 1.25em !important; margin-bottom: 1.25em !important; }
+              .prose li { margin-top: 0.5em !important; margin-bottom: 0.5em !important; display: list-item !important; }
+              .prose table { width: 100%; border-collapse: collapse; margin: 2rem 0; font-size: 0.9rem; line-height: 1.5; }
+              .prose th { background: rgba(255, 255, 255, 0.15); font-weight: 700; text-align: left; padding: 0.75rem 1rem; border: 1px solid rgba(255, 255, 255, 0.25); }
+              .prose td { padding: 0.75rem 1rem; border: 1px solid rgba(255, 255, 255, 0.25); color: #cbd5e1; }
+              .prose pre { background: #1e293b !important; border: 1px solid rgba(255, 255, 255, 0.2) !important; padding: 1.5rem !important; border-radius: 1rem !important; margin: 2.5rem 0 !important; box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5); }
+              .prose code { font-family: var(--font-mono), monospace !important; font-size: 0.95rem !important; background: transparent !important; padding: 0 !important; }
+              .prose p { margin-bottom: 2rem !important; }
+              .prose hr { border: none !important; border-top: 2px solid rgba(255, 255, 255, 0.3) !important; margin: 4rem 0 !important; }
+              .prose mark { background-color: rgba(59, 130, 246, 0.3); color: inherit; padding: 0 0.2rem; border-radius: 0.2rem; }
+              .prose strong, .prose b { color: #ffffff !important; font-weight: 800 !important; }
+            `,
+              }}
+            />
             <div
               dangerouslySetInnerHTML={{
                 __html: sanitizeHtml(post.content, {
@@ -229,20 +250,20 @@ export default async function InsightArticlePage({ params }: PostPageProps) {
                     "br",
                     "hr",
                     "u",
+                    "s",
+                    "strong",
+                    "b",
+                    "em",
+                    "i",
+                    "div",
                   ]),
                   allowedAttributes: {
                     ...sanitizeHtml.defaults.allowedAttributes,
-                    span: ["class", "style"],
-                    code: ["class"],
-                    p: ["style", "class"],
-                    h1: ["style", "class"],
-                    h2: ["style", "class"],
-                    h3: ["style", "class"],
-                    a: ["href", "name", "target", "class"],
-                    mark: ["class"],
+                    "*": ["class", "style"],
+                    a: ["href", "name", "target", "class", "style"],
                   },
                   allowedClasses: {
-                    "*": ["text-*", "bg-*", "underline", "prose-*", "hljs-*"],
+                    "*": ["*"],
                   },
                   allowedStyles: {
                     "*": {
@@ -252,6 +273,9 @@ export default async function InsightArticlePage({ params }: PostPageProps) {
                         /^center$/,
                         /^justify$/,
                       ],
+                      "font-weight": [/.*/],
+                      "font-style": [/.*/],
+                      "text-decoration": [/.*/],
                     },
                   },
                 }),
@@ -327,14 +351,14 @@ export default async function InsightArticlePage({ params }: PostPageProps) {
               </p>
               <div className="flex items-center justify-center md:justify-start gap-4">
                 <Link
-                  href="https://twitter.com/francisbello87"
+                  href="https://twitter.com/Francis_coder"
                   target="_blank"
                   className="text-xs font-black uppercase tracking-widest text-slate-400 hover:text-white transition-colors"
                 >
                   Twitter
                 </Link>
                 <Link
-                  href="https://www.linkedin.com/in/francisbello87"
+                  href="https://www.linkedin.com/in/francisbello/"
                   target="_blank"
                   className="text-xs font-black uppercase tracking-widest text-slate-400 hover:text-white transition-colors"
                 >
