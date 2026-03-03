@@ -159,7 +159,7 @@ export function TeamSettingsClient() {
                     ) : (
                       <form
                         onSubmit={handleInvite}
-                        className="flex gap-3 items-end"
+                        className="flex flex-col sm:flex-row gap-3 items-end"
                       >
                         <div className="flex-1 space-y-2">
                           <label className="text-xs font-medium text-slate-400">
@@ -177,7 +177,7 @@ export function TeamSettingsClient() {
                         <Button
                           type="submit"
                           disabled={inviteMutation.isPending || !inviteEmail}
-                          className="h-10 px-6 bg-blue-600 hover:bg-blue-500 text-white transition-all shadow-lg shadow-blue-500/20"
+                          className="h-10 w-full sm:w-auto px-6 bg-blue-600 hover:bg-blue-500 text-white transition-all shadow-lg shadow-blue-500/20"
                         >
                           {inviteMutation.isPending
                             ? "Sending..."

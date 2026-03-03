@@ -106,7 +106,7 @@ export default async function InsightsPage() {
       createdAt: new Date("2026-03-03T09:00:00Z"),
       updatedAt: new Date("2026-03-03T09:00:00Z"),
       published: true,
-      coverImage: "https://images.unsplash.com/photo-1607706189992-bf5f236ce311?auto=format&fit=crop&q=80",
+      coverImage: "https://images.unsplash.com/photo-1542831371-29b0f74f9713?auto=format&fit=crop&q=80",
       authorId: "francis",
       categoryId: "seo",
       author: {

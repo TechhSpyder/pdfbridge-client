@@ -178,7 +178,7 @@ export function BuiltForDevelopers() {
             >
               {({ className, style, tokens, getLineProps, getTokenProps }) => (
                 <pre
-                  className={`${className} max-w-full overflow-x-auto whitespace-pre text-sm sm:text-base p-4 sm:p-6`}
+                  className={`${className} max-w-full overflow-x-auto whitespace-pre text-xs sm:text-base p-4 sm:p-6`}
                   style={{ ...style, backgroundColor: "transparent" }}
                 >
                   {tokens.map((line, i) => (

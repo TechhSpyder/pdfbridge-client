@@ -512,7 +512,7 @@ function WebhookInspector({
         animate={{ x: 0 }}
         exit={{ x: "100%" }}
         transition={{ type: "spring", damping: 25, stiffness: 200 }}
-        className="h-full w-full max-w-xl bg-[#09090b] border-l border-white/10 shadow-2xl p-8 overflow-y-auto"
+        className="h-full w-full max-w-xl bg-[#09090b] border-l border-white/10 shadow-2xl p-4 sm:p-8 overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-8">

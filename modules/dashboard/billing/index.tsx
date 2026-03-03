@@ -266,18 +266,18 @@ export function BillingPage() {
             </p>
           </div>
 
-          <div className="flex flex-col gap-4 items-end">
-            <div className="flex flex-col gap-2 items-end">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+            <div className="flex flex-col gap-2">
               <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
                 Billing Cycle
               </span>
-              <div className="flex p-1 rounded-xl bg-slate-900 border border-white/5 gap-1">
+              <div className="flex p-1 rounded-xl bg-slate-900 border border-white/5 gap-1 w-fit">
                 {(["month", "year"] as const).map((item) => (
                   <button
                     key={item}
                     onClick={() => setInterval(item)}
                     className={cn(
-                      "px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
+                      "px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer",
                       {
                         "bg-emerald-500 text-white shadow-lg shadow-emerald-500/20":
                           interval === item,

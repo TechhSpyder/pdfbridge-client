@@ -1,9 +1,9 @@
 import { Button } from "@/modules/app/button";
-import { useMe, useSaveTemplate } from "@/modules/hooks/queries";
+import { useMe, useSaveTemplate, useJobStatus } from "@/modules/hooks/queries";
 import { cn } from "@/utils";
 import { useApiClient } from "@/utils/api-client";
 import { Loader2, Sparkles, Terminal } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Highlight, themes } from "prism-react-renderer";
 import { toast } from "sonner";
 import { Dialog } from "@/modules/app/dialog";
@@ -76,9 +76,11 @@ export function ApiPlayground() {
   const [saveName, setSaveName] = useState("");
   const [html, setHtml] = useState("");
   const [activeTab, setActiveTab] = useState<"url" | "html">("url");
+  const [activeJobId, setActiveJobId] = useState<string | null>(null);
   const [snippetLang, setSnippetLang] = useState<"curl" | "node" | "python">("node");
   const api = useApiClient();
   const saveMutation = useSaveTemplate();
+  const { data: jobStatus } = useJobStatus(activeJobId || "");
 
   const detectedVariables =
     html
@@ -88,6 +90,26 @@ export function ApiPlayground() {
 
   const { data: userData } = useMe();
   const allowAi = userData?.plan?.allowAi;
+
+  useEffect(() => {
+    if (!jobStatus || !activeJobId) return;
+
+    if (jobStatus.status === "done") {
+      toast.success("PDF Generated!", {
+        description: "Your document is ready for download.",
+        action: {
+          label: "Download",
+          onClick: () => window.open(jobStatus.result.url, "_blank"),
+        },
+      });
+      setActiveJobId(null);
+    } else if (jobStatus.status === "failed") {
+      toast.error("Generation Failed", {
+        description: jobStatus.result?.error || "An unknown error occurred.",
+      });
+      setActiveJobId(null);
+    }
+  }, [jobStatus, activeJobId]);
 
   const handleTest = async () => {
     if (extractMetadata && !allowAi && mode === "live") {
@@ -101,12 +123,17 @@ export function ApiPlayground() {
       description: "We are preparing your PDF...",
     });
     try {
-      await api.post("/api/v1/convert", {
+      const res = await api.post("/api/v1/convert", {
         ...(activeTab === "url" ? { url } : { html }),
         testMode: mode === "test",
         extractMetadata: mode === "live" && extractMetadata && allowAi,
         webhookUrl: webhookUrl || undefined,
       });
+      
+      if (res.jobId) {
+        setActiveJobId(res.jobId);
+      }
+
       toast.success("Conversion queued successfully!", {
         id: tId,
         description:

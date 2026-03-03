@@ -33,6 +33,20 @@ export const useConversions = (
   });
 };
 
+export const useJobStatus = (jobId: string, pollInterval?: number) => {
+  const api = useApiClient();
+  return useQuery({
+    queryKey: ["job-status", jobId],
+    queryFn: () => api.get(`/api/v1/jobs/${jobId}`),
+    enabled: !!jobId,
+    refetchInterval: (query) => {
+      const data: any = query.state.data;
+      if (data?.status === "done" || data?.status === "failed") return false;
+      return pollInterval || 2000;
+    },
+  });
+};
+
 export const useWebhookLogs = (conversionId: string) => {
   const api = useApiClient();
   return useQuery({

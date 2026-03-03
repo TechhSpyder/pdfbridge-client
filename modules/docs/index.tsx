@@ -137,10 +137,10 @@ function SidebarGroup({
   onToggle: () => void;
 }) {
   return (
-    <div className="mb-4">
+    <div className="mb-4 lg:mb-4 shrink-0">
       <button
         onClick={onToggle}
-        className="w-full flex items-center justify-between px-3 py-1.5 text-[10px] font-bold text-slate-500 uppercase tracking-widest hover:text-white transition-colors"
+        className="w-full flex items-center justify-between px-3 py-1.5 text-[10px] font-bold text-slate-500 uppercase tracking-widest hover:text-white transition-colors whitespace-nowrap"
       >
         {group.title}
         {isExpanded ? (
@@ -161,7 +161,7 @@ function SidebarGroup({
                   .getElementById(section.id)
                   ?.scrollIntoView({ behavior: "smooth" });
               }}
-              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
                 activeSection === section.id
                   ? "bg-blue-600/10 text-blue-400 border border-blue-500/20 shadow-[0_0_15px_rgba(37,99,235,0.1)] cursor-default"
                   : "text-slate-400 hover:text-white hover:bg-white/5 border border-transparent cursor-pointer"
@@ -217,10 +217,10 @@ export function Documentation({
   };
 
   const content = (
-    <div className="flex flex-col lg:flex-row gap-12 items-start">
+    <div className="flex flex-col lg:flex-row gap-12 items-start w-full max-lg:overflow-x-hidden">
       {/* Sidebar Navigation */}
-      <aside className="w-full lg:w-64 shrink-0 lg:sticky top-24">
-        <nav className="sticky top-24 space-y-1">
+      <aside className="w-full lg:w-64 shrink-0 lg:sticky lg:top-24 z-30">
+        <nav className="flex lg:flex-col overflow-x-auto lg:overflow-x-visible pb-4 lg:pb-0 scrollbar-hide lg:space-y-1 -mx-4 px-4 lg:mx-0 lg:px-0">
           {DOCUMENTATION_GROUPS.map((group) => (
             <SidebarGroup
               key={group.title}
@@ -236,7 +236,7 @@ export function Documentation({
             />
           ))}
 
-          <div className="pt-6 mt-6 border-t border-white/5 space-y-1">
+          <div className="hidden lg:block pt-6 mt-6 border-t border-white/5 space-y-1">
             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-3 mb-2">
               Product
             </p>
@@ -259,7 +259,7 @@ export function Documentation({
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 space-y-20 min-w-0">
+      <main className="flex-1 space-y-20 min-w-0 max-w-full overflow-hidden">
         {/* Introduction */}
         <section
           id="intro"
@@ -291,7 +291,7 @@ export function Documentation({
             content={
               <div className="space-y-4 mt-4">
                 <div className="relative group">
-                  <div className="p-4 rounded-xl bg-black/40 border border-white/5 font-mono text-sm text-blue-400 pr-12">
+                  <div className="p-4 rounded-xl bg-black/40 border border-white/5 font-mono text-sm text-blue-400 pr-12 break-all">
                     https://api.pdfbridge.xyz/api/v1
                   </div>
                   <button
@@ -344,7 +344,7 @@ export function Documentation({
           </div>
           <p className="text-slate-400 leading-relaxed">
             Include your key in the{" "}
-            <code className="text-blue-400 font-mono bg-blue-400/5 px-1.5 py-0.5 rounded">
+            <code className="text-blue-400 font-mono bg-blue-400/5 px-1.5 py-0.5 rounded break-all">
               x-api-key
             </code>{" "}
             header for all requests.
@@ -390,8 +390,8 @@ export function Documentation({
             <h4 className="font-bold text-white text-sm mb-4">
               Calculation Table (Free Tier Example)
             </h4>
-            <div className="overflow-hidden rounded-xl border border-white/5">
-              <table className="w-full text-left text-xs">
+            <div className="overflow-x-auto rounded-xl border border-white/5">
+              <table className="w-full min-w-[500px] text-left text-xs">
                 <thead>
                   <tr className="bg-white/5 text-slate-300">
                     <th className="px-4 py-3 font-semibold">File Size</th>
@@ -1080,7 +1080,7 @@ print(f"PDF ready: {status.pdfUrl}")`}
   if (noContainer) return content;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full overflow-x-hidden">
       {content}
     </div>
   );
@@ -1106,7 +1106,7 @@ function CodeBlock({ code, language }: { code: string; language: string }) {
       <Highlight theme={themes.vsDark} code={code.trim()} language={language}>
         {({ className, style, tokens, getLineProps, getTokenProps }) => (
           <pre
-            className={`${className} p-6 rounded-2xl border border-white/5 bg-slate-900/50 backdrop-blur-sm overflow-auto text-sm leading-relaxed`}
+            className={`${className} p-4 sm:p-6 rounded-2xl border border-white/5 bg-slate-900/50 backdrop-blur-sm overflow-x-auto max-w-full text-xs sm:text-sm leading-relaxed`}
             style={{ ...style, backgroundColor: "transparent" }}
           >
             {tokens.map((line, i) => (

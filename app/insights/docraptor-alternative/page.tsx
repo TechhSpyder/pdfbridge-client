@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { ChevronLeft, Share2, CheckCircle2, XCircle, ArrowRight, TrendingDown, DollarSign, ExternalLink } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -64,6 +65,18 @@ export default function DocRaptorAlternativePage() {
       {/* Content */}
       <main className="max-w-4xl mx-auto px-6 relative z-10 space-y-20">
         
+        {/* Featured Image */}
+        <div className="aspect-video relative rounded-3xl overflow-hidden border border-white/10 mb-12 shadow-2xl">
+          <Image
+            src="https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80"
+            alt="DocRaptor Alternative"
+            fill
+            className="object-cover"
+            priority
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
+          />
+        </div>
+        
         <section className="prose prose-invert prose-blue prose-lg max-w-none prose-headings:font-black prose-headings:tracking-tighter prose-p:text-slate-300">
           <h2>The PrinceXML Problem</h2>
           <p>DocRaptor is built entirely around <strong>PrinceXML</strong>—a proprietary HTML-to-PDF tool originally built over a decade ago. While it was revolutionary for its time (specifically regarding CSS Paged Media), it operates completely differently than a modern web browser.</p>
@@ -78,7 +91,7 @@ export default function DocRaptorAlternativePage() {
         <section>
           <h3 className="text-2xl font-black mb-6">PDFBridge vs DocRaptor (2026)</h3>
           <div className="overflow-x-auto rounded-2xl border border-white/10 bg-slate-900/50">
-            <table className="w-full text-left text-sm">
+            <table className="w-full text-left text-sm min-w-[600px]">
               <thead className="bg-white/5 border-b border-white/10">
                 <tr>
                   <th className="p-4 font-bold text-slate-300 w-1/3">Metric</th>
