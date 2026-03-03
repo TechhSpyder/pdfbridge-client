@@ -334,18 +334,55 @@ export default function RichTextEditor({
       <EditorContent editor={editor} />
 
       <style jsx global>{`
+        .ProseMirror h1 {
+          font-size: 2.25em;
+          margin-top: 0;
+          margin-bottom: 0.8em;
+          line-height: 1.1;
+          font-weight: 800;
+          color: #ffffff;
+        }
+        .ProseMirror h2 {
+          font-size: 1.5em;
+          margin-top: 2em;
+          margin-bottom: 1em;
+          line-height: 1.3;
+          font-weight: 700;
+          color: #f8fafc;
+        }
+        .ProseMirror ul {
+          list-style-type: disc !important;
+          padding-left: 1.5em !important;
+          margin-top: 1.25em;
+          margin-bottom: 1.25em;
+        }
+        .ProseMirror ol {
+          list-style-type: decimal !important;
+          padding-left: 1.5em !important;
+          margin-top: 1.25em;
+          margin-bottom: 1.25em;
+        }
+        .ProseMirror li {
+          margin-top: 0.5em;
+          margin-bottom: 0.5em;
+          display: list-item !important;
+        }
+        .ProseMirror p {
+          margin-top: 1em;
+          margin-bottom: 1em;
+        }
         .ProseMirror table {
           border-collapse: collapse;
           table-layout: fixed;
           width: 100%;
           margin: 0;
           overflow: hidden;
-          border: 1px solid rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.25);
         }
         .ProseMirror td,
         .ProseMirror th {
           min-width: 1em;
-          border: 1px solid rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.25);
           padding: 8px 12px;
           vertical-align: top;
           box-sizing: border-box;
@@ -354,7 +391,7 @@ export default function RichTextEditor({
         .ProseMirror th {
           font-weight: bold;
           text-align: left;
-          background: rgba(255, 255, 255, 0.05);
+          background: rgba(255, 255, 255, 0.15);
         }
         .ProseMirror .selectedCell:after {
           z-index: 2;
@@ -364,18 +401,18 @@ export default function RichTextEditor({
           right: 0;
           top: 0;
           bottom: 0;
-          background: rgba(59, 130, 246, 0.1);
+          background: rgba(59, 130, 246, 0.25);
           pointer-events: none;
         }
         .ProseMirror pre {
-          background: #0d1117;
+          background: #1e293b;
           border-radius: 0.5rem;
           padding: 1rem;
-          border: 1px solid rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.2);
         }
         .ProseMirror hr {
           border: none;
-          border-top: 2px solid rgba(255, 255, 255, 0.1);
+          border-top: 2px solid rgba(255, 255, 255, 0.3);
           margin: 2.5rem 0;
         }
         .ProseMirror mark {
