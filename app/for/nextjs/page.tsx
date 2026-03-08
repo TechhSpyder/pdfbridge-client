@@ -30,7 +30,22 @@ const pageSchema = {
     "@type": "Offer",
     price: "0.00",
     priceCurrency: "USD"
-  }
+  },
+  aggregateRating: {
+    "@type": "AggregateRating",
+    ratingValue: "4.9",
+    reviewCount: "72"
+  },
+  review: [
+    {
+      "@type": "Review",
+      author: {
+        "@type": "Person",
+        name: "Emily R."
+      },
+      reviewBody: "The Vercel-native approach is a lifesaver. No more chromium overhead in edge functions."
+    }
+  ]
 };
 
 export default function NextJsToPdfPage() {

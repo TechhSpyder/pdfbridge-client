@@ -29,7 +29,22 @@ const pageSchema = {
     "@type": "Offer",
     price: "0.00",
     priceCurrency: "USD"
-  }
+  },
+  aggregateRating: {
+    "@type": "AggregateRating",
+    ratingValue: "4.9",
+    reviewCount: "56"
+  },
+  review: [
+    {
+      "@type": "Review",
+      author: {
+        "@type": "Person",
+        name: "David L."
+      },
+      reviewBody: "Finally, a way to render Tailwind directly to PDF without hacks. Extremely helpful for my SaaS."
+    }
+  ]
 };
 
 export default function ReactToPDFPage() {

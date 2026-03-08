@@ -48,14 +48,18 @@ export function PuppeteerVs() {
             </p>
             <ul className="space-y-2">
               {puppeteerPains.map((pain) => (
-                <li key={pain} className="flex items-center gap-2 text-sm text-muted-foreground">
+                <li
+                  key={pain}
+                  className="flex items-center gap-2 text-sm text-muted-foreground"
+                >
                   <XCircle className="h-4 w-4 shrink-0 text-red-500/70" />
                   {pain}
                 </li>
               ))}
             </ul>
             <p className="pt-2 text-sm font-medium text-foreground/60 italic">
-              That&apos;s not your product.<br />That&apos;s plumbing.
+              Your team should focus on building product <br /> not maintaining
+              browser infrastructure.
             </p>
           </div>
 

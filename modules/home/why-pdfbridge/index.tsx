@@ -14,15 +14,15 @@ import Link from "next/link";
 
 const features = [
   {
-    title: "Lightning Fast",
+    title: "Distributed Worker Architecture",
     description:
-      "Our distributed worker architecture ensures your PDFs are generated and stored in the blink of an eye.",
+      "PDF generation and extraction run on a horizontally scalable worker fleet designed for high-throughput document workflows.",
     icon: <Zap className="h-6 w-6" />,
   },
   {
     title: "Ghost Mode Security",
     description:
-      "Pass `ghostMode: true` to bypass storage buckets entirely. The raw binary streams directly back to you for zero data retention.",
+      "Pass `ghostMode: true` to bypass storage buckets entirely. The raw binary streams directly back to you for zero data retention. No files written to storage. No persistent logs.",
     icon: <ShieldCheck className="h-6 w-6" />,
   },
   {
@@ -32,9 +32,9 @@ const features = [
     icon: <Globe className="h-6 w-6" />,
   },
   {
-    title: "AI Parsing & Templates",
+    title: "Invoice Data You Can Trust",
     description:
-      "Instantly extract structured JSON metadata from generated documents, or build dynamic Reusable Templates via natural language.",
+      "Submit any invoice PDF and get back vendor, line items, totals, and currency — always the same JSON structure. No schema drift. No parsing surprises.",
     icon: <Bot className="h-6 w-6" />,
   },
   {
@@ -64,11 +64,10 @@ export function WhyPdfBridge() {
           }`}
         >
           <h2 className="text-3xl font-semibold tracking-tight">
-            Built for Modern Frontends
+            Financial Document Automation Infrastructure
           </h2>
           <p className="mt-4 text-muted-foreground">
-            Flexbox. CSS Grid. Tailwind. Web fonts. Print backgrounds. Precise
-            page formatting. No fallback templates. Use your existing UI.
+            Instantly receive persistent URLs alongside AI-extracted metadata ready for your database — all in a single, resilient API call.
           </p>
         </div>
 

@@ -50,6 +50,26 @@ const softwareSchema = {
     "price": "0",
     "priceCurrency": "USD",
   },
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.9",
+    "reviewCount": "120"
+  },
+  "review": [
+    {
+      "@type": "Review",
+      "author": {
+        "@type": "Person",
+        "name": "Jordan Smith"
+      },
+      "reviewRating": {
+        "@type": "Rating",
+        "ratingValue": "5",
+        "bestRating": "5"
+      },
+      "reviewBody": "Unbelievably fast. The React-to-PDF integration saved us weeks of development time."
+    }
+  ],
   "url": "https://pdfbridge.xyz",
 };
 

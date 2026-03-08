@@ -1,7 +1,6 @@
-"use client";
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApiClient } from "@/app/api/api-client";
+import { usePDFBridge } from "./use-pdfbridge";
 import { toast } from "sonner";
 
 export const useMe = () => {
@@ -34,14 +33,14 @@ export const useConversions = (
 };
 
 export const useJobStatus = (jobId: string, pollInterval?: number) => {
-  const api = useApiClient();
+  const sdk = usePDFBridge();
   return useQuery({
     queryKey: ["job-status", jobId],
-    queryFn: () => api.get(`/api/v1/jobs/${jobId}`),
+    queryFn: () => sdk.getJob(jobId),
     enabled: !!jobId,
     refetchInterval: (query) => {
       const data: any = query.state.data;
-      if (data?.status === "done" || data?.status === "failed") return false;
+      if (data?.status === "COMPLETED" || data?.status === "FAILED") return false;
       return pollInterval || 2000;
     },
   });
@@ -214,6 +213,72 @@ export const useUpdateIpWhitelist = () => {
     onError: (err: any) => {
       toast.error("Failed to update IP Whitelist", {
         description: err.response?.data?.error || err.message,
+      });
+    },
+  });
+};
+
+export const useIntegrations = (organizationId?: string) => {
+  const sdk = usePDFBridge(organizationId);
+  return useQuery({
+    queryKey: ["integrations", organizationId],
+    queryFn: () => sdk.getIntegrations(),
+  });
+};
+
+export const useDisconnectIntegration = (organizationId?: string) => {
+  const sdk = usePDFBridge(organizationId);
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (provider: string) => sdk.disconnectIntegration(provider),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["integrations"] });
+      toast.success("Integration disconnected successfully");
+    },
+    onError: (err: any) => {
+      toast.error("Failed to disconnect integration", {
+        description: err.message || "Please check your network and try again.",
+      });
+    },
+  });
+};
+export const useLedger = (page = 1, limit = 10, refetchInterval?: number) => {
+  const api = useApiClient();
+  return useQuery({
+    queryKey: ["ledger", page, limit],
+    queryFn: () => api.get(`/api/v1/ledger?page=${page}&limit=${limit}`),
+    refetchInterval,
+  });
+};
+
+export const useLedgerDocument = (id: string) => {
+  const api = useApiClient();
+  return useQuery({
+    queryKey: ["ledger", id],
+    queryFn: () => api.get(`/api/v1/ledger/${id}`),
+    enabled: !!id,
+  });
+};
+
+export const useNormalizeInvoice = () => {
+  const api = useApiClient();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ file, testMode = true }: { file: File; testMode?: boolean }) => {
+      const formData = new FormData();
+      formData.append("file", file);
+      if (testMode) formData.append("testMode", "true");
+      return api.post("/api/v1/normalize-invoice", formData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["ledger"] });
+      toast.success("Normalization started", {
+        description: "The AI is extracting data. Check the ledger for updates.",
+      });
+    },
+    onError: (err: any) => {
+      toast.error("Failed to start normalization", {
+        description: err.response?.data?.message || err.message,
       });
     },
   });

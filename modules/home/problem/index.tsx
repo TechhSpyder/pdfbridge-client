@@ -5,12 +5,10 @@ import { XCircle } from "lucide-react";
 
 const painPoints = [
   "Headless Chrome crashes",
-  "Memory leaks at scale",
   "Queue orchestration",
   "Autoscaling browser pools",
   "Cold start delays",
   "Layout inconsistencies",
-  "CSS that works in browser but breaks in PDF",
 ];
 
 export function Problem() {

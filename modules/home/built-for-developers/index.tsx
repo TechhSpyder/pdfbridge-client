@@ -21,11 +21,14 @@ const snippets: CodeSnippet[] = [
 const pdf = new PDFBridge();
 
 const result = await pdf.generateAndWait({
-  url: "https://yourapp.com/invoice/123",
+  url: "https://yourapp.com/invoice/inv_123",
   options: { format: "A4", printBackground: true },
+  extractMetadata: true, // Extract structured JSON from the invoice
 });
 
-console.log(result.pdfUrl); // https://cdn.pdfbridge.xyz/...`,
+console.log(result.aiMetadata);
+// { documentType: "invoice", totalAmount: 450.00,
+//   currency: "USD", vendorName: "Acme Corp", lineItems: [...] }`,
   },
   {
     label: "Python SDK",
@@ -111,11 +114,11 @@ export function BuiltForDevelopers() {
           }`}
         >
           <h2 className="text-3xl font-semibold tracking-tight">
-            Generate a PDF in 30 Seconds
+            Parse Your First Invoice in 30 Seconds
           </h2>
           <p className="mt-4 text-muted-foreground">
-            No headless browser setup. No container orchestration. No
-            maintenance overhead.
+            No OCR setup. No schema wrangling. One request to extract structured
+            JSON from any invoice PDF.
           </p>
         </div>
 
@@ -192,9 +195,13 @@ export function BuiltForDevelopers() {
               )}
             </Highlight>
           </div>
-          <p className={`mt-4 text-sm text-center text-muted-foreground transition-all duration-700 ${
-            isVisible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
-          }`}>
+          <p
+            className={`mt-4 text-sm text-center text-muted-foreground transition-all duration-700 ${
+              isVisible
+                ? "translate-y-0 opacity-100"
+                : "translate-y-4 opacity-0"
+            }`}
+          >
             That&apos;s it. No infrastructure to manage.
           </p>
         </div>
