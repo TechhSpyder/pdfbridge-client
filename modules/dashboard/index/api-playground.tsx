@@ -159,16 +159,16 @@ export function ApiPlayground() {
   useEffect(() => {
     if (!jobStatus || !activeJobId) return;
 
-    if (jobStatus.status === "done") {
+    if (jobStatus.status === "COMPLETED") {
       toast.success("PDF Generated!", {
         description: "Your document is ready for download.",
         action: {
           label: "Download",
-          onClick: () => window.open(jobStatus.result.url, "_blank"),
+          onClick: () => window.open(jobStatus?.result?.url, "_blank"),
         },
       });
       setActiveJobId(null);
-    } else if (jobStatus.status === "failed") {
+    } else if (jobStatus.status === "FAILED") {
       toast.error("Generation Failed", {
         description: jobStatus.result?.error || "An unknown error occurred.",
       });
@@ -519,7 +519,7 @@ export function ApiPlayground() {
           >
             {({ className, style, tokens, getLineProps, getTokenProps }) => (
               <pre
-                className={cn(className, "p-4 m-0 !bg-transparent")}
+                className={cn(className, "p-4 m-0 bg-transparent!")}
                 style={style}
               >
                 {tokens.map((line, i) => {
