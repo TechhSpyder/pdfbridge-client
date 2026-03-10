@@ -20,6 +20,14 @@ export const useRotateKey = () => {
   });
 };
 
+export const useRevealKey = () => {
+  const api = useApiClient();
+  return useMutation({
+    mutationFn: (keyId: string) => api.post("/api/v1/keys/reveal", { keyId }),
+  });
+};
+
+
 export const useConversions = (
   page = 1,
   limit = 10,
