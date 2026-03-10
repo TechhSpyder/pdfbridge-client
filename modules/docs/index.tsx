@@ -78,8 +78,13 @@ const DOCUMENTATION_GROUPS = [
       },
       {
         id: "ai",
-        title: "Intelligent PDF Analysis",
+        title: "Intelligent Extraction",
         icon: <Cpu className="h-4 w-4" />,
+      },
+      {
+        id: "jobs",
+        title: "Job Polling Flow",
+        icon: <Info className="h-4 w-4" />,
       },
       { id: "ghost", title: "Ghost Mode", icon: <Info className="h-4 w-4" /> },
     ],
@@ -101,6 +106,16 @@ const DOCUMENTATION_GROUPS = [
         id: "webhooks",
         title: "Webhooks",
         icon: <Webhook className="h-4 w-4" />,
+      },
+    ],
+  },
+  {
+    title: "Technical Reference",
+    items: [
+      {
+        id: "api-ref",
+        title: "Full API Reference",
+        icon: <Terminal className="h-4 w-4" />,
       },
     ],
   },
@@ -156,6 +171,10 @@ function SidebarGroup({
             <button
               key={section.id}
               onClick={() => {
+                if (section.id === "api-ref") {
+                  window.location.href = "/docs/api-reference";
+                  return;
+                }
                 setActiveSection(section.id);
                 document
                   .getElementById(section.id)
@@ -738,70 +757,76 @@ export function Documentation({
           </div>
         </section>
 
-        {/* Intelligent PDF Analysis */}
+        {/* Intelligent Extraction */}
         <section id="ai" className="scroll-mt-24 space-y-6">
           <h2 className="text-3xl font-bold text-white flex items-center gap-4">
-            <Cpu className="text-purple-400" /> Intelligent PDF Analysis
+            <Cpu className="text-purple-400" /> Intelligent Extraction
           </h2>
           <p className="text-slate-400 leading-relaxed">
-            PDFBridge uses high-performance intelligent engines to automatically
-            analyze and extract structured JSON data from your generated PDFs.
-            Perfect for auto-tagging, data entry automation, and content
-            summarization.
+            PDFBridge features a high-performance extraction engine designed for 
+            <strong>Financial Document Automation</strong>. Use the specialized 
+            <code className="text-blue-400">/extract</code> endpoint to upload 
+            existing PDF invoices and receive strict, typed JSON in seconds.
           </p>
 
-          <div className="grid md:grid-cols-3 gap-4">
-            <div className="p-4 rounded-xl border border-white/5 bg-white/5">
-              <h4 className="font-bold text-white text-xs mb-1">Doc Types</h4>
-              <p className="text-[10px] text-slate-500">
-                Invoices, Receipts, Reports, CVs, and more.
-              </p>
-            </div>
-            <div className="p-4 rounded-xl border border-white/5 bg-white/5">
-              <h4 className="font-bold text-white text-xs mb-1">Entities</h4>
-              <p className="text-[10px] text-slate-500">
-                Totals, Dates, Companies, and Names.
-              </p>
-            </div>
-            <div className="p-4 rounded-xl border border-white/5 bg-white/5">
-              <h4 className="font-bold text-white text-xs mb-1">Summaries</h4>
-              <p className="text-[10px] text-slate-500">
-                Automated 1-2 sentence content insights.
-              </p>
-            </div>
+          <div className="grid md:grid-cols-2 gap-4">
+            <GlowCard
+              title="Bill To & Vendor Recognition"
+              sub="Zero Hallucination"
+              content={
+                <p className="text-xs text-slate-500 leading-relaxed mt-2">
+                  Our model is fine-tuned to distinguish between the party issuing the invoice 
+                  and the "Bill To" party, preventing metadata mismatches.
+                </p>
+              }
+            />
+            <GlowCard
+              title="Direct Pipeline"
+              sub="Faster & More Secure"
+              content={
+                <p className="text-xs text-slate-500 leading-relaxed mt-2">
+                  Uploading PDFs directly to <code className="text-blue-300">/extract</code> 
+                  is 5x faster than rendering via headless browser.
+                </p>
+              }
+            />
           </div>
 
-          <GlowCard
-            title="Pricing & Restrictions"
-            sub="Paid Tiers Only"
-            icon={<Info className="h-5 w-5 text-purple-400" />}
-            content={
-              <div className="space-y-4 mt-4 text-sm text-slate-400">
-                <p>
-                  Intelligent PDF analysis is exclusive to our{" "}
-                  <strong>Paid Plans</strong> (Starter, Pro, Enterprise).
-                </p>
-                <div className="p-3 rounded-lg bg-orange-500/10 border border-orange-500/20 text-orange-200 text-xs">
-                  <strong>Sandbox Mode:</strong> This feature is disabled when
-                  using Test Keys (`pk_test_...`) to prevent quota abuse.
-                </div>
-              </div>
-            }
-          />
+          <div className="space-y-4">
+             <h4 className="font-bold text-white text-sm">Example Workflow (cURL)</h4>
+             <CodeBlock 
+                code={`curl -X POST https://api.pdfbridge.xyz/api/v1/extract \\
+  -H "x-api-key: pk_live_..." \\
+  -F "file=@invoice.pdf"`}
+                language="bash"
+             />
+          </div>
+        </section>
+
+        {/* Job Polling Flow */}
+        <section id="jobs" className="scroll-mt-24 space-y-6">
+          <h2 className="text-3xl font-bold text-white flex items-center gap-4">
+            <Info className="text-blue-500" /> Job Polling Flow
+          </h2>
+          <p className="text-slate-400 leading-relaxed">
+            Since PDF generation and AI extraction are complex asynchronous tasks, the API 
+            immediately returns a <code className="text-blue-400">jobId</code>. You should 
+            poll for the final result or rely on <Link href="#webhooks" className="text-blue-400 hover:underline">Webhooks</Link>.
+          </p>
 
           <div className="space-y-4">
-            <h4 className="font-bold text-white text-sm">
-              Example AI Response
-            </h4>
-            <CodeBlock
-              code={`{
-  "documentType": "invoice",
-  "total": 540.50,
-  "currency": "USD",
-  "summary": "Monthly subscription invoice for cloud services.",
-  "tags": ["financial", "cloud", "saas"]
+            <h4 className="font-bold text-white text-sm">Polling Example</h4>
+            <CodeBlock 
+                code={`// Poll every 1-2 seconds until status is SUCCESS
+const response = await fetch("https://api.pdfbridge.xyz/api/v1/jobs/JOB_ID", {
+  headers: { "x-api-key": "..." }
+});
+const job = await response.json();
+
+if (job.status === "SUCCESS") {
+  console.log("Extraction Results:", job.result.aiMetadata);
 }`}
-              language="json"
+                language="javascript"
             />
           </div>
         </section>
