@@ -18,11 +18,12 @@ import {
   BookOpen,
 } from "lucide-react";
 import Link from "next/link";
-import { useMe } from "../hooks/queries";
+import { useMe, useRevealKey } from "../hooks/queries";
 import { toast } from "sonner";
 import dynamic from "next/dynamic";
 import { useClipboard } from "../hooks/use-copy-to-clipboard";
 import { cn } from "@/utils";
+import { useState } from "react";
 
 const RecentConversionsList = dynamic(
   () =>
@@ -56,8 +57,11 @@ const QuickStartPipeline = dynamic(
 export function DashboardPage() {
   const { user: clerkUser, isLoaded: clerkLoaded } = useUser();
   const { data: userData, isLoading: beLoading, error } = useMe();
+  const revealMutation = useRevealKey();
+  const [revealingId, setRevealingId] = useState<string | null>(null);
   const liveClipboard = useClipboard();
   const testClipboard = useClipboard();
+
 
   // Check if new user (created within last minute of sign in)
   const isNewUser =
@@ -159,16 +163,29 @@ export function DashboardPage() {
 
   const daysUntilReset = getDaysUntilReset();
 
-  // Create more realistic full keys for UI feedback
-  const userIdHash = userData?.id
-    ? btoa(userData.id).slice(0, 16)
-    : "secure_identifier";
-  const liveKeyFull = `pk_live_${userIdHash}${userData?.createdAt ? new Date(userData.createdAt).getTime().toString(16) : "0000"}`;
-  const testKeyFull = `pk_test_${userIdHash}${userData?.createdAt ? new Date(userData.createdAt).getTime().toString(16) : "0000"}`;
+  const handleCopy = async (keyId: string, type: "live" | "test") => {
+    if (!keyId) return;
+    setRevealingId(keyId);
+    try {
+      const result = await revealMutation.mutateAsync(keyId);
+      const clipboard = type === "live" ? liveClipboard : testClipboard;
+      clipboard.copy(result.apiKey, `${type.charAt(0).toUpperCase() + type.slice(1)} key copied to clipboard.`);
+    } catch (err: any) {
+      toast.error("Failed to reveal key", {
+        description: err.response?.data?.message || "Please try again later."
+      });
+    } finally {
+      setRevealingId(null);
+    }
+  };
 
-  // Masked hints for UI display
-  const liveKeyHint = "pk_live_••••••••";
-  const testKeyHint = "pk_test_••••••••";
+  // Metadata from backend
+  const liveKeyData = userData?.apiKeys?.find((k: any) => k.type === "live");
+  const testKeyData = userData?.apiKeys?.find((k: any) => k.type === "test");
+
+  const liveKeyHint = liveKeyData?.hint || "pk_live_••••••••";
+  const testKeyHint = testKeyData?.hint || "pk_test_••••••••";
+
 
   return (
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-1000">
@@ -243,7 +260,7 @@ export function DashboardPage() {
           {userData?.usage?.hasConversions ? (
             <UsageGraph />
           ) : (
-            <QuickStartPipeline testKeyFull={testKeyFull} />
+            <QuickStartPipeline testKeyFull={testKeyHint} />
           )}
         </div>
         {/* Recent Activity List */}
@@ -421,15 +438,13 @@ export function DashboardPage() {
                         </code>
                       </div>
                       <button
-                        onClick={() =>
-                          liveClipboard.copy(
-                            liveKeyFull,
-                            "Live key copied to clipboard.",
-                          )
-                        }
-                        className="p-1 hover:bg-white/10 rounded transition text-slate-500 hover:text-white cursor-pointer"
+                        disabled={!liveKeyData || revealingId === liveKeyData.id}
+                        onClick={() => handleCopy(liveKeyData.id, "live")}
+                        className="p-1 hover:bg-white/10 rounded transition text-slate-500 hover:text-white cursor-pointer disabled:opacity-50"
                       >
-                        {liveClipboard.copied ? (
+                        {revealingId === liveKeyData?.id ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : liveClipboard.copied ? (
                           <Check className="h-3 w-3 text-emerald-500" />
                         ) : (
                           <Copy className="h-3 w-3" />
@@ -446,15 +461,13 @@ export function DashboardPage() {
                         </code>
                       </div>
                       <button
-                        onClick={() =>
-                          testClipboard.copy(
-                            testKeyFull,
-                            "Test key copied to clipboard.",
-                          )
-                        }
-                        className="p-1 hover:bg-white/10 rounded transition text-slate-500 hover:text-white cursor-pointer"
+                        disabled={!testKeyData || revealingId === testKeyData.id}
+                        onClick={() => handleCopy(testKeyData.id, "test")}
+                        className="p-1 hover:bg-white/10 rounded transition text-slate-500 hover:text-white cursor-pointer disabled:opacity-50"
                       >
-                        {testClipboard.copied ? (
+                        {revealingId === testKeyData?.id ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : testClipboard.copied ? (
                           <Check className="h-3 w-3 text-emerald-500" />
                         ) : (
                           <Copy className="h-3 w-3" />

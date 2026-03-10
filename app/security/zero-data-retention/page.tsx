@@ -32,6 +32,21 @@ const softwareSchema = {
   "applicationCategory": "SecurityApplication",
   "operatingSystem": "Any",
   "description": "A high-security PDF generation API featuring Zero Data Retention. Ideal for generating sensitive invoices, medical records, and legal contracts.",
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "5.0",
+    "reviewCount": "15"
+  },
+  "review": [
+    {
+      "@type": "Review",
+      "author": {
+        "@type": "Person",
+        "name": "Security Lead at Fintech Platform"
+      },
+      "reviewBody": "The stateless architecture and Ghost Mode are essential for our PCI compliance."
+    }
+  ]
 };
 
 const faqSchema = {

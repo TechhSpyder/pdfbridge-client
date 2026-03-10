@@ -244,7 +244,7 @@ export function BillingPage() {
     }
   };
 
-  const planOrder = ["Free", "Starter", "Pro", "Enterprise"];
+  const planOrder = ["Free", "Developer", "Automation", "Resilience"];
   const plans = (plansData || [])
     .filter((p: any) => p.name !== "Test" && p.name !== "Test Mode")
     .sort(

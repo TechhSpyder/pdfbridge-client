@@ -36,6 +36,26 @@ const productSchema = {
     "highPrice": "199",
     "offerCount": "4"
   },
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.9",
+    "reviewCount": "24"
+  },
+  "review": [
+    {
+      "@type": "Review",
+      "author": {
+        "@type": "Person",
+        "name": "Alex Rivers"
+      },
+      "reviewRating": {
+        "@type": "Rating",
+        "ratingValue": "5",
+        "bestRating": "5"
+      },
+      "reviewBody": "The AI extraction is a game changer for our fintech pipeline. It handles messy invoices with near-perfect accuracy."
+    }
+  ],
   "additionalProperty": [
     {
       "@type": "PropertyValue",

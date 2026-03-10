@@ -70,21 +70,21 @@ export function Hero() {
               </motion.div>
 
               <h1 className="text-5xl sm:text-6xl lg:text-6xl font-black tracking-tight leading-[1.1]">
-                Stop Running{" "}
+                Financial Document{" "}
                 <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-300 via-indigo-300 to-cyan-400">
-                  Puppeteer
+                  Automation
                 </span>{" "}
-                in Production.
+                Infrastructure.
               </h1>
             </div>
 
             <p className="text-xl text-slate-400 max-w-lg leading-relaxed">
-              Generate pixel-perfect PDFs from your React or Next.js app —
-              without managing headless browser infrastructure.
+              Submit a PDF invoice. Receive structured JSON — vendor, line
+              items, totals, currency — every time.
             </p>
             <p className="text-sm text-slate-500 max-w-lg">
-              Built for teams shipping invoices, reports, dashboards, and
-              documents at scale.
+              Built for SaaS billing, fintech workflows, and accounting
+              automation — without managing headless browser infrastructure.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
@@ -194,10 +194,14 @@ export function Hero() {
                 </div>
                 <div>
                   <div className="text-[10px] text-blue-400/80 uppercase font-bold tracking-widest">
-                    AI Extracted
+                    Invoice Extracted
                   </div>
-                  <div className="text-xs text-white font-mono mt-1 bg-black/50 p-1.5 rounded-md border border-white/5">
-                    {`{ "total": "$450.00" }`}
+                  <div className="text-xs text-white font-mono mt-1 bg-black/50 p-1.5 rounded-md border border-white/5 leading-relaxed">
+                    {`{ "totalAmount": 450.00,`}
+                    <br />
+                    {`  "currency": "USD",`}
+                    <br />
+                    {`  "lineItems": [...] }`}
                   </div>
                 </div>
               </div>

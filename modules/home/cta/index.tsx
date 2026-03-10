@@ -22,7 +22,7 @@ export function CTA() {
             isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
           }`}
         >
-          Stop Debugging PDF Rendering.
+          Stop Building Invoice Parsing From Scratch.
         </h2>
 
         <p
@@ -30,7 +30,7 @@ export function CTA() {
             isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
           }`}
         >
-          Start shipping reliable documents.
+          One API call. Structured JSON back. Every time.
         </p>
 
         {/* CTA Buttons */}

@@ -2,6 +2,7 @@ export { Sidebar } from "./index/sidebar";
 export { SettingsPage } from "./settings";
 export { BillingPage } from "./billing";
 export { UsagePage } from "./usage";
+export { LedgerPage } from "./ledger";
 export { ApiKeysPage } from "./api-key";
 export { DashboardPage } from "./dashboard";
 export { Breadcrumbs } from "./index/bread-crumbs";

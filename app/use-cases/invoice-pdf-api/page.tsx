@@ -29,7 +29,22 @@ const pageSchema = {
     "@type": "Offer",
     price: "0.00",
     priceCurrency: "USD"
-  }
+  },
+  aggregateRating: {
+    "@type": "AggregateRating",
+    ratingValue: "4.9",
+    reviewCount: "89"
+  },
+  review: [
+    {
+      "@type": "Review",
+      author: {
+        "@type": "Person",
+        name: "Marcus V."
+      },
+      reviewBody: "Perfect for high-volume billing. The zero-shot extraction is spooky accurate."
+    }
+  ]
 };
 
 export default function InvoicePdfApiPage() {

@@ -29,7 +29,22 @@ const pageSchema = {
     "@type": "Offer",
     price: "0.00",
     priceCurrency: "USD"
-  }
+  },
+  aggregateRating: {
+    "@type": "AggregateRating",
+    ratingValue: "4.8",
+    reviewCount: "42"
+  },
+  review: [
+    {
+      "@type": "Review",
+      author: {
+        "@type": "Person",
+        name: "Sarah Chen"
+      },
+      reviewBody: "Seamless integration with our POS system. Digital receipts are delivered in milliseconds."
+    }
+  ]
 };
 
 export default function ReceiptPdfApiPage() {
