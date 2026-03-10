@@ -6,7 +6,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // 1. Fetch Dynamic Posts
   const dynamicPosts = await getPublishedPosts();
-  const dynamicRoutes = dynamicPosts.map((post) => ({
+  const dynamicRoutes = dynamicPosts.map((post: any) => ({
     url: `${baseUrl}/insights/${post.slug}`,
     lastModified: new Date(post.updatedAt || post.createdAt).toISOString(),
     changeFrequency: "weekly" as const,

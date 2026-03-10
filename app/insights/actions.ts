@@ -1,9 +1,9 @@
 "use server";
 
-import { prisma } from "../../lib/prisma";
+import { blogPrisma } from "../../lib/db";
 
 export async function getPublishedPosts() {
-  return prisma.post.findMany({
+  return blogPrisma.post.findMany({
     where: { published: true },
     include: {
       category: true,
@@ -14,7 +14,7 @@ export async function getPublishedPosts() {
 }
 
 export async function getPostBySlug(slug: string) {
-  return prisma.post.findUnique({
+  return blogPrisma.post.findUnique({
     where: { slug, published: true },
     include: {
       category: true,
@@ -24,7 +24,7 @@ export async function getPostBySlug(slug: string) {
 }
 
 export async function getRecentPosts(limit = 3) {
-  return prisma.post.findMany({
+  return blogPrisma.post.findMany({
     where: { published: true },
     take: limit,
     include: {

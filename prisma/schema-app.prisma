@@ -1,0 +1,368 @@
+generator client {
+  provider   = "prisma-client-js"
+  output     = "../node_modules/@prisma/client-app"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id                         String       @id @default(uuid())
+  name                       String?
+  email                      String       @unique
+  emailVerified              Boolean      @default(false)
+  image                      String?
+  isActive                   Boolean      @default(true)
+  createdAt                  DateTime     @default(now())
+  updatedAt                  DateTime     @updatedAt @default(now())
+  welcomeEmailSent           Boolean      @default(false)
+  notificationBillingUpdates Boolean      @default(true)
+  notificationUsageAlerts    Boolean      @default(true)
+  role                       String       @default("user") // "user" or "platform-owner"
+  lastActiveAt               DateTime?
+  memberships                Membership[]
+  conversions                Conversion[]
+  webhookLogs                WebhookLog[]
+  sessions                   Session[]
+  accounts                   Account[]
+}
+
+model Organization {
+  id                     String       @id @default(uuid())
+  name                   String
+  planId                 String
+  stripeCustomerId       String?      @unique
+  lemonSqueezyCustomerId String?      @unique
+  paystackCustomerCode   String?      @unique
+  paddleCustomerId       String?
+  paddleSubscriptionId   String?
+  ipWhitelist            String[]     @default([])
+  planStartedAt          DateTime?
+  billingInterval        String       @default("month")
+  createdAt              DateTime     @default(now())
+  memberships            Membership[]
+  apiKeys                ApiKey[]
+  conversions            Conversion[]
+  usage                  Usage[]
+  templates              Template[]
+  webhookLogs            WebhookLog[]
+  invites                Invite[]
+  vendors                VendorIdentity[]
+  integrations           IntegrationConnection[]
+  financialDocuments     FinancialDocument[]
+  plan                   Plan         @relation(fields: [planId], references: [id])
+}
+
+model Membership {
+  id             String       @id @default(uuid())
+  organizationId String
+  userId         String
+  role           String       @default("MEMBER") // OWNER, MEMBER
+  createdAt      DateTime     @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+}
+
+model ApiKey {
+  id             String       @id @default(uuid())
+  organizationId String
+  userId         String // Who created/last used it
+  keyHash        String       @unique
+  type           String
+  lastUsedAt     DateTime?
+  expiresAt      DateTime?
+  createdAt      DateTime     @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([keyHash])
+  @@index([organizationId])
+}
+
+model Plan {
+  id                          String         @id @default(uuid())
+  name                        String         @unique
+  limit                       Int
+  stripePriceId               String?        @unique
+  lemonSqueezyVariantId       String?        @unique
+  paystackPlanCode            String?        @unique
+  priceNgn                    Int            @default(0)
+  priceUsd                    Int            @default(0)
+  priceNgnAnnual              Int            @default(0)
+  priceUsdAnnual              Int            @default(0)
+  maxSeats                    Int            @default(1)
+  aiTemplateLimit             Int            @default(0)
+  allowIpWhitelisting         Boolean        @default(false)
+  allowCustomHeaders          Boolean        @default(false)
+  allowWebhooks               Boolean        @default(false)
+  allowAi                     Boolean        @default(false)
+  allowTailwind               Boolean        @default(false)
+  allowGhostMode              Boolean        @default(false)
+  lemonSqueezyVariantIdAnnual String?        @unique
+  paddlePriceId               String?
+  paddlePriceIdAnnual         String?
+  maxFileSize                 Int            @default(10485760)
+  paystackPlanCodeAnnual      String?        @unique
+  rateLimitPerMin             Int            @default(10)
+  retentionDays               Int            @default(7)
+  aiLimit                     Int            @default(0)
+  organizations               Organization[]
+}
+
+model Usage {
+  id                String       @id @default(uuid())
+  organizationId    String
+  month             Int
+  year              Int
+  count             Int          @default(0)
+  aiCount           Int          @default(0)
+  aiTemplateCount   Int          @default(0)
+  createdAt         DateTime     @default(now())
+  organization      Organization @relation(fields: [organizationId], references: [id])
+
+  @@unique([organizationId, month, year])
+  @@index([organizationId, month, year])
+}
+
+model Conversion {
+  id             String       @id @default(uuid())
+  organizationId String
+  userId         String
+  url            String?
+  htmlBody       String?
+  htmlLength     Int?
+  success        Boolean      @default(false)
+  errorMsg       String?
+  duration       Int
+  creditsUsed    Int          @default(1)
+  fileSize       Int?
+  createdAt      DateTime     @default(now())
+  status         String       @default("PENDING")
+  retentionDays  Int          @default(7)
+  isGhostMode    Boolean      @default(false)
+  isTestMode     Boolean      @default(false)
+  aiMetadata     Json?
+  s3Key          String?
+  metadata       Json?
+  webhookUrl     String?
+  idempotencyKey String?
+  user           User         @relation(fields: [userId], references: [id])
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  webhookLogs    WebhookLog[]
+
+  @@unique([organizationId, idempotencyKey])
+  @@index([organizationId, createdAt])
+  @@index([idempotencyKey])
+}
+
+model IpUsage {
+  id        String   @id @default(uuid())
+  ip        String
+  month     Int
+  year      Int
+  count     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([ip, month, year])
+  @@index([ip, month, year])
+}
+
+model WebhookEvent {
+  id          String    @id @default(uuid())
+  type        String
+  createdAt   DateTime  @default(now())
+  payload     Json
+  url         String?
+  attempts    Int       @default(0)
+  lastAttempt DateTime?
+  nextRetry   DateTime?
+  status      String    @default("pending")
+  errorMsg    String?
+
+  @@index([status, nextRetry])
+}
+
+model WebhookLog {
+  id             String       @id @default(uuid())
+  conversionId   String
+  userId         String
+  organizationId String
+  url            String
+  payload        Json
+  statusCode     Int?
+  responseBody   String?
+  duration       Int?
+  createdAt      DateTime     @default(now())
+  conversion     Conversion   @relation(fields: [conversionId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id])
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  @@index([conversionId])
+  @@index([userId])
+  @@index([organizationId])
+}
+
+model Template {
+  id             String       @id @default(uuid())
+  organizationId String
+  name           String
+  html           String       @db.Text
+  css            String?      @db.Text
+  variables      String[]     @default([])
+  prompt         String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+}
+
+model Invite {
+  id             String       @id @default(uuid())
+  organizationId String
+  email          String
+  role           String       @default("MEMBER")
+  token          String       @unique
+  expiresAt      DateTime
+  createdAt      DateTime     @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([organizationId])
+  @@unique([organizationId, email])
+}
+
+model VendorIdentity {
+  id             String       @id @default(uuid())
+  organizationId String
+  originalName   String       // The raw name extracted
+  normalizedName String       // The standardized name
+  category       String?      // Optional classification (e.g. 'Software', 'Hosting')
+  confidence     Float?       // Track confidence of historical matches
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, normalizedName])
+  @@index([organizationId])
+}
+
+model Integration {
+  id          String   @id // e.g., 'xero', 'quickbooks'
+  name        String   // e.g., 'Xero'
+  category    String   // e.g., 'ACCOUNTING'
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  connections IntegrationConnection[]
+}
+
+model IntegrationConnection {
+  id             String       @id @default(uuid())
+  organizationId String
+  integrationId  String
+  tenantId       String?      // Xero specific - the actual company file connected
+  tenantName     String?      // e.g., 'Demo Company (Global)'
+  accessToken    String       @db.Text
+  refreshToken   String?      @db.Text
+  idToken        String?      @db.Text
+  expiresAt      DateTime?
+  status         String       @default("ACTIVE") // ACTIVE, EXPIRED, DISCONNECTED
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  integration    Integration  @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, integrationId])
+  @@index([organizationId])
+}
+
+model FinancialDocument {
+  id             String              @id @default(uuid())
+  organizationId String
+  type           String              @default("BILL") // BILL, INVOICE, RECEIPT
+  status         String              @default("PENDING") // DRAFT, PENDING, DISPATCHED, SYNCED, VOID
+  vendorName     String?
+  vendorEmail    String?
+  invoiceNumber  String?
+  currency       String              @default("USD")
+  totalAmount    Decimal             @db.Decimal(20, 4)
+  taxAmount      Decimal?            @db.Decimal(20, 4)
+  date           DateTime?
+  dueDate        DateTime?
+  s3Key          String?             // Reference to the original file
+  metadata       Json?               // Full AI extraction result
+  externalId     String?             // ID in the external ERP (QBO/Xero)
+  externalUrl    String?             // Link to the document in ERP
+  isTestMode     Boolean             @default(false)
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  organization   Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  lineItems      FinancialLineItem[]
+
+  @@index([organizationId])
+  @@index([status])
+  @@index([type])
+}
+
+model FinancialLineItem {
+  id          String            @id @default(uuid())
+  documentId  String
+  description String
+  quantity    Decimal           @default(1) @db.Decimal(20, 4)
+  unitPrice   Decimal           @db.Decimal(20, 4)
+  totalPrice  Decimal           @db.Decimal(20, 4)
+  accountCode String?           // ERP-specific account code mapping
+  taxCode     String?           // ERP-specific tax code mapping
+  document    FinancialDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([documentId])
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime? @default(now())
+  updatedAt  DateTime? @updatedAt
+
+  @@map("verification")
+}

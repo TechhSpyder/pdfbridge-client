@@ -1,28 +1,28 @@
-import { auth } from "@clerk/nextjs/server";
+import { headers } from "next/headers";
 
 export async function getSeverApiClient() {
-  const { getToken } = await auth();
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3003";
 
   const request = async (path: string, options: RequestInit = {}) => {
-    const token = await getToken();
+    const headerList = await headers();
+    const cookie = headerList.get("cookie") || "";
 
-    const headers: HeadersInit = {
+    const headersInit: HeadersInit = {
       ...options.headers,
-      Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
+      "Cookie": cookie, // Forward cookies to backend
     };
 
     const response = await fetch(`${baseUrl}${path}`, {
       ...options,
-      headers,
+      headers: headersInit,
     });
 
     if (!response.ok) {
       const error = await response
         .json()
-        .catch(() => ({ error: "Unknown error" }));
-      throw new Error(error.error || "Request failed");
+        .catch(() => ({ error: "Request failed" }));
+      throw new Error(error.error || error.message || "Request failed");
     }
 
     return response.json();
@@ -30,5 +30,10 @@ export async function getSeverApiClient() {
 
   return {
     get: (path: string) => request(path, { method: "GET" }),
+    post: (path: string, body?: any) => 
+      request(path, { 
+        method: "POST", 
+        body: body ? JSON.stringify(body) : undefined 
+      }),
   };
 }

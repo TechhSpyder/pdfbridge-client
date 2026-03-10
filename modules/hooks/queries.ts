@@ -19,6 +19,14 @@ export const useRotateKey = () => {
   });
 };
 
+export const useRevealKey = () => {
+  const api = useApiClient();
+  return useMutation({
+    mutationFn: (keyId: string) => api.post("/api/v1/keys/reveal", { keyId }),
+  });
+};
+
+
 export const useConversions = (
   page = 1,
   limit = 10,
@@ -40,7 +48,8 @@ export const useJobStatus = (jobId: string, pollInterval?: number) => {
     enabled: !!jobId,
     refetchInterval: (query) => {
       const data: any = query.state.data;
-      if (data?.status === "COMPLETED" || data?.status === "FAILED") return false;
+      if (data?.status === "COMPLETED" || data?.status === "FAILED")
+        return false;
       return pollInterval || 2000;
     },
   });
@@ -86,6 +95,14 @@ export const useVerifyPayment = () => {
   return useMutation({
     mutationFn: (reference: string) =>
       api.get(`/api/v1/billing/verify/${reference}`),
+  });
+};
+
+export const useVerifyPaddle = () => {
+  const api = useApiClient();
+  return useMutation({
+    mutationFn: (transactionId: string) =>
+      api.get(`/api/v1/billing/verify-paddle/${transactionId}`),
   });
 };
 
@@ -264,7 +281,13 @@ export const useNormalizeInvoice = () => {
   const api = useApiClient();
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ file, testMode = true }: { file: File; testMode?: boolean }) => {
+    mutationFn: ({
+      file,
+      testMode = true,
+    }: {
+      file: File;
+      testMode?: boolean;
+    }) => {
       const formData = new FormData();
       formData.append("file", file);
       if (testMode) formData.append("testMode", "true");

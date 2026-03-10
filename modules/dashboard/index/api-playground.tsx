@@ -123,6 +123,9 @@ export function ApiPlayground() {
   const [snippetLang, setSnippetLang] = useState<"curl" | "node" | "python">(
     "node",
   );
+  const [currentToastId, setCurrentToastId] = useState<string | number | null>(
+    null,
+  );
   const api = useApiClient();
   const saveMutation = useSaveTemplate();
   const normalizeMutation = useNormalizeInvoice();
@@ -159,22 +162,38 @@ export function ApiPlayground() {
   useEffect(() => {
     if (!jobStatus || !activeJobId) return;
 
-    if (jobStatus.status === "COMPLETED") {
+    const status = (jobStatus as any).state || (jobStatus as any).status;
+
+    if (status === "COMPLETED" || status === "SUCCESS" || status === "done") {
       toast.success("PDF Generated!", {
+        id: currentToastId || undefined,
         description: "Your document is ready for download.",
         action: {
           label: "Download",
-          onClick: () => window.open(jobStatus?.result?.url, "_blank"),
+          onClick: () => window.open((jobStatus as any)?.result?.url, "_blank"),
         },
       });
       setActiveJobId(null);
-    } else if (jobStatus.status === "FAILED") {
+      setCurrentToastId(null);
+    } else if (status === "FAILED") {
       toast.error("Generation Failed", {
-        description: jobStatus.result?.error || "An unknown error occurred.",
+        id: currentToastId || undefined,
+        description: (jobStatus as any).result?.error || "An unknown error occurred.",
       });
       setActiveJobId(null);
+      setCurrentToastId(null);
+    } else if (status === "processing") {
+      toast.loading("Generating PDF...", {
+        id: currentToastId || undefined,
+        description: "PDFBridge Engine is crafting your document.",
+      });
+    } else if (status === "PENDING") {
+      toast.loading("In Queue...", {
+        id: currentToastId || undefined,
+        description: "Waiting for an available worker.",
+      });
     }
-  }, [jobStatus, activeJobId]);
+  }, [jobStatus, activeJobId, currentToastId]);
 
   const handleTest = async () => {
     if (activeTab === "file") return;
@@ -199,15 +218,16 @@ export function ApiPlayground() {
 
       if (res.jobId) {
         setActiveJobId(res.jobId);
+        setCurrentToastId(tId);
+      } else {
+        toast.success("Conversion queued successfully!", {
+          id: tId,
+          description:
+            mode === "test"
+              ? "Test PDF will appear in Recent Activity."
+              : "PDF will appear in Recent Activity momentarily.",
+        });
       }
-
-      toast.success("Conversion queued successfully!", {
-        id: tId,
-        description:
-          mode === "test"
-            ? "Test PDF (watermarked) will appear in Recent Activity."
-            : "PDF will appear in Recent Activity momentarily.",
-      });
     } catch (e: any) {
       const isRateLimited =
         e.message?.toLowerCase().includes("rate limit") ||
@@ -532,13 +552,9 @@ export function ApiPlayground() {
                       <span className="inline-block w-6 text-slate-600 select-none opacity-50 text-[10px] mr-4">
                         {i + 1}
                       </span>
-                      {line.map((token, keyIdx) => {
-                        const { key: tokenKey, ...tokenProps } = getTokenProps({
-                          token,
-                          key: keyIdx,
-                        }) as any;
-                        return <span key={tokenKey} {...tokenProps} />;
-                      })}
+                      {line.map((token, keyIdx) => (
+                        <span key={keyIdx} {...getTokenProps({ token })} />
+                      ))}
                     </div>
                   );
                 })}

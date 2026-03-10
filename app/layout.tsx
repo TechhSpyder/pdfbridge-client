@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/modules/app/nav";
-import { ClerkProvider } from "@clerk/nextjs";
+
 import { Providers } from "@/modules/app/provider";
 import { PostHogProvider } from "@/modules/app/posthog-provider";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -95,19 +95,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ClerkProvider>
-      <html lang="en" suppressHydrationWarning>
-        <body
-          className={`${inter.variable} antialiased overflow-x-hidden w-full`}
-        >
-          <PostHogProvider>
-            <Navbar />
-            <Providers>{children}</Providers>
-            <SpeedInsights />
-            <Analytics />
-          </PostHogProvider>
-        </body>
-      </html>
-    </ClerkProvider>
+    <html lang="en" suppressHydrationWarning>
+      <body
+        className={`${inter.variable} antialiased overflow-x-hidden w-full`}
+      >
+        <PostHogProvider>
+          <Navbar />
+          <Providers>{children}</Providers>
+          <SpeedInsights />
+          <Analytics />
+        </PostHogProvider>
+      </body>
+    </html>
   );
 }

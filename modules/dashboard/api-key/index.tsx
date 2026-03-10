@@ -13,12 +13,12 @@ import {
   ShieldCheck,
   Zap,
 } from "lucide-react";
-import { useUser } from "@clerk/nextjs";
+import { useSession } from "@/lib/auth-client";
 import Title from "@/modules/app/title";
 import { toast } from "sonner";
 
 export function ApiKeysPage() {
-  const { user } = useUser();
+  const { data: session } = useSession();
   const rotateMutation = useRotateKey();
   const [newKey, setNewKey] = useState<{ key: string; type: string } | null>(
     null,

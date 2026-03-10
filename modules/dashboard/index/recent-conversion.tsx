@@ -71,9 +71,12 @@ export function RecentConversionsList() {
         <div className="h-16 w-16 bg-blue-500/10 rounded-full flex flex-col items-center justify-center mb-4 text-blue-500 shadow-inner border border-blue-500/20">
           <Activity className="h-8 w-8" />
         </div>
-        <h3 className="text-lg font-bold text-white mb-2">No conversions yet</h3>
+        <h3 className="text-lg font-bold text-white mb-2">
+          No conversions yet
+        </h3>
         <p className="text-slate-400 text-sm max-w-[250px] mx-auto leading-relaxed mb-6">
-          Your pipeline is completely set up. Send an API request or use the Playground below to generate your first PDF.
+          Your pipeline is completely set up. Send an API request or use the
+          Playground below to generate your first PDF.
         </p>
         <button
           onClick={() => {
@@ -263,16 +266,18 @@ export function RecentConversionsList() {
                             data-lenis-prevent
                           >
                             {tokens.map((line, i) => {
-                              const lineProps = getLineProps({ line, key: i });
+                              const { key, ...lineProps } = getLineProps({
+                                line,
+                                key: i,
+                              });
                               return (
-                                <div key={i} {...lineProps}>
+                                <div key={key as any} {...lineProps}>
                                   <span className="inline-block w-8 text-slate-600 select-none text-[10px]">
                                     {i + 1}
                                   </span>
-                                  {line.map((token, key) => {
-                                    const tokenProps = getTokenProps({ token });
-                                    return <span key={key} {...tokenProps} />;
-                                  })}
+                                  {line.map((token, k) => (
+                                    <span key={k} {...getTokenProps({ token })} />
+                                  ))}
                                 </div>
                               );
                             })}

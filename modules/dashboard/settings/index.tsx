@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useUser, UserProfile, useAuth } from "@clerk/nextjs";
+import { useSession, authClient } from "@/lib/auth-client";
 import { useMe } from "@/modules/hooks/queries";
-import { Button, GlowCard, SmartContactLink } from "@/modules/app";
+import { Button, GlowCard, SmartContactLink, UserAvatar } from "@/modules/app";
 import {
   Settings,
   CreditCard,
@@ -30,6 +30,7 @@ import { usePDFBridge } from "@/modules/hooks/use-pdfbridge";
 
 export function SettingsPage() {
   const { data: userData, isLoading: userLoading } = useMe();
+  const { data: session } = useSession();
   const updateSettingsMutation = useUpdateSettings();
 
   const handleToggle = async (key: string, value: boolean) => {
@@ -324,30 +325,45 @@ export function SettingsPage() {
 }
 
 function ProfileForm() {
-  const { user } = useUser();
-  const [firstName, setFirstName] = useState(user?.firstName || "");
-  const [lastName, setLastName] = useState(user?.lastName || "");
+  const { data: session } = useSession();
+  const userData = useMe();
+  const [name, setName] = useState(session?.user?.name || "");
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    if (user) {
-      setFirstName(user.firstName || "");
-      setLastName(user.lastName || "");
+    if (session?.user) {
+      setName(session.user.name || "");
     }
-  }, [user]);
+  }, [session]);
 
   const handleSave = async () => {
-    if (!user) return;
     setIsSaving(true);
     try {
-      await user.update({
-        firstName,
-        lastName,
-      });
+      // Proactive: Use the direct profile update endpoint and refresh user data
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || ""}/api/v1/me/profile`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({ name }),
+        },
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to update profile");
+      }
+
+      await authClient.getSession(); // Force better-auth session refresh
+      await userData.refetch(); // Refresh useMe hook data
+
       toast.success("Profile updated successfully!");
     } catch (e: any) {
       toast.error("Failed to update profile", {
-        description: e.errors?.[0]?.longMessage || e.message,
+        description: e.message || "An unexpected error occurred.",
       });
     } finally {
       setIsSaving(false);
@@ -357,41 +373,28 @@ function ProfileForm() {
   return (
     <div className="mt-6 space-y-6 pt-2 border-t border-white/5">
       <div className="flex items-center gap-6">
-        <img
-          src={user?.imageUrl}
-          alt="Avatar"
-          className="h-16 w-16 rounded-full border border-white/10"
+        <UserAvatar
+          name={session?.user?.name}
+          image={session?.user?.image}
+          size="lg"
         />
         <div>
           <h4 className="text-lg font-bold text-white flex items-center gap-2">
-            {user?.fullName}
+            {session?.user?.name || "Unknown User"}
           </h4>
-          <p className="text-sm text-slate-400">
-            {user?.primaryEmailAddress?.emailAddress}
-          </p>
+          <p className="text-sm text-slate-400">{session?.user?.email}</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4">
         <div className="space-y-2">
           <label className="text-[10px] font-bold text-slate-500 uppercase">
-            First Name
+            Full Name
           </label>
           <input
             type="text"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-            className="w-full bg-black/40 border border-white/5 text-slate-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500/50 transition-colors"
-          />
-        </div>
-        <div className="space-y-2">
-          <label className="text-[10px] font-bold text-slate-500 uppercase">
-            Last Name
-          </label>
-          <input
-            type="text"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
             className="w-full bg-black/40 border border-white/5 text-slate-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500/50 transition-colors"
           />
         </div>
@@ -400,10 +403,7 @@ function ProfileForm() {
       <div className="pt-4 flex justify-end border-t border-white/5">
         <Button
           onClick={handleSave}
-          disabled={
-            isSaving ||
-            (firstName === user?.firstName && lastName === user?.lastName)
-          }
+          disabled={isSaving || name === session?.user?.name}
           className="bg-blue-600 hover:bg-blue-500 text-white font-bold h-10 px-6 shadow-xl shadow-blue-500/10 transition-all disabled:opacity-50"
         >
           {isSaving ? "Saving..." : "Save Changes"}
@@ -489,10 +489,15 @@ function IntegrationsTab({ organizationId }: { organizationId?: string }) {
               </div>
             </div>
 
-            {xeroConnection ? (
+            {xeroConnection?.status === "ACTIVE" ? (
               <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-400 border border-emerald-500/20">
                 <div className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
                 Connected
+              </span>
+            ) : xeroConnection?.status === "EXPIRED" ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-yellow-500/10 px-2.5 py-1 text-xs font-medium text-yellow-400 border border-yellow-500/20">
+                <div className="h-1.5 w-1.5 rounded-full bg-yellow-400 animate-pulse" />
+                Reconnect required
               </span>
             ) : (
               <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-800 px-2.5 py-1 text-xs font-medium text-slate-400 border border-slate-700">
@@ -505,20 +510,39 @@ function IntegrationsTab({ organizationId }: { organizationId?: string }) {
             {xeroConnection ? (
               <>
                 <div className="text-xs text-slate-400 flex flex-col gap-1">
-                  <span>Syncing to tenant:</span>
-                  <strong className="text-white">
+                  <span>
+                    {xeroConnection.status === "EXPIRED"
+                      ? "Last synced to:"
+                      : "Syncing to tenant:"}
+                  </span>
+                  <strong
+                    className={`${xeroConnection.status === "EXPIRED" ? "text-slate-500" : "text-white"}`}
+                  >
                     {xeroConnection.tenantName || "Unknown Company"}
                   </strong>
                 </div>
-                <Button
-                  onClick={() => handleDisconnect("xero")}
-                  variant="outline"
-                  disabled={disconnectMutation.isPending}
-                  className="text-red-400 border-red-500/10 hover:text-red-300 hover:bg-red-400/10 h-8 text-xs px-3"
-                >
-                  <Unplug className="w-3 h-3 mr-2" />
-                  Disconnect
-                </Button>
+                <div className="flex gap-2">
+                  {xeroConnection.status === "EXPIRED" && (
+                    <Button
+                      onClick={() => handleConnect("xero")}
+                      disabled={connecting === "xero"}
+                      className="bg-yellow-600 hover:bg-yellow-500 text-white font-bold h-8 text-xs px-3"
+                    >
+                      {connecting === "xero" ? "Handshake..." : "Reconnect"}
+                    </Button>
+                  )}
+                  <Button
+                    onClick={() => handleDisconnect("xero")}
+                    variant="outline"
+                    disabled={disconnectMutation.isPending}
+                    className="text-red-400 border-red-500/10 hover:text-red-300 hover:bg-red-400/10 h-8 text-xs px-3"
+                  >
+                    <Unplug className="w-3 h-3 mr-2" />
+                    {xeroConnection.status === "EXPIRED"
+                      ? "Remove"
+                      : "Disconnect"}
+                  </Button>
+                </div>
               </>
             ) : (
               <div className="w-full flex justify-end">
@@ -559,10 +583,15 @@ function IntegrationsTab({ organizationId }: { organizationId?: string }) {
               </div>
             </div>
 
-            {quickbooksConnection ? (
+            {quickbooksConnection?.status === "ACTIVE" ? (
               <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-400 border border-emerald-500/20">
                 <div className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
                 Connected
+              </span>
+            ) : quickbooksConnection?.status === "EXPIRED" ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-yellow-500/10 px-2.5 py-1 text-xs font-medium text-yellow-400 border border-yellow-500/20">
+                <div className="h-1.5 w-1.5 rounded-full bg-yellow-400 animate-pulse" />
+                Reconnect required
               </span>
             ) : (
               <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-800 px-2.5 py-1 text-xs font-medium text-slate-400 border border-slate-700">
@@ -575,20 +604,41 @@ function IntegrationsTab({ organizationId }: { organizationId?: string }) {
             {quickbooksConnection ? (
               <>
                 <div className="text-xs text-slate-400 flex flex-col gap-1">
-                  <span>Syncing to company:</span>
-                  <strong className="text-white">
+                  <span>
+                    {quickbooksConnection.status === "EXPIRED"
+                      ? "Last synced to:"
+                      : "Syncing to company:"}
+                  </span>
+                  <strong
+                    className={`${quickbooksConnection.status === "EXPIRED" ? "text-slate-500" : "text-white"}`}
+                  >
                     {quickbooksConnection.tenantName || "QuickBooks Company"}
                   </strong>
                 </div>
-                <Button
-                  onClick={() => handleDisconnect("quickbooks")}
-                  variant="outline"
-                  disabled={disconnectMutation.isPending}
-                  className="text-red-400 border-red-500/10 hover:text-red-300 hover:bg-red-400/10 h-8 text-xs px-3"
-                >
-                  <Unplug className="w-3 h-3 mr-2" />
-                  Disconnect
-                </Button>
+                <div className="flex gap-2">
+                  {quickbooksConnection.status === "EXPIRED" && (
+                    <Button
+                      onClick={() => handleConnect("quickbooks")}
+                      disabled={connecting === "quickbooks"}
+                      className="bg-yellow-600 hover:bg-yellow-500 text-white font-bold h-8 text-xs px-3"
+                    >
+                      {connecting === "quickbooks"
+                        ? "Handshake..."
+                        : "Reconnect"}
+                    </Button>
+                  )}
+                  <Button
+                    onClick={() => handleDisconnect("quickbooks")}
+                    variant="outline"
+                    disabled={disconnectMutation.isPending}
+                    className="text-red-400 border-red-500/10 hover:text-red-300 hover:bg-red-400/10 h-8 text-xs px-3"
+                  >
+                    <Unplug className="w-3 h-3 mr-2" />
+                    {quickbooksConnection.status === "EXPIRED"
+                      ? "Remove"
+                      : "Disconnect"}
+                  </Button>
+                </div>
               </>
             ) : (
               <div className="w-full flex justify-end">

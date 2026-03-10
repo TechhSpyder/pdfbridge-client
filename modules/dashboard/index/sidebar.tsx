@@ -11,8 +11,9 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
+  UserAvatar,
 } from "@/modules/app";
-import { useClerk, useUser } from "@clerk/nextjs";
+import { authClient } from "@/lib/auth-client";
 import { LogOut, MessageCircle, Check, ChevronDown, Zap } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -50,8 +51,9 @@ const footerVariants: Variants = {
 
 function SidebarContent({ isSmallScreen, setSidebarOpen }: any) {
   const pathname = usePathname();
-  const { signOut } = useClerk();
-  const { user, isLoaded } = useUser();
+  const session = authClient.useSession();
+  const user = session.data?.user;
+  const isLoaded = !session.isPending;
   const { copied, copy } = useClipboard();
   const [open, setOpen] = useState(false);
   const router = useRouter();
@@ -83,12 +85,9 @@ function SidebarContent({ isSmallScreen, setSidebarOpen }: any) {
       <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
         {NAV_LINKS.filter((link) => {
           if (link.label === "Blog Journal") {
-            const userRole =
-              (user?.publicMetadata?.role as string) ||
-              (user?.publicMetadata?.userRole as string) ||
-              "";
-            const primaryEmail = user?.primaryEmailAddress?.emailAddress || "";
-            const allowedEmails = ["hello@techhspyder.com"]; // Fallback or sync with actions
+            const userRole = (user as any)?.role || "";
+            const primaryEmail = user?.email || "";
+            const allowedEmails = ["hello@techhspyder.com", "bellofrancis87@gmail.com"];
             return (
               userRole === "platform-owner" ||
               allowedEmails.includes(primaryEmail.toLowerCase())
@@ -157,27 +156,24 @@ function SidebarContent({ isSmallScreen, setSidebarOpen }: any) {
           {isLoaded && user && (
             <>
               <div className="flex items-center gap-3 px-1 mt-4 md:hidden border-t border-t-border pb-3">
-                <div className="h-8 w-8 rounded-full overflow-hidden border border-white/10">
-                  <Image
-                    src={user.imageUrl || ""}
-                    alt={user.fullName || "User"}
-                    width={32}
-                    height={32}
-                  />
-                </div>
+                <UserAvatar
+                  name={user.name}
+                  image={user.image}
+                  size="sm"
+                />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-white truncate">
-                    {user.fullName || "Developer"}
+                    {user.name || "Developer"}
                   </p>
                   <p className="text-xs text-slate-500 truncate">
-                    {user.primaryEmailAddress?.emailAddress}
+                    {user.email}
                   </p>
                 </div>
               </div>
 
               <button
-                onClick={() => {
-                  signOut();
+                onClick={async () => {
+                  await authClient.signOut();
                   if (isSmallScreen) setSidebarOpen(false);
                 }}
                 role="button"
@@ -195,17 +191,14 @@ function SidebarContent({ isSmallScreen, setSidebarOpen }: any) {
                       tabIndex={0}
                       className="flex items-center cursor-pointer gap-3 px-3 py-2 text-slate-400 hover:text-secondary-foreground transition-all duration-200 hover:bg-white/5 border border-transparent rounded-lg"
                     >
-                      <div className="h-8 w-8 rounded-full overflow-hidden border border-border">
-                        <Image
-                          src={user.imageUrl || ""}
-                          alt={user.fullName || "User"}
-                          width={32}
-                          height={32}
-                        />
-                      </div>
+                      <UserAvatar
+                        name={user.name}
+                        image={user.image}
+                        size="sm"
+                      />
 
                       <p className="text-sm font-medium truncate">
-                        {user.fullName || "Developer"}
+                        {user.name || "Developer"}
                       </p>
 
                       <ChevronDown
@@ -219,20 +212,17 @@ function SidebarContent({ isSmallScreen, setSidebarOpen }: any) {
 
                   <PopoverContent className="border-muted bg-popover w-[--radix-popover-trigger-width]!">
                     <div className="flex items-center gap-3 px-1 mb-4 border-b border-b-border pb-3">
-                      <div className="h-8 w-8 rounded-full overflow-hidden border border-white/10">
-                        <Image
-                          src={user.imageUrl || ""}
-                          alt={user.fullName || "User"}
-                          width={32}
-                          height={32}
-                        />
-                      </div>
+                      <UserAvatar
+                        name={user.name}
+                        image={user.image}
+                        size="sm"
+                      />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-white truncate">
-                          {user.fullName || "Developer"}
+                          {user.name || "Developer"}
                         </p>
                         <p className="text-xs text-slate-500 truncate">
-                          {user.primaryEmailAddress?.emailAddress}
+                          {user.email}
                         </p>
                       </div>
                     </div>
@@ -252,7 +242,10 @@ function SidebarContent({ isSmallScreen, setSidebarOpen }: any) {
                     </SmartContactLink>
 
                     <button
-                      onClick={() => signOut()}
+                      onClick={async () => {
+                        await authClient.signOut();
+                        router.push("/");
+                      }}
                       className="flex w-full items-center cursor-pointer gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-red-400 hover:bg-red-400/10 transition-all duration-200 group border border-transparent hover:border-red-500/20"
                     >
                       <LogOut className="h-4 w-4 text-slate-500 group-hover:text-red-400 transition-colors" />

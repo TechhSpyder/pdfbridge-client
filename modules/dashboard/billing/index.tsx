@@ -7,6 +7,7 @@ import {
   useBillingInfo,
   useCancelSubscription,
   usePlans,
+  useVerifyPaddle,
 } from "@/modules/hooks/queries";
 import { Button, SmartContactLink } from "@/modules/app";
 import {
@@ -39,13 +40,15 @@ export function BillingPage() {
   } = usePlans();
   const checkoutMutation = useCheckout();
   const verifyMutation = useVerifyPayment();
+  const verifyPaddle = useVerifyPaddle();
   const searchParams = useSearchParams();
   const { data: billingInfo } = useBillingInfo();
   const cancelMutation = useCancelSubscription();
+
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
   const [interval, setInterval] = useState<"month" | "year">("month");
   const verifyingRef = useRef(false);
-  const token = process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN!;
+
   useEffect(() => {
     if (userData?.billingInterval) {
       setInterval(userData.billingInterval as any);
@@ -53,7 +56,6 @@ export function BillingPage() {
   }, [userData?.billingInterval]);
 
   useEffect(() => {
-    // Initialize Paddle if it's available, or poll briefly if it's still loading
     const initPaddle = () => {
       if (window.Paddle) {
         const env =
@@ -63,6 +65,27 @@ export function BillingPage() {
         window.Paddle.Environment.set(env);
         window.Paddle.Initialize({
           token: process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN || "",
+          eventCallback: async (data: any) => {
+            console.log("[PADDLE] Event Captured:", data.name, data);
+            if (data.name === "checkout.completed") {
+              const tid = data.data.transaction_id || data.data.id;
+              if (tid && !verifyingRef.current) {
+                // Don't set verifyingRef here yet, as we want to allow URL fallback if this fails
+                const toastId = toast.loading("Confirming your upgrade...");
+                try {
+                  await verifyPaddle.mutateAsync(tid);
+                  toast.success("Welcome to the new tier!", { id: toastId });
+                  refetch();
+                } catch (e: any) {
+                  console.error("[PADDLE] Verif Error:", e);
+                  toast.error(
+                    "Manual verification failed. Webhook will retry.",
+                    { id: toastId },
+                  );
+                }
+              }
+            }
+          },
         });
         return true;
       }
@@ -70,10 +93,10 @@ export function BillingPage() {
     };
 
     if (!initPaddle()) {
-      const pollInterval = window.setInterval(() => {
-        if (initPaddle()) window.clearInterval(pollInterval);
+      const poll = window.setInterval(() => {
+        if (initPaddle()) window.clearInterval(poll);
       }, 500);
-      return () => window.clearInterval(pollInterval);
+      return () => window.clearInterval(poll);
     }
   }, []);
 
@@ -82,6 +105,9 @@ export function BillingPage() {
   useEffect(() => {
     const reference = searchParams.get("reference");
     const success = searchParams.get("success");
+    const transactionId =
+      searchParams.get("transactionId") ||
+      searchParams.get("paddle_transaction_id");
 
     if (reference && !verifyingRef.current) {
       verifyingRef.current = true;
@@ -107,10 +133,32 @@ export function BillingPage() {
           verifyingRef.current = false;
         },
       });
-    } else if (success === "true" && !reference) {
-      toast.success("Account successfully upgraded!", {
-        description: "Your new limits are now active across the edge network.",
+    } else if (transactionId && !verifyingRef.current) {
+      verifyingRef.current = true;
+      const tId = toast.loading("Verifying Paddle transaction...", {
+        description: "Your upgrade is being processed.",
       });
+
+      verifyPaddle.mutate(transactionId, {
+        onSuccess: () => {
+          toast.success("Account upgraded successfully!", { id: tId });
+          refetch();
+        },
+        onError: (err: any) => {
+          toast.error("Verification failed", {
+            id: tId,
+            description:
+              err.message ||
+              "Manual check failed. Webhook should trigger soon.",
+          });
+          verifyingRef.current = false;
+        },
+      });
+    } else if (success === "true" && !reference && !transactionId) {
+      toast.success("Account successfully upgraded!", {
+        description: "Your billing status is being updated.",
+      });
+      refetch();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
@@ -190,6 +238,7 @@ export function BillingPage() {
             displayMode: "overlay",
             theme: "dark",
             locale: "en",
+            successUrl: response.redirectUrl,
           },
           items: [
             {
@@ -203,9 +252,27 @@ export function BillingPage() {
 
           customData: {
             userId: response.userId,
+            organizationId: response.organizationId,
             planId: planId,
             product_name: `PDFBridge ${plansData.find((p: any) => p.id === planId)?.name}`,
             description: "Unlimited PDFs, no stress",
+          },
+          eventCallback: async (data: any) => {
+            if (data.name === "checkout.completed") {
+              const transactionId = data.data.transaction_id;
+              const tId2 = toast.loading("Verifying your upgrade...");
+              try {
+                await verifyPaddle.mutateAsync(transactionId);
+                toast.success("Account upgraded successfully!", { id: tId2 });
+                refetch();
+              } catch (err: any) {
+                console.error("Paddle verification failed:", err);
+                toast.error(
+                  "Upgrade verification failed. Please contact support.",
+                  { id: tId2 },
+                );
+              }
+            }
           },
         });
         toast.dismiss(tId);

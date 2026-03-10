@@ -1,41 +1,68 @@
 "use client";
 
 import React, { useState } from "react";
-import { useSignIn } from "@clerk/nextjs";
+import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { Button } from "@/modules/app/button";
-import { Mail, ArrowLeft, Loader2 } from "lucide-react";
+import { Mail, ArrowLeft, Loader2, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
+import { toast } from "sonner";
 
 export default function ForgotPasswordPage() {
-  const { isLoaded, signIn } = useSignIn();
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isLoaded) return;
 
     setLoading(true);
     setError("");
 
     try {
-      await signIn.create({
-        strategy: "reset_password_email_code",
-        identifier: email,
+      const { error: resetError } = await authClient.forgetPassword({
+        email,
+        redirectTo: "/reset-password",
       });
-      router.push(`/reset-password?email=${encodeURIComponent(email)}`);
+
+      if (resetError) {
+        throw new Error(resetError.message || "Failed to send reset link");
+      }
+
+      setSuccess(true);
+      toast.success("Reset link sent!");
     } catch (err: any) {
-      setError(
-        err.errors?.[0]?.message ||
-          "Failed to send reset code. Please check your email.",
-      );
+      setError(err.message || "Failed to send reset instructions. Please check your email.");
     } finally {
       setLoading(false);
     }
   };
+
+  if (success) {
+    return (
+      <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#020617] px-4 py-12">
+        <div className="relative z-10 w-full max-w-md text-center space-y-6 animate-in fade-in zoom-in duration-500">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-emerald-500/10 mb-4">
+            <CheckCircle2 className="h-10 w-10 text-emerald-500" />
+          </div>
+          <h2 className="text-3xl font-extrabold text-white">Check your email</h2>
+          <p className="text-slate-400">
+            We've sent a password reset link to <span className="text-white font-medium">{email}</span>. 
+            Please check your inbox and follow the instructions.
+          </p>
+          <div className="pt-4">
+            <Link href="/sign-in">
+              <Button variant="outline" className="w-full">
+                Back to sign in
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#020617] px-4 py-12">
@@ -95,10 +122,10 @@ export default function ForgotPasswordPage() {
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Sending code...
+                  Sending link...
                 </>
               ) : (
-                "Send Reset Code"
+                "Send Reset Link"
               )}
             </Button>
           </div>

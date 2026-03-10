@@ -110,7 +110,7 @@ export default function NextJsToPdfPage() {
                <Code2 className="text-slate-300" size={24} />
             </div>
             <h3 className="text-xl font-black mb-3">Protected Routes</h3>
-            <p className="text-sm text-slate-400 font-medium leading-relaxed">Pass Bearer tokens natively through the API to generate PDFs of dashboards locked behind Clerk or NextAuth.</p>
+            <p className="text-sm text-slate-400 font-medium leading-relaxed">Pass session cookies or Bearer tokens natively to generate PDFs of dashboards locked behind Better-Auth or NextAuth.</p>
           </div>
         </div>
 

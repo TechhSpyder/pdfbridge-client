@@ -396,8 +396,8 @@ export default async function InsightArticlePage({ params }: PostPageProps) {
               </h3>
               <div className="space-y-6">
                 {recentPosts
-                  .filter((p) => p.id !== post.id)
-                  .map((p) => (
+                  .filter((p: any) => p.id !== post.id)
+                  .map((p: any) => (
                     <Link
                       key={p.id}
                       href={`/insights/${p.slug}`}
