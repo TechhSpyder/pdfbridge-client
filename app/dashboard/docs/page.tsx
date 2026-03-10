@@ -1,5 +1,9 @@
-import { Documentation } from "@/modules/docs";
+import dynamic from "next/dynamic";
 import { Metadata } from "next";
+
+const Documentation = dynamic(() =>
+  import("@/modules/docs").then((mod) => mod.Documentation),
+);
 
 export const metadata: Metadata = {
   title: "API Documentation",
@@ -9,7 +13,7 @@ export const metadata: Metadata = {
 
 export default function DashboardDocsPage() {
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="relative space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Header */}
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">

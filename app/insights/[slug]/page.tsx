@@ -1,23 +1,71 @@
 import { getPostBySlug, getRecentPosts } from "../actions";
+import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 // import DOMPurify from "isomorphic-dompurify";
-import {
-  ChevronLeft,
-  Calendar,
-  Tag,
-  Clock,
-  Share2,
-  ArrowRight,
-  BookMarked,
-} from "lucide-react";
+import { ChevronLeft } from "lucide-react";
+import { Calendar } from "lucide-react";
+import { Tag } from "lucide-react";
+import { Clock } from "lucide-react";
+import { Share2 } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { BookMarked } from "lucide-react";
 import sanitizeHtml from "sanitize-html";
 
 export const dynamic = "force-dynamic";
 
 interface PostPageProps {
   params: Promise<{ slug: string }>;
+}
+
+export async function generateMetadata({
+  params,
+}: PostPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const post = await getPostBySlug(slug);
+
+  if (!post) {
+    return {
+      title: "Post Not Found",
+    };
+  }
+
+  const images = post.coverImage
+    ? [
+        {
+          url: post.coverImage,
+          width: 1200,
+          height: 630,
+          alt: post.title,
+        },
+      ]
+    : [];
+
+  return {
+    title: post.title,
+    description: post.description || post.title,
+    alternates: {
+      canonical: `https://pdfbridge.xyz/insights/${slug}`,
+    },
+    openGraph: {
+      title: post.title,
+      description: post.description || post.title,
+      type: "article",
+      url: `https://pdfbridge.xyz/insights/${slug}`,
+      images,
+      publishedTime: post.createdAt
+        ? new Date(post.createdAt).toISOString()
+        : undefined,
+      authors: [post.author?.name || "PDFBridge Team"],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.description || post.title,
+      images: post.coverImage ? [post.coverImage] : [],
+    },
+  };
 }
 
 export default async function InsightArticlePage({ params }: PostPageProps) {
@@ -33,8 +81,35 @@ export default async function InsightArticlePage({ params }: PostPageProps) {
   const wordCount = post.content.split(/\s+/).length;
   const readTime = Math.max(1, Math.ceil(wordCount / 200));
 
+  const articleSchema = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: post.title,
+    image: post.coverImage ? [post.coverImage] : [],
+    datePublished: new Date(post.createdAt).toISOString(),
+    dateModified: post.updatedAt
+      ? new Date(post.updatedAt).toISOString()
+      : new Date(post.createdAt).toISOString(),
+    author: [
+      {
+        "@type": "Person",
+        name: post.author?.name || "Francis Bello",
+        url: "https://www.linkedin.com/in/francisbello/",
+      },
+    ],
+  };
+
+  const authorName = post.author?.name || "Francis Bello";
+  const authorAvatar =
+    post.author?.avatar ||
+    "https://avatars.githubusercontent.com/u/91897994?v=4&size=64";
+
   return (
     <article className="min-h-screen bg-slate-950 text-white selection:bg-blue-500/30 pb-20">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+      />
       {/* Background Decor */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
         <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-blue-600/5 blur-[150px] rounded-full translate-x-1/2 -translate-y-1/2" />
@@ -86,33 +161,56 @@ export default async function InsightArticlePage({ params }: PostPageProps) {
             <div className="flex items-center gap-2 group">
               <div className="h-10 w-10 rounded-full overflow-hidden border border-white/10 group-hover:border-blue-500/50 transition-colors">
                 <Image
-                  src={
-                    post.author?.avatar ||
-                    "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80"
-                  }
-                  alt={post.author?.name || "Admin"}
+                  src={authorAvatar}
+                  alt={authorName}
                   width={40}
                   height={40}
                   className="object-cover"
+                  sizes="40px"
                 />
               </div>
               <div>
                 <span className="block text-slate-400 text-[11px] mb-0.5">
-                  {post.author?.name || "Admin"}
+                  {authorName}
                 </span>
-                <span className="block text-slate-600">Product Engineer</span>
+                <span className="block text-slate-600">Founder & Engineer</span>
               </div>
             </div>
 
             <div className="h-4 w-px bg-white/10" />
 
-            <div className="flex items-center gap-2">
-              <Calendar size={14} className="text-blue-500" />
-              {new Date(post.createdAt).toLocaleDateString("en-US", {
-                month: "long",
-                day: "numeric",
-                year: "numeric",
-              })}
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <Calendar size={14} className="text-blue-500" />
+                <span className="text-slate-400">
+                  Published{" "}
+                  <time dateTime={new Date(post.createdAt).toISOString()}>
+                    {new Date(post.createdAt).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
+                  </time>
+                </span>
+              </div>
+
+              {post.updatedAt &&
+                new Date(post.updatedAt).getTime() !==
+                  new Date(post.createdAt).getTime() && (
+                  <div className="flex items-center gap-2">
+                    <div className="h-1 w-1 bg-white/20 rounded-full" />
+                    <span className="text-slate-400">
+                      Updated{" "}
+                      <time dateTime={new Date(post.updatedAt).toISOString()}>
+                        {new Date(post.updatedAt).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </time>
+                    </span>
+                  </div>
+                )}
             </div>
 
             <div className="flex items-center gap-2">
@@ -127,64 +225,94 @@ export default async function InsightArticlePage({ params }: PostPageProps) {
       <main className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-16 relative z-10">
         <div className="lg:col-span-8">
           {/* Featured Image */}
-          <div className="aspect-video relative rounded-3xl overflow-hidden border border-white/10 mb-12 shadow-2xl">
-            <Image
-              src={
-                post.coverImage ||
-                "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80"
-              }
-              alt={post.title}
-              fill
-              className="object-cover"
-              priority
-            />
-          </div>
+          {post.coverImage && (
+            <div className="aspect-video relative rounded-3xl overflow-hidden border border-white/10 mb-12 shadow-2xl">
+              <Image
+                src={post.coverImage}
+                alt={post.title}
+                fill
+                className="object-cover"
+                priority
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
+              />
+            </div>
+          )}
 
           {/* Article Content */}
+          {/* Article Content */}
           <div className="prose prose-invert prose-blue prose-lg max-w-none prose-headings:font-black prose-headings:tracking-tighter prose-p:font-medium prose-p:text-slate-300 prose-p:leading-relaxed prose-strong:text-white prose-a:text-blue-400 prose-code:text-blue-200">
+            <style
+              dangerouslySetInnerHTML={{
+                __html: `
+              .prose h1 { font-size: 2.25em !important; margin-top: 0 !important; margin-bottom: 0.8em !important; line-height: 1.1 !important; font-weight: 800 !important; color: #ffffff !important; }
+              .prose h2 { font-size: 1.5em !important; margin-top: 2em !important; margin-bottom: 1em !important; line-height: 1.3 !important; font-weight: 700 !important; color: #f8fafc !important; }
+              .prose ul { list-style-type: disc !important; padding-left: 1.5em !important; margin-top: 1.25em !important; margin-bottom: 1.25em !important; }
+              .prose ol { list-style-type: decimal !important; padding-left: 1.5em !important; margin-top: 1.25em !important; margin-bottom: 1.25em !important; }
+              .prose li { margin-top: 0.5em !important; margin-bottom: 0.5em !important; display: list-item !important; }
+              .prose table { width: 100%; border-collapse: collapse; margin: 2rem 0; font-size: 0.9rem; line-height: 1.5; }
+              .prose th { background: rgba(255, 255, 255, 0.15); font-weight: 700; text-align: left; padding: 0.75rem 1rem; border: 1px solid rgba(255, 255, 255, 0.25); }
+              .prose td { padding: 0.75rem 1rem; border: 1px solid rgba(255, 255, 255, 0.25); color: #cbd5e1; }
+              .prose pre { background: #1e293b !important; border: 1px solid rgba(255, 255, 255, 0.2) !important; padding: 1.5rem !important; border-radius: 1rem !important; margin: 2.5rem 0 !important; box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5); }
+              .prose code { font-family: var(--font-mono), monospace !important; font-size: 0.95rem !important; background: transparent !important; padding: 0 !important; }
+              .prose p { margin-bottom: 2rem !important; }
+              .prose hr { border: none !important; border-top: 2px solid rgba(255, 255, 255, 0.3) !important; margin: 4rem 0 !important; }
+              .prose mark { background-color: rgba(59, 130, 246, 0.3); color: inherit; padding: 0 0.2rem; border-radius: 0.2rem; }
+              .prose strong, .prose b { color: #ffffff !important; font-weight: 800 !important; }
+            `,
+              }}
+            />
             <div
               dangerouslySetInnerHTML={{
-                __html: sanitizeHtml(post.content, {
-                  allowedTags: sanitizeHtml.defaults.allowedTags.concat([
-                    "img",
-                    "table",
-                    "thead",
-                    "tbody",
-                    "tr",
-                    "th",
-                    "td",
-                    "pre",
-                    "code",
-                    "span",
-                    "br",
-                    "hr",
-                    "u",
-                  ]),
-                  allowedAttributes: {
-                    ...sanitizeHtml.defaults.allowedAttributes,
-                    span: ["class", "style"],
-                    code: ["class"],
-                    p: ["style", "class"],
-                    h1: ["style", "class"],
-                    h2: ["style", "class"],
-                    h3: ["style", "class"],
-                    a: ["href", "name", "target", "class"],
-                    mark: ["class"],
-                  },
-                  allowedClasses: {
-                    "*": ["text-*", "bg-*", "underline", "prose-*", "hljs-*"],
-                  },
-                  allowedStyles: {
-                    "*": {
-                      "text-align": [
-                        /^left$/,
-                        /^right$/,
-                        /^center$/,
-                        /^justify$/,
-                      ],
+                __html: sanitizeHtml(
+                  post.content.replace(
+                    /<tbody>\s*(<tr>(?:\s*<th[^>]*>[\s\S]*?<\/th>)+\s*<\/tr>)/gi,
+                    "<thead>$1</thead><tbody>",
+                  ),
+                  {
+                    allowedTags: sanitizeHtml.defaults.allowedTags.concat([
+                      "img",
+                      "table",
+                      "thead",
+                      "tbody",
+                      "tr",
+                      "th",
+                      "td",
+                      "pre",
+                      "code",
+                      "span",
+                      "br",
+                      "hr",
+                      "u",
+                      "s",
+                      "strong",
+                      "b",
+                      "em",
+                      "i",
+                      "div",
+                    ]),
+                    allowedAttributes: {
+                      ...sanitizeHtml.defaults.allowedAttributes,
+                      "*": ["class", "style"],
+                      a: ["href", "name", "target", "class", "style"],
+                    },
+                    allowedClasses: {
+                      "*": ["*"],
+                    },
+                    allowedStyles: {
+                      "*": {
+                        "text-align": [
+                          /^left$/,
+                          /^right$/,
+                          /^center$/,
+                          /^justify$/,
+                        ],
+                        "font-weight": [/.*/],
+                        "font-style": [/.*/],
+                        "text-decoration": [/.*/],
+                      },
                     },
                   },
-                }),
+                ),
               }}
             />
           </div>
@@ -204,40 +332,71 @@ export default async function InsightArticlePage({ params }: PostPageProps) {
 
           <hr className="my-16 border-white/5" />
 
+          {/* Internal Links/Dead End Fix */}
+          <div className="mb-16 p-8 rounded-3xl bg-blue-900/10 border border-blue-500/20">
+            <h3 className="text-xl font-black mb-4">
+              Start Generating PDFs Today
+            </h3>
+            <p className="text-slate-400 font-medium mb-6">
+              PDFBridge provides the most scalable HTML-to-PDF infrastructure on
+              the market. Say goodbye to managing headless browsers.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center gap-4">
+              <Link
+                href="/sign-up"
+                className="w-full sm:w-auto px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-center transition-colors shadow-lg shadow-blue-500/20"
+              >
+                Start Building Free
+              </Link>
+              <Link
+                href="/#pricing"
+                className="w-full sm:w-auto px-6 py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white font-bold text-center transition-colors"
+              >
+                View Pricing
+              </Link>
+              <Link
+                href="/docs"
+                className="w-full sm:w-auto px-6 py-3 rounded-xl text-slate-400 hover:text-white font-bold text-center transition-colors"
+              >
+                Read Docs →
+              </Link>
+            </div>
+          </div>
+
           {/* Author Footer Card */}
           <div className="p-8 rounded-3xl bg-slate-900/50 border border-white/5 backdrop-blur-sm flex flex-col md:flex-row gap-8 items-center">
             <div className="h-20 w-20 rounded-2xl overflow-hidden border border-white/10 shrink-0">
               <Image
-                src={
-                  post.author?.avatar ||
-                  "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80"
-                }
-                alt={post.author?.name || "Admin"}
+                src={authorAvatar}
+                alt={authorName}
                 width={80}
                 height={80}
                 className="object-cover"
+                sizes="80px"
               />
             </div>
             <div className="flex-1 text-center md:text-left">
               <h4 className="text-lg font-black mb-2">
-                Written by {post.author?.name || "Admin"}
+                Written by {authorName}
               </h4>
               <p className="text-slate-500 text-sm font-medium leading-relaxed mb-4">
                 {post.author?.bio ||
-                  "Exploring the intersection of engineering and design at PDFBridge. Passionate about scalability and reliable document processing."}
+                  "Founder of PDFBridge. I am passionate about simplifying digital infrastructure and building reliable APIs that developers love."}
               </p>
               <div className="flex items-center justify-center md:justify-start gap-4">
                 <Link
-                  href="#"
+                  href="https://twitter.com/Francis_coder"
+                  target="_blank"
                   className="text-xs font-black uppercase tracking-widest text-slate-400 hover:text-white transition-colors"
                 >
                   Twitter
                 </Link>
                 <Link
-                  href="#"
+                  href="https://www.linkedin.com/in/francisbello/"
+                  target="_blank"
                   className="text-xs font-black uppercase tracking-widest text-slate-400 hover:text-white transition-colors"
                 >
-                  GitHub
+                  LinkedIn
                 </Link>
               </div>
             </div>
@@ -293,7 +452,7 @@ export default async function InsightArticlePage({ params }: PostPageProps) {
                 PDFBridge.
               </p>
               <Link
-                href="/dashboard"
+                href="/sign-up"
                 className="w-full inline-flex items-center justify-center px-6 py-3 rounded-2xl bg-white text-blue-700 text-xs font-black uppercase tracking-widest hover:bg-slate-50 transition-colors relative z-10"
               >
                 Start for Free

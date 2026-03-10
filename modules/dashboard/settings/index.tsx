@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useUser, UserProfile } from "@clerk/nextjs";
 import { useMe } from "@/modules/hooks/queries";
 import { Button, GlowCard, SmartContactLink } from "@/modules/app";
@@ -16,6 +17,7 @@ import {
 import Link from "next/link";
 import { useUpdateSettings } from "@/modules/hooks/queries";
 import { toast } from "sonner";
+import Title from "@/modules/app/title";
 
 export function SettingsPage() {
   const { data: userData, isLoading: userLoading } = useMe();
@@ -26,21 +28,19 @@ export function SettingsPage() {
       await updateSettingsMutation.mutateAsync({ [key]: value });
       toast.success("Preferences updated");
     } catch (e: any) {
-      toast.error(e.message);
+      toast.error("Failed to update preferences", {
+        description: e.message || "Please check your network and try again.",
+      });
     }
   };
 
   return (
     <div className="max-w-5xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
-      <div>
-        <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-          <Settings className="h-8 w-8 text-slate-400" />
-          Settings & Billing
-        </h1>
-        <p className="mt-1 text-slate-400 text-sm">
-          Manage your account security, profile, and subscription preferences.
-        </p>
-      </div>
+      <Title
+        title="Settings & Billing"
+        description="Manage your account security, profile, and subscription preferences."
+        icon={<Settings className="h-8 w-8 text-slate-400" />}
+      />
 
       <div className="grid gap-8 lg:grid-cols-2">
         <div className="lg:col-span-2 space-y-12">
@@ -126,24 +126,20 @@ export function SettingsPage() {
                   privacy.
                 </p>
                 <div className="pt-4 flex flex-col gap-3">
-                  <button
-                    onClick={() =>
-                      toast.info("Detailed Security Docs arriving in V1.1")
-                    }
+                  <Link
+                    href="/terms"
                     className="text-left text-xs text-blue-400 hover:text-blue-300 flex items-center justify-between group cursor-pointer"
                   >
-                    Security Documentation
+                    Terms of Service
                     <ChevronRight className="h-3 w-3 group-hover:translate-x-1 transition-transform" />
-                  </button>
-                  <button
-                    onClick={() =>
-                      toast.info("Privacy Policy portal coming soon")
-                    }
+                  </Link>
+                  <Link
+                    href="/privacy"
                     className="text-left text-xs text-blue-400 hover:text-blue-300 flex items-center justify-between group cursor-pointer"
                   >
                     Privacy Policy
                     <ChevronRight className="h-3 w-3 group-hover:translate-x-1 transition-transform" />
-                  </button>
+                  </Link>
                 </div>
               </div>
 
@@ -154,7 +150,7 @@ export function SettingsPage() {
                   conversions and delete all your API keys permanently.
                 </p>
                 <SmartContactLink
-                  email="support@pdfbridge.xyz"
+                  email="support@techhspyder.com"
                   isButton
                   className="w-full text-xs h-9 border-red-500/20 text-red-500 hover:bg-red-500/10 hover:border-red-500/40 transition-colors cursor-pointer border rounded-md flex items-center justify-center font-bold"
                 >
@@ -234,7 +230,7 @@ export function SettingsPage() {
             />
           </div>
 
-          {/* Personal Info via Clerk */}
+          {/* Identity & Profile Management */}
           <div className="space-y-6">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-slate-800/50">
@@ -245,38 +241,104 @@ export function SettingsPage() {
               </h3>
             </div>
 
-            <div className="rounded-2xl border border-white/5 bg-slate-900/40 overflow-hidden shadow-2xl overflow-y-auto max-h-[1200px]">
-              <UserProfile
-                appearance={{
-                  elements: {
-                    rootBox: "w-full",
-                    card: "bg-transparent shadow-none border-none p-0 w-full",
-                    navbar: "hidden",
-                    headerTitle: "hidden",
-                    headerSubtitle: "hidden",
-                    scrollBox: "bg-transparent",
-                    pageScrollBox: "p-0",
-                    userButtonPopoverCard:
-                      "bg-slate-900 border border-white/10",
-                    profileSectionTitleText: "text-white text-sm font-bold",
-                    profileSectionPrimaryButton:
-                      "text-blue-400 hover:text-blue-300",
-                    userButtonBlockButtonText: "text-white",
-                    formButtonPrimary: "bg-blue-600 hover:bg-blue-500",
-                    formFieldInput:
-                      "bg-black/40 border-white/10 text-white focus:border-blue-500 transition-colors",
-                    formFieldLabel: "text-slate-400 text-xs",
-                    footer: "hidden",
-                    profileSection:
-                      "px-6 py-6 border-b border-white/5 last:border-0",
-                    accordionTriggerButton: "text-white hover:bg-white/5",
-                    breadcrumbs: "hidden",
-                  },
-                }}
-              />
-            </div>
+            <GlowCard
+              title="Profile Details"
+              sub="Manage your personal information."
+              icon={<UserIcon className="h-5 w-5 text-blue-400" />}
+              content={<ProfileForm />}
+            />
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function ProfileForm() {
+  const { user } = useUser();
+  const [firstName, setFirstName] = useState(user?.firstName || "");
+  const [lastName, setLastName] = useState(user?.lastName || "");
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      setFirstName(user.firstName || "");
+      setLastName(user.lastName || "");
+    }
+  }, [user]);
+
+  const handleSave = async () => {
+    if (!user) return;
+    setIsSaving(true);
+    try {
+      await user.update({
+        firstName,
+        lastName,
+      });
+      toast.success("Profile updated successfully!");
+    } catch (e: any) {
+      toast.error("Failed to update profile", {
+        description: e.errors?.[0]?.longMessage || e.message,
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <div className="mt-6 space-y-6 pt-2 border-t border-white/5">
+      <div className="flex items-center gap-6">
+        <img
+          src={user?.imageUrl}
+          alt="Avatar"
+          className="h-16 w-16 rounded-full border border-white/10"
+        />
+        <div>
+          <h4 className="text-lg font-bold text-white flex items-center gap-2">
+            {user?.fullName}
+          </h4>
+          <p className="text-sm text-slate-400">
+            {user?.primaryEmailAddress?.emailAddress}
+          </p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <label className="text-[10px] font-bold text-slate-500 uppercase">
+            First Name
+          </label>
+          <input
+            type="text"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            className="w-full bg-black/40 border border-white/5 text-slate-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500/50 transition-colors"
+          />
+        </div>
+        <div className="space-y-2">
+          <label className="text-[10px] font-bold text-slate-500 uppercase">
+            Last Name
+          </label>
+          <input
+            type="text"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            className="w-full bg-black/40 border border-white/5 text-slate-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500/50 transition-colors"
+          />
+        </div>
+      </div>
+
+      <div className="pt-4 flex justify-end border-t border-white/5">
+        <Button
+          onClick={handleSave}
+          disabled={
+            isSaving ||
+            (firstName === user?.firstName && lastName === user?.lastName)
+          }
+          className="bg-blue-600 hover:bg-blue-500 text-white font-bold h-10 px-6 shadow-xl shadow-blue-500/10 transition-all disabled:opacity-50"
+        >
+          {isSaving ? "Saving..." : "Save Changes"}
+        </Button>
       </div>
     </div>
   );

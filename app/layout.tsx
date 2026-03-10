@@ -4,12 +4,16 @@ import "./globals.css";
 import { Navbar } from "@/modules/app/nav";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Providers } from "@/modules/app/provider";
+import { PostHogProvider } from "@/modules/app/posthog-provider";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
+import Script from "next/script";
 
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
+  display: "swap",
+  preload: true,
 });
 export const metadata: Metadata = {
   metadataBase: new URL("https://pdfbridge.xyz"),
@@ -27,6 +31,14 @@ export const metadata: Metadata = {
     "gotenberg",
     "developer tools",
     "automated document generation",
+    "html to pdf api",
+    "automated pdf generation",
+    "react pdf export",
+    "pdf rendering issues",
+    "secure document conversion",
+    "bulk pdf creation",
+    "javascript pdf output",
+    "invoice pdf automation",
   ],
   authors: [{ name: "PDFBridge Team" }],
   creator: "PDFBridge",
@@ -36,14 +48,18 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
     title: "PDFBridge | Modern API for PDF Generation",
-    description: "The developer's bridge to perfect PDFs.",
+    description:
+      "The high-performance bridge between your code and perfect documents. Support for Tailwind, Intelligent PDF Analysis, and Zero-Storage privacy.",
     url: "https://pdfbridge.xyz",
     siteName: "PDFBridge",
     images: [
       {
-        url: "https://res.cloudinary.com/duv0exsir/image/upload/v1769535362/branded_og_image_pdfbridge_1769534994459_qn8iyg.jpg", // We should generate this later if it doesn't exist
+        url: "https://res.cloudinary.com/duv0exsir/image/upload/v1769535362/branded_og_image_pdfbridge_1769534994459_qn8iyg.jpg",
         width: 1200,
         height: 630,
         alt: "PDFBridge - Modern PDF Generation API",
@@ -56,11 +72,11 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "PDFBridge | Modern API for PDF Generation",
     description:
-      "Generate high-quality PDFs from URLs and HTML with a single API call.",
+      "Generate high-quality PDFs from URLs and HTML with a single API call. Tailwind-Native & AI-Powered.",
     images: [
       "https://res.cloudinary.com/duv0exsir/image/upload/v1769535362/branded_og_image_pdfbridge_1769534994459_qn8iyg.jpg",
     ],
-    creator: "@pdfbridge",
+    creator: "@TechhSpyder",
   },
   icons: {
     icon: [
@@ -75,17 +91,21 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
-        <body className={`${inter.variable} antialiased`}>
-          <Navbar />
-          <Providers>{children}</Providers>
-          <SpeedInsights />
-          <Analytics />
+        <body
+          className={`${inter.variable} antialiased overflow-x-hidden w-full`}
+        >
+          <PostHogProvider>
+            <Navbar />
+            <Providers>{children}</Providers>
+            <SpeedInsights />
+            <Analytics />
+          </PostHogProvider>
         </body>
       </html>
     </ClerkProvider>

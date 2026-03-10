@@ -22,13 +22,13 @@ const Privacy: FC = () => {
 
       <h1 className="text-3xl font-bold mb-4">Privacy Policy</h1>
       <p className="mb-6">
-        <strong>Last Updated:</strong> 26/01/2026
+        <strong>Last Updated:</strong> 19/02/2026
       </p>
 
       <p className="mb-4">
-        PDFBridge is operated by <strong>Francis Bello</strong>, under the brand{" "}
-        <strong>TechhSpyder</strong>. This Privacy Policy explains how I
-        collect, use, and protect your data.
+        PDFBridge is operated by{" "}
+        <strong>TechhSpyder Product Studio Ltd.</strong>. This Privacy Policy
+        explains how we collect, use, and protect your data.
       </p>
 
       <section className="mb-6">
@@ -66,7 +66,12 @@ const Privacy: FC = () => {
         <h2 className="text-xl font-semibold mb-2">3. File Privacy</h2>
         <ul className="list-disc list-inside">
           <li>Files are processed solely to deliver the Service</li>
-          <li>Temporary storage may occur</li>
+          <li>Temporary storage may occur (standard 7-day retention)</li>
+          <li>
+            <strong>Ghost Mode:</strong> If enabled, the file is instantly
+            deleted after the rendering process and webhook delivery. No copy is
+            retained in our storage systems.
+          </li>
           <li>Files are never sold or manually reviewed</li>
         </ul>
       </section>
@@ -80,16 +85,34 @@ const Privacy: FC = () => {
           <li>Legal authorities when required</li>
         </ul>
         <p>
-          I do <strong>not</strong> sell your data.
+          We do <strong>not</strong> sell your data.
+        </p>
+        <p className="mt-2">
+          Where PDFBridge processes personal data on behalf of customers, such
+          processing is governed by our{" "}
+          <Link href="/dpa" className="underline">
+            Data Processing Agreement
+          </Link>
+          .
         </p>
       </section>
 
       <section className="mb-6">
         <h2 className="text-xl font-semibold mb-2">5. Data Retention</h2>
-        <p>
-          Data is retained only as necessary for service delivery and
-          legal/accounting obligations.
-        </p>
+        <ul className="list-disc list-inside">
+          <li>
+            <strong>Generated Files:</strong> Automatically purged from storage
+            after 7 days. If Ghost Mode is active, deletion is instantaneous.
+          </li>
+          <li>
+            <strong>Metadata & Webhook Logs:</strong> Retained for 45 days for
+            billing, account history, and debugging purposes.
+          </li>
+          <li>
+            <strong>Account Data:</strong> Retained as long as your account is
+            active.
+          </li>
+        </ul>
       </section>
 
       <section className="mb-6">

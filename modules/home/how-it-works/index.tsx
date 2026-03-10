@@ -20,9 +20,9 @@ const steps = [
   },
   {
     step: "03",
-    title: "Download your PDF",
+    title: "Download PDF & Extract JSON",
     description:
-      "Receive a persistent, globally available Cloudflare R2 link instantly.",
+      "Receive a persistent Cloudflare R2 link instantly, alongside AI-extracted JSON metadata ready for your database.",
     icon: Download,
   },
 ];
@@ -40,7 +40,7 @@ export function HowItWorks() {
           }`}
         >
           <h2 className="text-3xl font-semibold tracking-tight">
-            How it works
+            How It Works
           </h2>
           <p className="mt-4 text-muted-foreground">
             Generate production-ready PDFs in three simple steps.
@@ -52,7 +52,7 @@ export function HowItWorks() {
           {steps.map((step, index) => (
             <div
               key={step.step}
-              className={`relative rounded-2xl border border-border bg-background p-6 transition-all duration-700 ease-out ${
+              className={`relative rounded-2xl border border-white/15 bg-background p-6 transition-all duration-700 ease-out ${
                 isVisible
                   ? "translate-y-0 opacity-100"
                   : "translate-y-8 opacity-0"

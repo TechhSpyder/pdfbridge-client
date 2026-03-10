@@ -1,13 +1,15 @@
 {
   "name": "pdfbridge-client",
   "version": "0.1.0",
+  "author": "TechhSpyder Product Studio Ltd.",
   "private": true,
   "scripts": {
     "dev": "next dev --webpack",
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "release": "release-it"
   },
   "dependencies": {
     "@ark-ui/react": "^5.30.0",
@@ -42,6 +44,7 @@
     "lowlight": "^3.3.0",
     "lucide-react": "^0.562.0",
     "next": "16.1.2",
+    "posthog-js": "^1.357.1",
     "prism-react-renderer": "^2.4.1",
     "react": "19.2.3",
     "react-dom": "19.2.3",

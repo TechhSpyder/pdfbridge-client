@@ -3,6 +3,8 @@ import { currentUser } from "@clerk/nextjs/server";
 import { MailWarning } from "lucide-react";
 import { Button } from "@/modules/app/button";
 import { redirect } from "next/navigation";
+import { InactivityHandler } from "@/modules/auth/inactivity-handler";
+import Script from "next/script";
 
 export default async function DashboardLayout({
   children,
@@ -62,13 +64,18 @@ export default async function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-[#020617] text-white flex">
+      <Script
+        src="https://cdn.paddle.com/paddle/v2/paddle.js"
+        strategy="lazyOnload"
+      />
+      <InactivityHandler />
       {/* Dashboard Sidebar */}
       <Sidebar />
 
-      <main className="w-full overflow-hidden">
+      <main className="w-full">
         <MobileTopBar />
         <Breadcrumbs />
-        <div className="px-4 sm:px-6 lg:px-8 w-full py-6 z-50 max-lg:pt-36">
+        <div className="px-4 sm:px-6 lg:px-8 w-full py-6 z-50 max-lg:pt-24">
           {children}
         </div>
       </main>

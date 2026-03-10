@@ -58,10 +58,10 @@ function SidebarContent({ isSmallScreen, setSidebarOpen }: any) {
 
   return (
     <>
-      <div className="p-6 border-b border-muted h-20 flex items-center justify-between">
+      <div className="p-6 border-b border-b-white/15 h-20 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3">
           <Image
-            src="/pdfbridge_logo.svg"
+            src="/webp/pdfbridge_logo.webp"
             alt="PDFBridge"
             width={32}
             height={32}
@@ -88,7 +88,7 @@ function SidebarContent({ isSmallScreen, setSidebarOpen }: any) {
               (user?.publicMetadata?.userRole as string) ||
               "";
             const primaryEmail = user?.primaryEmailAddress?.emailAddress || "";
-            const allowedEmails = ["admin@pdfbridge.xyz"]; // Fallback or sync with actions
+            const allowedEmails = ["hello@techhspyder.com"]; // Fallback or sync with actions
             return (
               userRole === "platform-owner" ||
               allowedEmails.includes(primaryEmail.toLowerCase())
@@ -105,18 +105,18 @@ function SidebarContent({ isSmallScreen, setSidebarOpen }: any) {
                 href={link.href}
                 onClick={() => isSmallScreen && setSidebarOpen(false)}
                 className={cn(
-                  "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 group",
+                  "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 group select-none active:scale-[0.97]",
                   isActive
-                    ? "bg-blue-600/10 text-blue-400 border border-blue-500/20"
+                    ? "bg-blue-600/10 text-blue-400 border border-blue-500/20 shadow-[0_0_15px_rgba(37,99,235,0.1)]"
                     : "text-slate-400 hover:text-white hover:bg-white/5 border border-transparent",
                 )}
               >
                 <Icon
                   className={cn(
-                    "h-4 w-4 transition-colors",
+                    "h-4 w-4 transition-all duration-300 group-hover:scale-110",
                     isActive
                       ? "text-blue-400"
-                      : "text-slate-500 group-hover:text-slate-300",
+                      : "text-slate-500 group-hover:text-slate-300 group-hover:translate-x-0.5",
                   )}
                 />
                 {link.label}
@@ -180,6 +180,7 @@ function SidebarContent({ isSmallScreen, setSidebarOpen }: any) {
                   signOut();
                   if (isSmallScreen) setSidebarOpen(false);
                 }}
+                role="button"
                 className="flex w-full items-center border-t border-t-muted pt-4 md:hidden cursor-pointer gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-red-400 hover:bg-red-400/10 transition-all duration-200 group border border-transparent hover:border-red-500/20"
               >
                 <LogOut className="h-4 w-4 text-slate-500 group-hover:text-red-400 transition-colors" />
@@ -189,7 +190,11 @@ function SidebarContent({ isSmallScreen, setSidebarOpen }: any) {
               <div className="md:flex hidden">
                 <Popover open={open} onOpenChange={setOpen}>
                   <PopoverTrigger className="w-full rounded-lg">
-                    <div className="flex items-center cursor-pointer gap-3 px-3 py-2 text-slate-400 hover:text-secondary-foreground transition-all duration-200 hover:bg-white/5 border border-transparent rounded-lg">
+                    <div
+                      role="button"
+                      tabIndex={0}
+                      className="flex items-center cursor-pointer gap-3 px-3 py-2 text-slate-400 hover:text-secondary-foreground transition-all duration-200 hover:bg-white/5 border border-transparent rounded-lg"
+                    >
                       <div className="h-8 w-8 rounded-full overflow-hidden border border-border">
                         <Image
                           src={user.imageUrl || ""}
@@ -233,7 +238,7 @@ function SidebarContent({ isSmallScreen, setSidebarOpen }: any) {
                     </div>
 
                     <SmartContactLink
-                      email="info@pdfbridge.xyz"
+                      email="hello@techhspyder.com"
                       className={cn(
                         "flex items-center gap-3 px-3 py-2 text-slate-400 w-full hover:text-white hover:bg-white/5 border border-transparent rounded-lg text-sm font-medium transition-all duration-200 group",
                       )}
@@ -308,7 +313,7 @@ export function Sidebar() {
             <motion.div
               ref={ref}
               key="sidebar"
-              className="z-150 w-64 bg-sidebar border-r border-muted flex flex-col fixed inset-y-0 left-0"
+              className="z-150 w-64 bg-sidebar border-r border-white/15 flex flex-col fixed inset-y-0 left-0"
               initial="hidden"
               animate="visible"
               exit="exit"
@@ -324,7 +329,7 @@ export function Sidebar() {
       </AnimatePresence>
 
       {/* Desktop Sidebar (Always CSS visible, never flashes) */}
-      <div className="hidden lg:flex z-40 w-64 bg-sidebar border-r border-muted flex-col sticky top-0 h-screen shrink-0">
+      <div className="hidden lg:flex z-40 w-64 bg-sidebar border-r border-white/15 flex-col sticky top-0 h-screen shrink-0">
         <SidebarContent isSmallScreen={false} setSidebarOpen={setSidebarOpen} />
       </div>
     </>

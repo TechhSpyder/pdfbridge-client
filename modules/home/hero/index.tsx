@@ -1,14 +1,23 @@
 "use client";
 
-import { ArrowRight, Sparkles, ShieldCheck, Zap } from "lucide-react";
+import { ArrowRight, Sparkles, Zap } from "lucide-react";
 import { Button } from "../../app/button";
 import { useScrollAnimation } from "../../hooks/use-scroll-animation";
-import TransformationAnimation from "./index/TransformationAnimation";
+import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
+
+const TransformationAnimation = dynamic(
+  () => import("./index/TransformationAnimation"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full aspect-square max-w-[500px] mx-auto opacity-0" />
+    ),
+  },
+);
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { toast } from "sonner";
-import NextImage from "next/image";
+import Image from "next/image";
 
 export function Hero() {
   const { ref: contentRef, isVisible: contentVisible } = useScrollAnimation();
@@ -17,16 +26,20 @@ export function Hero() {
   return (
     <section
       ref={contentRef}
-      className="relative min-h-[90vh] flex items-center overflow-hidden py-20 sm:py-32 w-full"
+      className="relative min-h-[90svh] lg:min-h-[90vh] flex items-center overflow-hidden py-20 sm:py-32 w-full"
     >
       {/* Premium Background Elements */}
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-[#020617]" />
-        <NextImage
-          src="/hero_bg.png"
-          alt=""
+        <Image
+          src="/webp/hero_bg_1_1x.webp"
+          alt="hero background"
           fill
+          sizes="(max-width: 768px) 100vw, (max-width: 1920px) 100vw, 1920px"
+          quality={75}
           priority
+          fetchPriority="high"
+          loading="eager"
           className="object-cover opacity-40 mix-blend-luminosity"
         />
         <div className="absolute inset-0 bg-linear-to-b from-transparent via-[#020617]/50 to-[#020617]" />
@@ -47,22 +60,31 @@ export function Hero() {
                 transition={{ delay: 0.2 }}
                 className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold tracking-wider uppercase"
               >
-                <Sparkles className="w-3 h-3" /> Now in Public Beta
+                <Sparkles className="w-3 h-3" />
+                <Link
+                  href="https://www.producthunt.com/products/pdfbridge?launch=pdfbridge"
+                  target="_blank"
+                >
+                  Launching on Product Hunt March 3 → Follow for updates
+                </Link>
               </motion.div>
 
               <h1 className="text-5xl sm:text-6xl lg:text-6xl font-black tracking-tight leading-[1.1]">
-                Generate <br />
-                <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-400 via-indigo-400 to-cyan-400">
-                  Pixel-Perfect
-                </span>
-                <br /> PDFs.
+                Stop Running{" "}
+                <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-300 via-indigo-300 to-cyan-400">
+                  Puppeteer
+                </span>{" "}
+                in Production.
               </h1>
             </div>
 
             <p className="text-xl text-slate-400 max-w-lg leading-relaxed">
-              The high-performance API for developers who need reliable,
-              scalable, and secure HTML-to-PDF conversion without the
-              infrastructure headache.
+              Generate pixel-perfect PDFs from your React or Next.js app —
+              without managing headless browser infrastructure.
+            </p>
+            <p className="text-sm text-slate-500 max-w-lg">
+              Built for teams shipping invoices, reports, dashboards, and
+              documents at scale.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
@@ -72,7 +94,7 @@ export function Hero() {
                 onClick={() => router.push("/sign-up")}
                 className="bg-blue-600 hover:bg-blue-700 text-sm text-white px-5 h-14 flex items-center justify-center rounded-2xl shadow-xl shadow-blue-500/20 group"
               >
-                Start Building Free
+                Try 50 Free Conversions
                 <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform duration-200 ease-out" />
               </Button>
               <Link href="/docs" className="block">
@@ -82,10 +104,13 @@ export function Hero() {
                   variant="secondary"
                   className="h-14 px-8 rounded-2xl border-slate-800 hover:bg-slate-900 cursor-pointer w-full sm:w-auto"
                 >
-                  Read Docs
+                  View API Docs →
                 </Button>
               </Link>
             </div>
+            <p className="text-xs text-slate-600 pt-1">
+              No credit card required.
+            </p>
 
             {/* <div className="flex flex-wrap gap-6 text-sm text-slate-500 pt-8 border-t border-slate-800/50">
               <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
@@ -147,6 +172,32 @@ export function Hero() {
                   </div>
                   <div className="text-xs text-white font-semibold">
                     Job #8234 Processed
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* AI Floater */}
+            <motion.div
+              animate={{ y: [0, 8, 0] }}
+              transition={{
+                duration: 5,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 1,
+              }}
+              className="absolute -bottom-10 -left-10 bg-slate-900/80 backdrop-blur-md border border-white/10 p-4 rounded-2xl shadow-2xl hidden xl:block"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                  <Sparkles className="w-4 h-4 text-blue-400" />
+                </div>
+                <div>
+                  <div className="text-[10px] text-blue-400/80 uppercase font-bold tracking-widest">
+                    AI Extracted
+                  </div>
+                  <div className="text-xs text-white font-mono mt-1 bg-black/50 p-1.5 rounded-md border border-white/5">
+                    {`{ "total": "$450.00" }`}
                   </div>
                 </div>
               </div>

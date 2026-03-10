@@ -32,7 +32,7 @@ export const useApiClient = () => {
       const error = await response
         .json()
         .catch(() => ({ error: "Unknown error" }));
-      throw new Error(error.error || "Request failed");
+      throw new Error(error.message || error.error || "Request failed");
     }
 
     return response.json();
@@ -44,6 +44,8 @@ export const useApiClient = () => {
       request(path, { method: "POST", body: JSON.stringify(body) }),
     patch: (path: string, body: any) =>
       request(path, { method: "PATCH", body: JSON.stringify(body) }),
+    put: (path: string, body: any) =>
+      request(path, { method: "PUT", body: JSON.stringify(body) }),
     delete: (path: string) => request(path, { method: "DELETE" }),
   };
 };

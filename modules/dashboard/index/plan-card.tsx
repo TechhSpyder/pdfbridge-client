@@ -3,7 +3,6 @@ import { GlowCard } from "./glow-card";
 import { PLAN_METADATA } from "@/modules/constants";
 import { cn } from "@/utils";
 import { Check, Loader2, Zap } from "lucide-react";
-import React, { useState } from "react";
 
 export function PlanCard({
   plan,
@@ -12,9 +11,12 @@ export function PlanCard({
   onCheckout,
   isCheckoutPending,
   selectedPlanId,
+  forcedInterval,
 }: any) {
-  const [interval, setInterval] = useState<"month" | "year">("month");
-  const isCurrent = userData?.plan?.id === plan.id;
+  const interval = forcedInterval || "month";
+  const isCurrent =
+    userData?.plan?.id === plan.id &&
+    (userData?.billingInterval || "month") === interval;
   const isFree = plan.priceUsd === 0 && plan.priceNgn === 0;
   const metadata = PLAN_METADATA[plan.name] || {};
 
@@ -60,24 +62,6 @@ export function PlanCard({
               })}
             />
           </div>
-          {!isFree && !isEnterprise && (
-            <div className="flex items-center gap-1 p-1 rounded-lg bg-slate-900 border border-white/5 w-fit">
-              {(["month", "year"] as const).map((item) => (
-                <button
-                  key={item}
-                  onClick={() => setInterval(item)}
-                  className={cn(
-                    "px-3 py-1 text-[10px] cursor-pointer font-bold rounded-md transition-all text-slate-500 hover:text-slate-300",
-                    {
-                      "bg-blue-500 text-white shadow-lg": interval === item,
-                    },
-                  )}
-                >
-                  {item === "month" ? "Monthly" : "Annual"}
-                </button>
-              ))}
-            </div>
-          )}
         </div>
 
         <div>
@@ -131,7 +115,15 @@ export function PlanCard({
                 <div className="mt-1 shrink-0 w-4 h-4 rounded-full bg-slate-800 flex items-center justify-center border border-white/5">
                   <Check className="h-3 w-3 text-emerald-500" />
                 </div>
-                <span className="text-sm text-slate-400">{feature}</span>
+                <span
+                  className={cn(
+                    "text-sm text-slate-400",
+                    feature.startsWith("Everything in") &&
+                      "font-bold text-white",
+                  )}
+                >
+                  {feature}
+                </span>
               </li>
             ))}
             {!metadata.features && (
@@ -151,9 +143,14 @@ export function PlanCard({
               <div className="w-full py-2.5 px-4 rounded-xl bg-slate-800 text-slate-400 text-center text-sm font-bold border border-white/5">
                 Current Plan
               </div>
+            ) : userData?.plan?.id === plan.id ? (
+              <div className="w-full py-2.5 px-4 rounded-xl bg-slate-800/50 text-slate-500 text-center text-sm font-bold border border-white/5 italic">
+                Current Plan (
+                {userData?.billingInterval === "year" ? "Annual" : "Monthly"})
+              </div>
             ) : isEnterprise ? (
               <SmartContactLink
-                email="support@pdfbridge.xyz"
+                email="support@techhspyder.com"
                 isButton
                 className="w-full h-12 shadow-2xl active:scale-95 transition-all text-sm font-black bg-slate-700 hover:bg-slate-600 rounded-md py-2 px-4 flex items-center justify-center text-white"
               >

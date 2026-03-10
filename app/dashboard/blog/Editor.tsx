@@ -16,6 +16,7 @@ import { Button } from "@/modules/app/button";
 import { upsertPost, getCategories, getAuthors } from "./actions";
 import RichTextEditor from "@/modules/dashboard/blog/RichTextEditor";
 import sanitizeHtml from "sanitize-html";
+import Image from "next/image";
 
 interface EditorProps {
   post?: any;
@@ -74,7 +75,10 @@ export default function BlogEditor({ post, onClose }: EditorProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-xl p-4 md:p-8 animate-in fade-in duration-300">
+    <div
+      data-lenis-prevent
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-xl p-4 md:p-8 animate-in fade-in duration-300"
+    >
       <div className="w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col bg-slate-950 border border-white/10 rounded-3xl shadow-2xl">
         {/* Editor Header */}
         <div className="flex items-center justify-between p-6 border-b border-white/5">
@@ -243,7 +247,10 @@ export default function BlogEditor({ post, onClose }: EditorProps) {
             </div>
           ) : (
             <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 h-full overflow-hidden">
-              <div className="lg:col-span-2 h-full overflow-y-auto p-8 custom-scrollbar space-y-8">
+              <div
+                data-lenis-prevent
+                className="lg:col-span-2 h-full overflow-y-auto p-8 custom-scrollbar space-y-8"
+              >
                 {/* Main Content */}
                 <div className="space-y-3">
                   <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">
@@ -272,7 +279,10 @@ export default function BlogEditor({ post, onClose }: EditorProps) {
                   />
                 </div>
               </div>
-              <div className="lg:col-span-1 h-full overflow-y-auto p-8 border-l border-white/5 bg-slate-900/10 space-y-8 custom-scrollbar">
+              <div
+                data-lenis-prevent
+                className="lg:col-span-1 h-full overflow-y-auto p-8 border-l border-white/5 bg-slate-900/10 space-y-8 custom-scrollbar"
+              >
                 {/* Sidebar Config */}
                 <div className="p-6 rounded-3xl bg-slate-900/30 border border-white/5 space-y-6">
                   <h3 className="text-sm font-black uppercase tracking-widest text-slate-400">
@@ -376,9 +386,13 @@ export default function BlogEditor({ post, onClose }: EditorProps) {
                   />
                   {formData.coverImage && (
                     <div className="aspect-video rounded-xl overflow-hidden border border-white/10 group relative">
-                      <img
-                        src={formData.coverImage}
+                      <Image
+                        src={formData.coverImage || ""}
+                        alt="Cover preview"
+                        width={400}
+                        height={225}
                         className="w-full h-full object-cover"
+                        unoptimized
                       />
                       <button
                         onClick={() =>
@@ -439,6 +453,39 @@ export default function BlogEditor({ post, onClose }: EditorProps) {
         </div>
       </div>
       <style jsx global>{`
+        .prose h1 {
+          font-size: 2.25em !important;
+          margin-top: 0 !important;
+          margin-bottom: 0.8em !important;
+          line-height: 1.1 !important;
+          font-weight: 800 !important;
+          color: #ffffff !important;
+        }
+        .prose h2 {
+          font-size: 1.5em !important;
+          margin-top: 2em !important;
+          margin-bottom: 1em !important;
+          line-height: 1.3 !important;
+          font-weight: 700 !important;
+          color: #f8fafc !important;
+        }
+        .prose ul {
+          list-style-type: disc !important;
+          padding-left: 1.5em !important;
+          margin-top: 1.25em !important;
+          margin-bottom: 1.25em !important;
+        }
+        .prose ol {
+          list-style-type: decimal !important;
+          padding-left: 1.5em !important;
+          margin-top: 1.25em !important;
+          margin-bottom: 1.25em !important;
+        }
+        .prose li {
+          margin-top: 0.5em !important;
+          margin-bottom: 0.5em !important;
+          display: list-item !important;
+        }
         .prose table {
           width: 100%;
           border-collapse: collapse;
@@ -447,20 +494,20 @@ export default function BlogEditor({ post, onClose }: EditorProps) {
           line-height: 1.5;
         }
         .prose th {
-          background: rgba(255, 255, 255, 0.05);
+          background: rgba(255, 255, 255, 0.15);
           font-weight: 700;
           text-align: left;
           padding: 0.75rem 1rem;
-          border: 1px solid rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.25);
         }
         .prose td {
           padding: 0.75rem 1rem;
-          border: 1px solid rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.25);
           color: #cbd5e1;
         }
         .prose pre {
-          background: #0d1117 !important;
-          border: 1px solid rgba(255, 255, 255, 0.05) !important;
+          background: #1e293b !important;
+          border: 1px solid rgba(255, 255, 255, 0.2) !important;
           padding: 1.5rem !important;
           border-radius: 1rem !important;
           margin: 2.5rem 0 !important;
@@ -477,7 +524,7 @@ export default function BlogEditor({ post, onClose }: EditorProps) {
         }
         .prose hr {
           border: none !important;
-          border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+          border-top: 2px solid rgba(255, 255, 255, 0.3) !important;
           margin: 4rem 0 !important;
         }
         .prose mark {

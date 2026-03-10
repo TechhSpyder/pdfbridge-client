@@ -23,7 +23,14 @@ export const useApiClient = () => {
       const error = await response
         .json()
         .catch(() => ({ error: "Unknown error" }));
-      throw new Error(error.error || "Request failed");
+
+      // Handle Session Expired
+      if (error.error === "Session Expired") {
+        window.location.href = `/sign-in?redirect_url=${encodeURIComponent(window.location.pathname)}`;
+        return;
+      }
+
+      throw new Error(error.message || error.error || "Request failed");
     }
 
     return response.json();

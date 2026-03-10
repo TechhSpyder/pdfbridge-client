@@ -2,7 +2,15 @@
 
 import { GlowCard } from "@/modules/app/glow-card";
 import { useScrollAnimation } from "@/modules/hooks/use-scroll-animation";
-import { Zap, ShieldCheck, Globe } from "lucide-react";
+import {
+  Zap,
+  ShieldCheck,
+  Globe,
+  ChartColumnStacked,
+  Bot,
+  Activity,
+} from "lucide-react";
+import Link from "next/link";
 
 const features = [
   {
@@ -12,9 +20,9 @@ const features = [
     icon: <Zap className="h-6 w-6" />,
   },
   {
-    title: "Enterprise Grade",
+    title: "Ghost Mode Security",
     description:
-      "Built-in URL sandboxing and secure request handling keep your data safe and your infrastructure isolated.",
+      "Pass `ghostMode: true` to bypass storage buckets entirely. The raw binary streams directly back to you for zero data retention.",
     icon: <ShieldCheck className="h-6 w-6" />,
   },
   {
@@ -23,6 +31,24 @@ const features = [
       "If a browser can see it, we can print it. Full support for modern CSS, JavaScript, and web fonts.",
     icon: <Globe className="h-6 w-6" />,
   },
+  {
+    title: "AI Parsing & Templates",
+    description:
+      "Instantly extract structured JSON metadata from generated documents, or build dynamic Reusable Templates via natural language.",
+    icon: <Bot className="h-6 w-6" />,
+  },
+  {
+    title: "Proven Alternative",
+    description:
+      "Switching from PDFShift or other PDF APIs? See our honest comparison and migration guide.",
+    icon: <ChartColumnStacked className="h-6 w-6" />,
+  },
+  {
+    title: "Webhook Reliability",
+    description:
+      "Built-in webhook notifications with automatic exponential backoff ensure your systems stay in sync, even during downtime.",
+    icon: <Activity className="h-6 w-6" />,
+  },
 ];
 
 export function WhyPdfBridge() {
@@ -30,7 +56,7 @@ export function WhyPdfBridge() {
 
   return (
     <section id="features" ref={ref} className="py-24 bg-background">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Heading */}
         <div
           className={`mx-auto max-w-2xl text-center transition-all duration-700 ${
@@ -38,11 +64,11 @@ export function WhyPdfBridge() {
           }`}
         >
           <h2 className="text-3xl font-semibold tracking-tight">
-            Why PDFBridge?
+            Built for Modern Frontends
           </h2>
           <p className="mt-4 text-muted-foreground">
-            Infrastructure-grade PDF generation built for performance, security,
-            and reliability.
+            Flexbox. CSS Grid. Tailwind. Web fonts. Print backgrounds. Precise
+            page formatting. No fallback templates. Use your existing UI.
           </p>
         </div>
 
@@ -62,6 +88,16 @@ export function WhyPdfBridge() {
                 title={feature.title}
                 description={feature.description}
                 icon={feature.icon}
+                content={
+                  feature.title === "Proven Alternative" && (
+                    <Link
+                      href="/insights/pdfshift-alternative"
+                      className="text-sm mt-3 underline font-medium"
+                    >
+                      Compare PDFBridge vs PDFShift →
+                    </Link>
+                  )
+                }
               />
             </div>
           ))}

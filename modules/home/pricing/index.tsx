@@ -1,6 +1,7 @@
 "use client";
 
 import { GlowCard } from "@/modules/app/glow-card";
+import { PLAN_METADATA } from "@/modules/constants";
 import { useScrollAnimation } from "@/modules/hooks/use-scroll-animation";
 import { cn } from "@/utils";
 import { Check } from "lucide-react";
@@ -8,38 +9,63 @@ import { useState } from "react";
 
 const tiers = [
   {
+    id: "1dec",
     title: "Free",
     price: "$0",
     sub: "Perfect for getting started",
     features: [
-      "5 conversions/month",
-      "Community support",
-      "R2 Storage (24h)",
+      "50 Conversions / month",
+      "1 AI Template / month",
+      "1 Team Seat",
       "Basic API access",
+      "Community support",
+      "10MB File Limit",
+      "7 Days Retention",
+      "No Webhooks",
     ],
   },
   {
+    id: "2cec",
     title: "Starter",
     price: "$10",
-    sub: "For scaling teams",
+    // sub: "For scaling teams",
     features: [
-      "2,000 conversions/month",
-      "Priority email support",
-      "Custom domains",
-      "Persistent storage",
-      "Advanced analytics",
+      "2,000 Conversions / month",
+      "100 Intelligent PDF Analyses / month",
+      "Up to 5 Team Seats",
+      "Native Tailwind Support",
+      "Custom Headers/Footers",
+      "25MB File Limit",
+      "30 Days Retention",
+      "Webhooks Included",
     ],
   },
   {
+    id: "3bec",
     title: "Pro",
     price: "$30",
-    sub: "Enterprise solutions",
+    // sub: "Enterprise solutions",
     features: [
-      "20,000 conversions/month",
-      "Dedicated infrastructure",
-      "SLA guarantee",
-      "24/7 phone support",
-      "Custom integrations",
+      "20,000 Conversions / month",
+      "1,000 Intelligent PDF Analyses / month",
+      "Up to 20 Team Seats",
+      "Ghost Mode (Private)",
+      "50MB File Limit",
+      "Unlimited Retention",
+      "Everything in Starter",
+    ],
+  },
+  {
+    id: "4aec",
+    title: "Enterprise",
+    price: "Custom",
+    // sub: "Enterprise solutions",
+    features: [
+      "Unlimited Conversions / year",
+      "10,000 Intelligent PDF Analyses / month",
+      "IP Whitelisting Support",
+      "100MB+ File Limit",
+      "Everything in Pro",
     ],
   },
 ];
@@ -47,6 +73,7 @@ const tiers = [
 export function Pricing() {
   const { ref, isVisible } = useScrollAnimation();
   const [activeIndex, setActiveIndex] = useState(1);
+  const metadata = PLAN_METADATA[tiers[activeIndex].title] || {};
 
   return (
     <section
@@ -70,11 +97,15 @@ export function Pricing() {
         </div>
 
         {/* Tier Cards */}
-        <div className="mt-16 grid gap-6 sm:grid-cols-1 md:grid-cols-3">
+
+        <div className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4! w-full">
           {tiers.map((tier, index) => (
             <div
               key={tier.title}
               onClick={() => setActiveIndex(index)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === "Enter" && setActiveIndex(index)}
               className={cn(
                 "transition-all duration-500 ease-out cursor-pointer",
                 index === activeIndex && "md:scale-110",
@@ -100,11 +131,21 @@ export function Pricing() {
                       </span>
                     </div>
                     <ul className="mt-2 mb-4 space-y-3 text-sm text-muted-foreground">
-                      {tier.features.map((f) => (
+                      {tier.features.map((f, i) => (
                         // <li key={f}><Check className="w-4 h-4 text-blue-400 flex-shrink-0" /> {f}</li>
-                        <li key={f} className="flex items-center gap-3 text-sm">
+                        <li
+                          key={`${tier.id}-${i}`}
+                          className="flex items-center gap-3 text-sm"
+                        >
                           <Check className="w-4 h-4 text-blue-400 shrink-0" />
-                          <span>{f}</span>
+                          <span
+                            className={cn(
+                              f.startsWith("Everything in") &&
+                                "font-bold text-white",
+                            )}
+                          >
+                            {f}
+                          </span>
                         </li>
                       ))}
                     </ul>

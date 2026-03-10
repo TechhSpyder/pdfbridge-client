@@ -13,32 +13,34 @@ type CodeSnippet = {
 
 const snippets: CodeSnippet[] = [
   {
-    label: "JavaScript",
-    lang: "javascript",
-    code: `const res = await fetch('https://api.pdfbridge.xyz/v1/convert', {
-  method: 'POST',
-  headers: { 'x-api-key': 'your_key', 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    url: 'https://example.com',
-    options: { format: 'A4', printBackground: true }
-  })
+    label: "Node.js SDK",
+    lang: "typescript",
+    code: `import { PDFBridge } from "@techhspyder/pdfbridge-node";
+
+// Automatically loads PDFBRIDGE_API_KEY from process.env
+const pdf = new PDFBridge();
+
+const result = await pdf.generateAndWait({
+  url: "https://yourapp.com/invoice/123",
+  options: { format: "A4", printBackground: true },
 });
-const { statusUrl } = await res.json();`,
+
+console.log(result.pdfUrl); // https://cdn.pdfbridge.xyz/...`,
   },
   {
-    label: "Python",
+    label: "Python SDK",
     lang: "python",
-    code: `import requests
-import json
+    code: `from pdfbridge import PDFBridge
 
-headers = {'x-api-key': 'your_key', 'Content-Type': 'application/json'}
-data = {
-    "url": "https://example.com",
-    "options": {"format": "A4", "printBackground": True}
-}
-res = requests.post('https://api.pdfbridge.xyz/v1/convert', 
-headers=headers, json=data)
-status_url = res.json()['statusUrl']`,
+# Automatically loads PDFBRIDGE_API_KEY from environment
+client = PDFBridge()
+
+status = client.generate_and_wait(
+    url="https://yourapp.com/invoice/123",
+    options={"format": "A4", "printBackground": True},
+)
+
+print(status.pdfUrl)  # https://cdn.pdfbridge.xyz/...`,
   },
   {
     label: "Go",
@@ -55,14 +57,14 @@ import (
 
 func main() {
   payload := map[string]interface{}{
-    "url": "https://example.com",
+    "url": "https://yourapp.com/invoice/123",
     "options": map[string]interface{}{"format": "A4", 
     "printBackground": true},
   }
   body, _ := json.Marshal(payload)
-  req, _ := http.NewRequest("POST", "https://api.pdfbridge.xyz/v1/convert", 
+  req, _ := http.NewRequest("POST", "https://api.pdfbridge.xyz/api/v1/convert", 
   bytes.NewBuffer(body))
-  req.Header.Set("x-api-key", "your_key")
+  req.Header.Set("x-api-key", "pk_live_your_key")
   req.Header.Set("Content-Type", "application/json")
   client := &http.Client{}
   res, _ := client.Do(req)
@@ -75,20 +77,20 @@ func main() {
     label: "PHP",
     lang: "php",
     code: `<?php
-$ch = curl_init('https://api.pdfbridge.xyz/v1/convert');
+$ch = curl_init('https://api.pdfbridge.xyz/api/v1/convert');
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
-  'x-api-key: your_key',
+  'x-api-key: pk_live_your_key',
   'Content-Type: application/json'
 ]);
 curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
-  'url' => 'https://example.com',
+  'url' => 'https://yourapp.com/invoice/123',
   'options' => ['format' => 'A4', 'printBackground' => true]
 ]));
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 $response = curl_exec($ch);
 curl_close($ch);
 $data = json_decode($response, true);
-$statusUrl = $data['statusUrl'];`,
+$pdfUrl = $data['pdfUrl'];`,
   },
 ];
 
@@ -109,10 +111,11 @@ export function BuiltForDevelopers() {
           }`}
         >
           <h2 className="text-3xl font-semibold tracking-tight">
-            Integrate in minutes, not days
+            Generate a PDF in 30 Seconds
           </h2>
           <p className="mt-4 text-muted-foreground">
-            Simple API calls in the language you already use.
+            No headless browser setup. No container orchestration. No
+            maintenance overhead.
           </p>
         </div>
 
@@ -175,7 +178,7 @@ export function BuiltForDevelopers() {
             >
               {({ className, style, tokens, getLineProps, getTokenProps }) => (
                 <pre
-                  className={`${className} max-w-full overflow-x-auto whitespace-pre text-sm sm:text-base p-4 sm:p-6`}
+                  className={`${className} max-w-full overflow-x-auto whitespace-pre text-xs sm:text-base p-4 sm:p-6`}
                   style={{ ...style, backgroundColor: "transparent" }}
                 >
                   {tokens.map((line, i) => (
@@ -189,6 +192,11 @@ export function BuiltForDevelopers() {
               )}
             </Highlight>
           </div>
+          <p className={`mt-4 text-sm text-center text-muted-foreground transition-all duration-700 ${
+            isVisible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
+          }`}>
+            That&apos;s it. No infrastructure to manage.
+          </p>
         </div>
       </div>
     </section>

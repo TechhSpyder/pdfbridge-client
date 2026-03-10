@@ -95,7 +95,7 @@ export default function AuthorsPage() {
               </label>
               <input
                 type="text"
-                placeholder="e.g. Francis Bello"
+                placeholder="e.g. TechhSpyder Team"
                 value={formData.name}
                 onChange={(e) =>
                   setFormData({ ...formData, name: e.target.value })

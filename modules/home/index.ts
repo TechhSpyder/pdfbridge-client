@@ -7,3 +7,4 @@ export { Pricing } from "./pricing";
 export { FAQ } from "./faq";
 export { CTA } from "./cta";
 export { Footer } from "./footer";
+export { PublicPlayground } from "./hero/PublicPlayground";

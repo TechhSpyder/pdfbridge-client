@@ -4,10 +4,16 @@ import React, { useEffect, useState } from "react";
 import { useSignIn, useSignUp } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { Button } from "@/modules/app/button";
-import { Github, Mail, Eye, EyeOff, Loader2 } from "lucide-react";
+import { Github } from "lucide-react";
+import { Mail } from "lucide-react";
+import { Eye } from "lucide-react";
+import { EyeOff } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import { Lock } from "lucide-react";
 import Link from "next/link";
 import { Turnstile } from "@marsidev/react-turnstile";
 import { PasswordStrengthIndicator } from "./password-strength";
+import { toast } from "sonner";
 
 interface AuthCardProps {
   type: "sign-in" | "sign-up";
@@ -42,8 +48,27 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
   const [isPasswordValid, setIsPasswordValid] = useState(false);
   const [isRouting, setIsRouting] = useState(false);
   const router = useRouter();
-
+  const [showTurnstile, setShowTurnstile] = useState(false);
+  const [show2FA, setShow2FA] = useState(false);
+  const [activeStrategy, setActiveStrategy] = useState<string | null>(null);
   const isSignIn = type === "sign-in";
+  useEffect(() => {
+    if (!isSignIn) {
+      setShowTurnstile(true);
+    }
+  }, [isSignIn]);
+
+  useEffect(() => {
+    const key =
+      process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000AA";
+    if (key === "1x00000000000000000000AA") {
+      console.warn(
+        "[TURNSTILE] Using LOCAL TEST site key. This WILL fail on production domains.",
+      );
+    } else {
+      console.log(`[TURNSTILE] Loaded site key: ${key.substring(0, 6)}...`);
+    }
+  }, []);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -107,6 +132,7 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
       });
 
       if (result.status === "complete") {
+        toast.success("Account verified successfully! Welcome to PDFBridge.");
         setIsRouting(true);
         await setSignUpActive({ session: result.createdSessionId });
         router.push("/dashboard");
@@ -117,6 +143,33 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
       setError(
         err.errors?.[0]?.message || "An error occurred during verification",
       );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onVerify2FA = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!signInLoaded) return;
+    setLoading(true);
+    setError("");
+
+    try {
+      const result = await signIn.attemptSecondFactor({
+        strategy: (activeStrategy as any) || "totp",
+        code,
+      });
+
+      if (result.status === "complete") {
+        toast.success("Verification successful! Welcome back.");
+        setIsRouting(true);
+        await setSignInActive({ session: result.createdSessionId });
+        router.push("/dashboard");
+      } else {
+        setError("Invalid 2FA code. Please try again.");
+      }
+    } catch (err: any) {
+      setError(err.errors?.[0]?.message || "Invalid 2FA code.");
     } finally {
       setLoading(false);
     }
@@ -170,12 +223,38 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
         });
 
         if (result.status === "complete") {
+          toast.success("Welcome back to PDFBridge!");
           setIsRouting(true);
           await setSignInActive({ session: result.createdSessionId });
           router.push("/dashboard");
         } else {
-          console.log(result);
-          setError("This account uses a different sign-in method.");
+          // Handle other statuses more gracefully instead of a vague hardcoded string
+          console.log("Authentication status:", result.status);
+          if (result.status === "needs_first_factor") {
+            setError(
+              "Authentication incomplete. Please check your credentials.",
+            );
+          } else if (result.status === "needs_second_factor") {
+            setShow2FA(true);
+            setCode("");
+            setError("");
+
+            // Automatically prepare the first available factor that needs it
+            const factor = result.supportedSecondFactors?.find(
+              (f) => f.strategy === "phone_code" || f.strategy === "email_code",
+            );
+            if (factor) {
+              setActiveStrategy(factor.strategy);
+              await signIn.prepareSecondFactor({ strategy: factor.strategy });
+            } else {
+              // Default to TOTP if no sendable factors
+              setActiveStrategy("totp");
+            }
+          } else {
+            setError(
+              `Sign-in status: ${result.status}. Please contact support.`,
+            );
+          }
         }
       } else {
         if (!signUpLoaded) return;
@@ -185,9 +264,10 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
         });
 
         // For simplicity, we assume no verification is needed or we use common flows.
-        // If verification is needed, Clerk's pre-built component is often better,
+        // If verification is needed, a custom verification portal is provided.
         // but for a "bespoke" look we can redirect to a verification page.
         if (result.status === "complete") {
+          toast.success("Account created! Welcome to PDFBridge.");
           setIsRouting(true);
           await setSignUpActive({ session: result.createdSessionId });
           router.push("/dashboard");
@@ -323,8 +403,153 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
     );
   }
 
+  if (show2FA) {
+    return (
+      <div className="w-full max-w-md space-y-8 animate-in fade-in zoom-in duration-500">
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-500/10 mb-6 group transition-transform hover:scale-110">
+            <Lock className="h-8 w-8 text-blue-500 group-hover:animate-bounce" />
+          </div>
+          <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+            Security Check
+          </h2>
+          <p className="mt-4 text-slate-400">
+            Enter the 2FA code from your <br />
+            <span className="text-white font-semibold capitalize">
+              {activeStrategy?.replace("_", " ") || "Authenticator app"}
+            </span>
+          </p>
+        </div>
+
+        <form onSubmit={onVerify2FA} className="mt-8 space-y-8">
+          <div className="space-y-6">
+            <div className="relative group">
+              <label
+                className="block text-sm font-medium text-slate-400 mb-2 transition-colors group-focus-within:text-blue-500"
+                htmlFor="2fa-code"
+              >
+                Verification Code
+              </label>
+              <input
+                id="2fa-code"
+                type="text"
+                required
+                maxLength={6}
+                className="block w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-5 text-white placeholder-slate-600 transition-all duration-300 focus:border-blue-500/50 focus:bg-white/[0.07] focus:outline-none focus:ring-4 focus:ring-blue-500/10 text-center tracking-[0.75em] font-mono text-3xl uppercase"
+                placeholder="000000"
+                value={code}
+                autoFocus
+                autoComplete="one-time-code"
+                onChange={(e) => setCode(e.target.value.replace(/[^0-9]/g, ""))}
+              />
+              <div className="absolute inset-x-0 bottom-0 h-px bg-linear-to-r from-transparent via-blue-500/50 to-transparent scale-x-0 group-focus-within:scale-x-100 transition-transform duration-500" />
+            </div>
+
+            {error && (
+              <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 animate-shake">
+                <p className="text-sm text-red-500 text-center">{error}</p>
+              </div>
+            )}
+
+            <Button
+              type="submit"
+              disabled={loading || code.length < 6}
+              className="w-full py-5 text-lg font-bold shadow-2xl shadow-blue-500/20 flex items-center justify-center group relative overflow-hidden active:scale-[0.98] transition-transform"
+            >
+              <div className="absolute inset-0 bg-linear-to-r from-blue-600 to-indigo-600 opacity-0 group-hover:opacity-10 transition-opacity" />
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Verifying...
+                </>
+              ) : (
+                "Verify & Sign In"
+              )}
+            </Button>
+
+            <div className="flex flex-col items-center gap-4 pt-2">
+              {(activeStrategy === "phone_code" ||
+                activeStrategy === "email_code") && (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (!signInLoaded || !activeStrategy) return;
+                    setLoading(true);
+                    try {
+                      await signIn.prepareSecondFactor({
+                        strategy: activeStrategy as any,
+                      });
+                      setError(""); // Clear any old errors on success
+                    } catch (err: any) {
+                      setError(err.errors?.[0]?.message || "Failed to resend.");
+                    } finally {
+                      setLoading(false);
+                    }
+                  }}
+                  className="text-xs text-blue-500 hover:text-blue-400 transition-colors"
+                >
+                  Didn't get a code? Resend
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => {
+                  setShow2FA(false);
+                  setCode("");
+                  setError("");
+                }}
+                className="text-sm text-slate-500 hover:text-white transition-colors flex items-center gap-1"
+              >
+                <span>Use a different account?</span>
+              </button>
+            </div>
+          </div>
+        </form>
+
+        {isRouting && (
+          <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#020617]/80 backdrop-blur-md animate-in fade-in duration-500">
+            <div className="relative">
+              <div className="h-24 w-24 rounded-full border-t-2 border-b-2 border-blue-500 animate-spin" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Loader2 className="h-10 w-10 text-blue-500 animate-pulse" />
+              </div>
+            </div>
+            <p className="mt-8 text-lg font-medium text-white animate-pulse">
+              Configuring your workspace...
+            </p>
+            <p className="mt-2 text-sm text-slate-400">
+              Redirecting to dashboard
+            </p>
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="w-full max-w-md space-y-8 animate-in fade-in zoom-in duration-500">
+      <div className="flex justify-center mb-6">
+        <Link
+          href="/?redirect=false"
+          className="group flex items-center gap-2 text-xs font-medium text-slate-500 hover:text-white transition-all duration-300 px-3 py-1.5 rounded-full border border-white/5 hover:border-white/10 bg-white/5"
+        >
+          <svg
+            className="w-3 h-3 transition-transform group-hover:-translate-x-0.5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M10 19l-7-7m0 0l7-7m-7 7h18"
+            />
+          </svg>
+          Back to home
+        </Link>
+      </div>
+
       <div className="text-center">
         <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
           {isSignIn ? "Welcome Back" : "Create Account"}
@@ -355,8 +580,8 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
 
       <div className="mt-8 space-y-6">
         {/* Social Buttons */}
-        {/* <div className="grid grid-cols-2 gap-4">
-          <button
+        <div className="grid grid-cols-1 gap-4">
+          {/* <button
             onClick={() => handleSocialSignIn("oauth_google")}
             disabled={loadingGoogle || loadingGithub}
             className="flex w-full items-center justify-center gap-3 cursor-pointer rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -384,11 +609,11 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
               </svg>
             )}
             <span>Google</span>
-          </button>
+          </button> */}
           <button
             onClick={() => handleSocialSignIn("oauth_github")}
             disabled={loadingGoogle || loadingGithub}
-            className="flex w-full items-center justify-center cursor-pointer gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex w-full items-center justify-center cursor-pointer gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10 disabled:opacity-70 disabled:cursor-not-allowed"
           >
             {loadingGithub ? (
               <Loader2 className="h-5 w-5 animate-spin" />
@@ -397,7 +622,7 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
             )}
             <span>GitHub</span>
           </button>
-        </div> */}
+        </div>
 
         {/* <div className="relative flex items-center py-4">
           <div className="grow border-t border-white/10"></div>
@@ -512,7 +737,7 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
           )}
 
           {error && <p className="text-sm text-red-500">{error}</p>}
-          {!isSignIn && (
+          {/* {!isSignIn && (
             <div className="flex justify-center py-2">
               <Turnstile
                 siteKey={
@@ -530,7 +755,29 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
                 }}
               />
             </div>
+          )} */}
+          {showTurnstile && (
+            <div className="flex flex-col items-center gap-2 py-2">
+              <Turnstile
+                siteKey={
+                  process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ||
+                  "1x00000000000000000000AA"
+                }
+                onSuccess={(token) => setTurnstileToken(token)}
+                onExpire={() => setTurnstileToken(null)}
+                onError={() => {
+                  setError("Error loading security check. Please refresh.");
+                  setTurnstileToken(null);
+                }}
+                options={{ theme: "dark" }}
+              />
+              <p className="text-[10px] text-slate-500 text-center">
+                Security check failing? Try disabling extensions (like MetaMask)
+                or use an Incognito window.
+              </p>
+            </div>
           )}
+
           <Button
             type="submit"
             disabled={loading}

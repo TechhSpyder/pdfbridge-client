@@ -8,7 +8,7 @@ type GlowCardProps = {
 
   description?: string;
   icon?: React.ReactNode;
-  sub?: string;
+  sub?: React.ReactNode;
   content?: React.ReactNode;
   titleClass?: string;
   className?: string;
@@ -41,7 +41,7 @@ export function GlowCard({
       ref={cardRef}
       onMouseMove={handleMouseMove}
       className={cn(
-        "group relative overflow-hidden h-full rounded-2xl border border-muted bg-background p-6 transition-shadow hover:shadow-lg",
+        "group relative overflow-hidden h-full rounded-2xl border border-muted bg-background p-6 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:shadow-[0_20px_40px_-15px_rgba(37,99,235,0.15)] hover:scale-[1.005] hover:border-white/20 active:scale-[0.99] will-change-transform",
         className,
       )}
       style={{
@@ -69,7 +69,7 @@ export function GlowCard({
           <p className="mt-1 text-sm text-muted-foreground">{sub}</p>
         </div>
 
-        <p className="mt-2 text-sm text-muted-foreground">{description}</p>
+        <p className="my-2 text-sm text-muted-foreground">{description}</p>
         {content}
       </div>
     </div>
