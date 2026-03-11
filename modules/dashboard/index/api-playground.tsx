@@ -24,7 +24,10 @@ function generateSnippet(
   webhookUrl: string,
   uniqueVariables: string[],
 ) {
-  const sessionSecret = typeof window !== 'undefined' ? sessionStorage.getItem("last_secret") : null;
+  const sessionSecret =
+    typeof window !== "undefined"
+      ? sessionStorage.getItem("last_secret")
+      : null;
   const apiKey = sessionSecret || "YOUR_API_KEY";
 
   if (activeTab === "file") {

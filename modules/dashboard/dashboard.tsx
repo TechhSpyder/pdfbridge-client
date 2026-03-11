@@ -59,7 +59,6 @@ export function DashboardPage() {
   const { data: userData, isLoading: beLoading, error } = useMe();
   const { data: apiKeysData, isLoading: keysLoading } = useApiKeys();
 
-
   // Check if new user (created within last minute of sign in)
   const isNewUser =
     clerkUser?.createdAt && clerkUser?.lastSignInAt
@@ -168,7 +167,6 @@ export function DashboardPage() {
   const liveKeyHint = liveKeyData?.hint || "pk_live_••••••••";
   const testKeyHint = testKeyData?.hint || "pk_test_••••••••";
 
-
   return (
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-1000">
       {/* Header */}
@@ -242,7 +240,10 @@ export function DashboardPage() {
           {userData?.usage?.hasConversions ? (
             <UsageGraph />
           ) : (
-            <QuickStartPipeline testKeyFull={testKeyHint} />
+            <QuickStartPipeline
+              testKeyFull={testKeyHint}
+              hasKeys={hasKeys}
+            />
           )}
         </div>
         {/* Recent Activity List */}
@@ -416,7 +417,8 @@ export function DashboardPage() {
                       </div>
                       <div className="text-center">
                         <p className="text-xs text-slate-400 max-w-[200px] mx-auto leading-relaxed">
-                          You haven&apos;t generated any API keys yet. Start your integration in seconds.
+                          You haven&apos;t generated any API keys yet. Start
+                          your integration in seconds.
                         </p>
                       </div>
                       <Link href="/dashboard/api-keys" className="w-full">
@@ -451,7 +453,9 @@ export function DashboardPage() {
                         </div>
                       </div>
                       <div className="flex justify-between items-center text-[10px] mt-2 bg-white/5 p-2 rounded-lg">
-                        <p className="text-slate-400">Keep credentials secure.</p>
+                        <p className="text-slate-400">
+                          Keep credentials secure.
+                        </p>
                         <Link
                           href="/dashboard/api-keys"
                           className="text-emerald-400 font-bold hover:underline"
