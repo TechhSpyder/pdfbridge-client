@@ -24,11 +24,17 @@ function generateSnippet(
   webhookUrl: string,
   uniqueVariables: string[],
 ) {
+  const sessionSecret =
+    typeof window !== "undefined"
+      ? sessionStorage.getItem("last_secret")
+      : null;
+  const apiKey = sessionSecret || "YOUR_API_KEY";
+
   if (activeTab === "file") {
     const endpoint = "https://pdfbridge.xyz/api/v1/normalize-invoice";
     if (lang === "curl") {
       return `curl -X POST ${endpoint} \\
-  -H "Authorization: Bearer YOUR_API_KEY" \\
+  -H "Authorization: Bearer ${apiKey}" \\
   -F "file=@/path/to/your/invoice.pdf"${mode === "test" ? ' \\\n  -F "testMode=true"' : ""}`;
     }
     if (lang === "python") {
@@ -37,7 +43,7 @@ function generateSnippet(
 url = "${endpoint}"
 files = {'file': open('invoice.pdf', 'rb')}
 data = {'testMode': 'true'} if "${mode}" == "test" else {}
-headers = {"Authorization": "Bearer YOUR_API_KEY"}
+headers = {"Authorization": "Bearer ${apiKey}"}
 
 response = requests.post(url, headers=headers, files=files, data=data)
 print(response.json())`;
@@ -49,7 +55,7 @@ ${mode === "test" ? 'formData.append("testMode", "true");' : ""}
 const response = await fetch("${endpoint}", {
   method: "POST",
   headers: {
-    "Authorization": "Bearer YOUR_API_KEY"
+    "Authorization": "Bearer ${apiKey}"
   },
   body: formData
 });
@@ -76,7 +82,7 @@ console.log(data);`;
 
   if (lang === "curl") {
     return `curl -X POST ${endpoint} \\
-  -H "Authorization: Bearer YOUR_API_KEY" \\
+  -H "Authorization: Bearer ${apiKey}" \\
   -H "Content-Type: application/json" \\
   -d '${payloadStr}'`;
   }
@@ -87,7 +93,7 @@ import json
 
 url = "${endpoint}"
 headers = {
-    "Authorization": "Bearer YOUR_API_KEY",
+    "Authorization": "Bearer ${apiKey}",
     "Content-Type": "application/json"
 }
 payload = ${payloadStr.replace(/true/g, "True").replace(/false/g, "False")}
@@ -99,7 +105,7 @@ print(response.json())`;
   return `const response = await fetch("${endpoint}", {
   method: "POST",
   headers: {
-    "Authorization": "Bearer YOUR_API_KEY",
+    "Authorization": "Bearer ${apiKey}",
     "Content-Type": "application/json"
   },
   body: JSON.stringify(${payloadStr.replace(/\n/g, "\n  ")})

@@ -9,6 +9,7 @@ import {
   AlertCircle,
   Zap,
   Key,
+  Plus,
   Activity,
   Copy,
   Check,
@@ -18,10 +19,9 @@ import {
   BookOpen,
 } from "lucide-react";
 import Link from "next/link";
-import { useMe, useRevealKey } from "../hooks/queries";
+import { useMe, useApiKeys } from "../hooks/queries";
 import { toast } from "sonner";
 import dynamic from "next/dynamic";
-import { useClipboard } from "../hooks/use-copy-to-clipboard";
 import { cn } from "@/utils";
 import { useState } from "react";
 
@@ -57,11 +57,7 @@ const QuickStartPipeline = dynamic(
 export function DashboardPage() {
   const { user: clerkUser, isLoaded: clerkLoaded } = useUser();
   const { data: userData, isLoading: beLoading, error } = useMe();
-  const revealMutation = useRevealKey();
-  const [revealingId, setRevealingId] = useState<string | null>(null);
-  const liveClipboard = useClipboard();
-  const testClipboard = useClipboard();
-
+  const { data: apiKeysData, isLoading: keysLoading } = useApiKeys();
 
   // Check if new user (created within last minute of sign in)
   const isNewUser =
@@ -71,7 +67,7 @@ export function DashboardPage() {
         ) < 60000
       : false;
 
-  const isLoading = !clerkLoaded || beLoading;
+  const isLoading = !clerkLoaded || beLoading || keysLoading;
 
   if (error) {
     const isRateLimited =
@@ -163,29 +159,13 @@ export function DashboardPage() {
 
   const daysUntilReset = getDaysUntilReset();
 
-  const handleCopy = async (keyId: string, type: "live" | "test") => {
-    if (!keyId) return;
-    setRevealingId(keyId);
-    try {
-      const result = await revealMutation.mutateAsync(keyId);
-      const clipboard = type === "live" ? liveClipboard : testClipboard;
-      clipboard.copy(result.apiKey, `${type.charAt(0).toUpperCase() + type.slice(1)} key copied to clipboard.`);
-    } catch (err: any) {
-      toast.error("Failed to reveal key", {
-        description: err.response?.data?.message || "Please try again later."
-      });
-    } finally {
-      setRevealingId(null);
-    }
-  };
-
-  // Metadata from backend
-  const liveKeyData = userData?.apiKeys?.find((k: any) => k.type === "live");
-  const testKeyData = userData?.apiKeys?.find((k: any) => k.type === "test");
+  // Metadata from decoupled keys endpoint
+  const liveKeyData = apiKeysData?.find((k: any) => k.type === "live");
+  const testKeyData = apiKeysData?.find((k: any) => k.type === "test");
+  const hasKeys = apiKeysData && apiKeysData.length > 0;
 
   const liveKeyHint = liveKeyData?.hint || "pk_live_••••••••";
   const testKeyHint = testKeyData?.hint || "pk_test_••••••••";
-
 
   return (
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-1000">
@@ -260,7 +240,10 @@ export function DashboardPage() {
           {userData?.usage?.hasConversions ? (
             <UsageGraph />
           ) : (
-            <QuickStartPipeline testKeyFull={testKeyHint} />
+            <QuickStartPipeline
+              testKeyFull={testKeyHint}
+              hasKeys={hasKeys}
+            />
           )}
         </div>
         {/* Recent Activity List */}
@@ -427,63 +410,61 @@ export function DashboardPage() {
                   </div>
                 </div>
                 <div className="mt-4 space-y-3 relative z-10 flex-col flex-1 flex justify-center">
-                  <div className="flex sm:items-center gap-3.5 max-sm:flex-col">
-                    <div className="p-2.5 rounded-lg sm:w-1/2 bg-black/40 border border-white/10 flex items-center justify-between group/key">
-                      <div className="flex flex-col">
-                        <span className="text-[8px] uppercase font-bold text-slate-500">
-                          Live
-                        </span>
-                        <code className="text-[10px] font-mono text-slate-400 truncate pr-2">
-                          {liveKeyHint}
-                        </code>
+                  {!hasKeys ? (
+                    <div className="flex flex-col items-center justify-center py-4 space-y-4">
+                      <div className="p-3 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                        <Key className="h-6 w-6 text-emerald-500" />
                       </div>
-                      <button
-                        disabled={!liveKeyData || revealingId === liveKeyData.id}
-                        onClick={() => handleCopy(liveKeyData.id, "live")}
-                        className="p-1 hover:bg-white/10 rounded transition text-slate-500 hover:text-white cursor-pointer disabled:opacity-50"
-                      >
-                        {revealingId === liveKeyData?.id ? (
-                          <Loader2 className="h-3 w-3 animate-spin" />
-                        ) : liveClipboard.copied ? (
-                          <Check className="h-3 w-3 text-emerald-500" />
-                        ) : (
-                          <Copy className="h-3 w-3" />
-                        )}
-                      </button>
-                    </div>
-                    <div className="p-2.5 rounded-lg sm:w-1/2 bg-black/40 border flex items-center justify-between group/key border-white/10">
-                      <div className="flex flex-col">
-                        <span className="text-[8px] uppercase font-bold text-orange-500/70">
-                          Test
-                        </span>
-                        <code className="text-[10px] font-mono text-slate-400 truncate pr-2">
-                          {testKeyHint}
-                        </code>
+                      <div className="text-center">
+                        <p className="text-xs text-slate-400 max-w-[200px] mx-auto leading-relaxed">
+                          You haven&apos;t generated any API keys yet. Start
+                          your integration in seconds.
+                        </p>
                       </div>
-                      <button
-                        disabled={!testKeyData || revealingId === testKeyData.id}
-                        onClick={() => handleCopy(testKeyData.id, "test")}
-                        className="p-1 hover:bg-white/10 rounded transition text-slate-500 hover:text-white cursor-pointer disabled:opacity-50"
-                      >
-                        {revealingId === testKeyData?.id ? (
-                          <Loader2 className="h-3 w-3 animate-spin" />
-                        ) : testClipboard.copied ? (
-                          <Check className="h-3 w-3 text-emerald-500" />
-                        ) : (
-                          <Copy className="h-3 w-3" />
-                        )}
-                      </button>
+                      <Link href="/dashboard/api-keys" className="w-full">
+                        <Button className="w-full bg-emerald-600 hover:bg-emerald-500 shadow-lg shadow-emerald-600/20 h-10 text-xs font-bold gap-2">
+                          <Plus className="h-4 w-4" />
+                          Generate API Key
+                        </Button>
+                      </Link>
                     </div>
-                  </div>
-                  <div className="flex justify-between items-center text-[10px] mt-2 bg-white/5 p-2 rounded-lg">
-                    <p className="text-slate-400">Keep credentials secure.</p>
-                    <Link
-                      href="/dashboard/api-keys"
-                      className="text-emerald-400 font-bold hover:underline"
-                    >
-                      Manage Keys
-                    </Link>
-                  </div>
+                  ) : (
+                    <>
+                      <div className="flex sm:items-center gap-3.5 max-sm:flex-col">
+                        <div className="p-2.5 rounded-lg sm:w-1/2 bg-black/40 border border-white/10 flex items-center justify-between group/key transition-colors hover:border-emerald-500/30">
+                          <div className="flex flex-col">
+                            <span className="text-[8px] uppercase font-bold text-slate-500">
+                              Live
+                            </span>
+                            <code className="text-[10px] font-mono text-slate-400 truncate pr-2">
+                              {liveKeyHint}
+                            </code>
+                          </div>
+                        </div>
+                        <div className="p-2.5 rounded-lg sm:w-1/2 bg-black/40 border flex items-center justify-between group/key border-white/10 transition-colors hover:border-orange-500/30">
+                          <div className="flex flex-col">
+                            <span className="text-[8px] uppercase font-bold text-orange-500/70">
+                              Test
+                            </span>
+                            <code className="text-[10px] font-mono text-slate-400 truncate pr-2">
+                              {testKeyHint}
+                            </code>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-center text-[10px] mt-2 bg-white/5 p-2 rounded-lg">
+                        <p className="text-slate-400">
+                          Keep credentials secure.
+                        </p>
+                        <Link
+                          href="/dashboard/api-keys"
+                          className="text-emerald-400 font-bold hover:underline"
+                        >
+                          Manage Keys
+                        </Link>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
               <GlowCard
