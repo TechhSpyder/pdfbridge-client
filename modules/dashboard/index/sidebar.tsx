@@ -4,7 +4,7 @@ import { AnimatePresence, motion, Variants } from "framer-motion";
 import { cn } from "@/utils";
 import { useEffect, useRef, useState } from "react";
 import { useSidebarStore } from "@/modules/stores";
-import { NAV_LINKS } from "@/modules/constants";
+import { NAV_GROUPS } from "@/modules/constants";
 import {
   Button,
   SmartContactLink,
@@ -39,7 +39,7 @@ const sidebarVariants: Variants = {
 };
 
 const linkVariants: Variants = {
-  hidden: { x: -20, opacity: 0 },
+  hidden: { x: -10, opacity: 0 },
   visible: { x: 0, opacity: 1 },
 };
 
@@ -54,74 +54,126 @@ function SidebarContent({ isSmallScreen, setSidebarOpen }: any) {
   const { user, isLoaded } = useUser();
   const { copied, copy } = useClipboard();
   const [open, setOpen] = useState(false);
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
+    General: true,
+    Engineering: true,
+    Resources: true,
+    Account: true,
+  });
   const router = useRouter();
+
+  const toggleGroup = (groupLabel: string) => {
+    setOpenGroups((prev) => ({
+      ...prev,
+      [groupLabel]: !prev[groupLabel],
+    }));
+  };
+
+  const userRole =
+    (user?.publicMetadata?.role as string) ||
+    (user?.publicMetadata?.userRole as string) ||
+    "";
+  const primaryEmail = user?.primaryEmailAddress?.emailAddress || "";
+  const allowedEmails = ["hello@techhspyder.com"];
+  const isPlatformOwner =
+    userRole === "platform-owner" ||
+    allowedEmails.includes(primaryEmail.toLowerCase());
 
   return (
     <>
-      <div className="p-6 border-b border-b-white/15 h-20 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-3">
-          <Image
-            src="/webp/pdfbridge_logo.webp"
-            alt="PDFBridge"
-            width={32}
-            height={32}
-          />
-          <span className="font-bold text-xl text-white tracking-tight">
+      <div className="p-6 border-b border-b-white/10 h-20 flex items-center justify-between bg-sidebar/50 backdrop-blur-md sticky top-0 z-50">
+        <Link href="/" className="flex items-center gap-3 group">
+          <div className="relative">
+            <div className="absolute -inset-1 bg-blue-500/20 rounded-full blur-md group-hover:bg-blue-500/40 transition-all duration-500 opacity-0 group-hover:opacity-100" />
+            <Image
+              src="/webp/pdfbridge_logo.webp"
+              alt="PDFBridge"
+              width={28}
+              height={28}
+              className="relative transition-transform duration-500 group-hover:rotate-12"
+            />
+          </div>
+          <span className="font-black text-lg text-white tracking-tight uppercase">
             PDFBridge
           </span>
         </Link>
         {isSmallScreen && (
           <button
             onClick={() => setSidebarOpen(false)}
-            className="text-white text-xl font-bold p-2 hover:bg-white/5 rounded-lg transition-colors"
+            className="text-slate-400 p-2 hover:bg-white/5 rounded-lg transition-colors"
           >
             ×
           </button>
         )}
       </div>
 
-      <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-        {NAV_LINKS.filter((link) => {
-          if (link.label === "Blog Journal") {
-            const userRole =
-              (user?.publicMetadata?.role as string) ||
-              (user?.publicMetadata?.userRole as string) ||
-              "";
-            const primaryEmail = user?.primaryEmailAddress?.emailAddress || "";
-            const allowedEmails = ["hello@techhspyder.com"]; // Fallback or sync with actions
-            return (
-              userRole === "platform-owner" ||
-              allowedEmails.includes(primaryEmail.toLowerCase())
-            );
-          }
-          return true;
-        }).map((link) => {
-          const Icon = link.icon;
-          const isActive = pathname === link.href;
-
+      <nav
+        className="flex-1 px-4 py-8 space-y-6 overflow-y-auto scrollbar-hide"
+        data-lenis-prevent
+      >
+        {NAV_GROUPS.map((group) => {
+          const isOpen = openGroups[group.label];
           return (
-            <motion.div key={link.href} variants={linkVariants}>
-              <Link
-                href={link.href}
-                onClick={() => isSmallScreen && setSidebarOpen(false)}
-                className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 group select-none active:scale-[0.97]",
-                  isActive
-                    ? "bg-blue-600/10 text-blue-400 border border-blue-500/20 shadow-[0_0_15px_rgba(37,99,235,0.1)]"
-                    : "text-slate-400 hover:text-white hover:bg-white/5 border border-transparent",
-                )}
+            <div key={group.label} className="space-y-1">
+              <button
+                onClick={() => toggleGroup(group.label)}
+                className="w-full flex items-center justify-between px-3 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 hover:text-slate-300 transition-colors group/header"
               >
-                <Icon
+                {group.label}
+                <ChevronDown
                   className={cn(
-                    "h-4 w-4 transition-all duration-300 group-hover:scale-110",
-                    isActive
-                      ? "text-blue-400"
-                      : "text-slate-500 group-hover:text-slate-300 group-hover:translate-x-0.5",
+                    "h-3 w-3 transition-transform duration-300",
+                    isOpen ? "rotate-0" : "-rotate-90 opacity-50",
                   )}
                 />
-                {link.label}
-              </Link>
-            </motion.div>
+              </button>
+              <AnimatePresence initial={false}>
+                {isOpen && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    className="overflow-hidden space-y-1"
+                  >
+                    {group.links
+                      .filter((link) => {
+                        if (link.label === "Blog Journal") return isPlatformOwner;
+                        return true;
+                      })
+                      .map((link) => {
+                        const Icon = link.icon;
+                        const isActive = pathname === link.href;
+
+                        return (
+                          <motion.div key={link.href} variants={linkVariants}>
+                            <Link
+                              href={link.href}
+                              onClick={() => isSmallScreen && setSidebarOpen(false)}
+                              className={cn(
+                                "flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-300 group select-none active:scale-[0.97] border",
+                                isActive
+                                  ? "bg-blue-600/10 text-blue-400 border-blue-500/20 shadow-[0_0_20px_rgba(37,99,235,0.08)]"
+                                  : "text-slate-500 hover:text-slate-200 hover:bg-white/[0.03] border-transparent",
+                              )}
+                            >
+                              <Icon
+                                className={cn(
+                                  "h-4 w-4 transition-all duration-300",
+                                  isActive
+                                    ? "text-blue-400 scale-110"
+                                    : "text-slate-600 group-hover:text-slate-400 group-hover:scale-110",
+                                )}
+                              />
+                              {link.label}
+                            </Link>
+                          </motion.div>
+                        );
+                      })}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           );
         })}
       </nav>
