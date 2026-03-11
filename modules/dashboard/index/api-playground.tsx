@@ -7,7 +7,7 @@ import {
 } from "@/modules/hooks/queries";
 import { cn } from "@/utils";
 import { useApiClient } from "@/utils/api-client";
-import { Loader2, Sparkles, Terminal, Upload, FileText } from "lucide-react";
+import { Loader2, Sparkles, Terminal, Upload } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { Highlight, themes } from "prism-react-renderer";
 import { toast } from "sonner";
@@ -22,13 +22,10 @@ function generateSnippet(
   mode: "live" | "test",
   extractMetadata: boolean,
   webhookUrl: string,
-  uniqueVariables: string[],
+  uniqueVariables:string[],
+  fallbackKey?: string
 ) {
-  const sessionSecret =
-    typeof window !== "undefined"
-      ? sessionStorage.getItem("last_secret")
-      : null;
-  const apiKey = sessionSecret || "YOUR_API_KEY";
+  const apiKey = fallbackKey || "YOUR_API_KEY";
 
   if (activeTab === "file") {
     const endpoint = "https://pdfbridge.xyz/api/v1/normalize-invoice";
@@ -39,19 +36,19 @@ function generateSnippet(
     }
     if (lang === "python") {
       return `import requests
-
+ 
 url = "${endpoint}"
 files = {'file': open('invoice.pdf', 'rb')}
 data = {'testMode': 'true'} if "${mode}" == "test" else {}
 headers = {"Authorization": "Bearer ${apiKey}"}
-
+ 
 response = requests.post(url, headers=headers, files=files, data=data)
 print(response.json())`;
     }
     return `const formData = new FormData();
 formData.append("file", fileObject);
 ${mode === "test" ? 'formData.append("testMode", "true");' : ""}
-
+ 
 const response = await fetch("${endpoint}", {
   method: "POST",
   headers: {
@@ -59,7 +56,7 @@ const response = await fetch("${endpoint}", {
   },
   body: formData
 });
-
+ 
 const data = await response.json();
 console.log(data);`;
   }
@@ -90,14 +87,14 @@ console.log(data);`;
   if (lang === "python") {
     return `import requests
 import json
-
+ 
 url = "${endpoint}"
 headers = {
     "Authorization": "Bearer ${apiKey}",
     "Content-Type": "application/json"
 }
 payload = ${payloadStr.replace(/true/g, "True").replace(/false/g, "False")}
-
+ 
 response = requests.post(url, headers=headers, json=payload)
 print(response.json())`;
   }
@@ -110,7 +107,7 @@ print(response.json())`;
   },
   body: JSON.stringify(${payloadStr.replace(/\n/g, "\n  ")})
 });
-
+ 
 const data = await response.json();
 console.log(data);`;
 }
@@ -129,10 +126,15 @@ export function ApiPlayground() {
   const [snippetLang, setSnippetLang] = useState<"curl" | "node" | "python">(
     "node",
   );
+
   const api = useApiClient();
+  const { data: me } = useMe();
   const saveMutation = useSaveTemplate();
   const normalizeMutation = useNormalizeInvoice();
   const { data: jobStatus } = useJobStatus(activeJobId || "");
+
+  const userKeys = me?.apiKeys || [];
+  const currentKeyHint = userKeys.find((k: any) => k.type === mode)?.hint;
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
@@ -484,21 +486,23 @@ export function ApiPlayground() {
               Integration Code
             </span>
           </div>
-          <div className="flex gap-1 pr-2">
-            {(["node", "python", "curl"] as const).map((lang) => (
-              <button
-                key={lang}
-                onClick={() => setSnippetLang(lang)}
-                className={cn(
-                  "px-3 py-1.5 text-[10px] font-bold uppercase rounded-md transition-all cursor-pointer",
-                  snippetLang === lang
-                    ? "bg-slate-800/80 text-white"
-                    : "text-slate-500 hover:text-slate-300 hover:bg-white/5",
-                )}
-              >
-                {lang}
-              </button>
-            ))}
+          <div className="flex items-center gap-4 pr-4">
+            <div className="flex gap-1">
+              {(["node", "python", "curl"] as const).map((lang) => (
+                <button
+                  key={lang}
+                  onClick={() => setSnippetLang(lang)}
+                  className={cn(
+                    "px-3 py-1.5 text-[10px] font-bold uppercase rounded-md transition-all cursor-pointer",
+                    snippetLang === lang
+                      ? "bg-slate-800/80 text-white"
+                      : "text-slate-500 hover:text-slate-300 hover:bg-white/5",
+                  )}
+                >
+                  {lang}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
         {/* Code Content */}
@@ -521,6 +525,7 @@ export function ApiPlayground() {
               extractMetadata && allowAi,
               webhookUrl,
               uniqueVariables,
+              currentKeyHint,
             )}
           >
             {({ className, style, tokens, getLineProps, getTokenProps }) => (
@@ -563,6 +568,7 @@ export function ApiPlayground() {
                   extractMetadata && allowAi,
                   webhookUrl,
                   uniqueVariables,
+                  currentKeyHint,
                 ),
               );
               toast.success("Snippet copied to clipboard");

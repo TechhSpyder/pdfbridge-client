@@ -20,15 +20,12 @@ export function QuickStartPipeline({
   const clipboard = useClipboard();
   const [keyCopied, setKeyCopied] = useState(false);
 
-  const sessionKey = typeof window !== 'undefined' ? sessionStorage.getItem("last_secret") : null;
-  const activeKey = sessionKey || testKeyFull;
-
   const handleCopyKey = () => {
-    if (!sessionKey && hasKeys) {
+    if (hasKeys) {
         toast.info("Key already created and hidden. Manage or roll keys in settings.");
         return;
     }
-    clipboard.copy(activeKey, "API Key copied to clipboard.");
+    clipboard.copy(testKeyFull, "API Key Hint copied to clipboard.");
     setKeyCopied(true);
     toast.success("Key copied! You're ready to make your first request.");
   };
@@ -39,14 +36,10 @@ export function QuickStartPipeline({
       icon: <Key className="h-5 w-5" />,
       title: !hasKeys 
         ? "Generate your API Key" 
-        : sessionKey 
-          ? "Copy your new API Key" 
-          : "API Key Active",
+        : "API Key Active",
       description: !hasKeys
         ? "Create your first set of keys to start building today."
-        : sessionKey
-          ? "You'll need this to authenticate your first request. Copy it now."
-          : "You have active keys. Check the Playground or manage them in Settings.",
+        : "You have active keys. Check the Playground or manage them in Settings.",
       isComplete: hasKeys,
       action: !hasKeys ? (
         <Link href="/dashboard/api-keys">
@@ -57,17 +50,6 @@ export function QuickStartPipeline({
             Generate Key
           </Button>
         </Link>
-      ) : sessionKey ? (
-        <Button
-          onClick={handleCopyKey}
-          variant={keyCopied ? "outline" : "primary"}
-          className={cn(
-            "text-xs h-8 px-4",
-            !keyCopied && "bg-blue-600 hover:bg-blue-500 text-white font-bold",
-          )}
-        >
-          {keyCopied ? "Copied!" : "Copy New Key"}
-        </Button>
       ) : (
         <Link href="/dashboard/api-keys">
             <Button
@@ -78,6 +60,7 @@ export function QuickStartPipeline({
             </Button>
         </Link>
       ),
+
     },
     {
       id: "test-api",

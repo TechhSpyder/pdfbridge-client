@@ -1,7 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { useCreateKey, useDeleteKey, useMe, useApiKeys } from "@/modules/hooks/queries";
+import {
+  useCreateKey,
+  useDeleteKey,
+  useMe,
+  useApiKeys,
+} from "@/modules/hooks/queries";
 import { Button } from "@/modules/app/button";
 import { GlowCard } from "@/modules/app/glow-card";
 import {
@@ -17,6 +22,7 @@ import {
 } from "lucide-react";
 import Title from "@/modules/app/title";
 import { toast } from "sonner";
+import { ConfirmActionDialog } from "@/modules/app/confirm-action-dialog";
 
 export function ApiKeysPage() {
   const { data: userData } = useMe();
@@ -31,6 +37,10 @@ export function ApiKeysPage() {
   const [copied, setCopied] = useState(false);
   const [isCreating, setIsCreating] = useState<"live" | "test" | null>(null);
   const [keyName, setKeyName] = useState("");
+  const [deletingKey, setDeletingKey] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
 
   const handleCreate = async () => {
     if (!isCreating || !keyName) return;
@@ -40,11 +50,6 @@ export function ApiKeysPage() {
         name: keyName,
         type: isCreating,
       });
-
-      // Session Persistence for Playground pre-population
-      if (response.apiKey) {
-        sessionStorage.setItem("last_secret", response.apiKey);
-      }
 
       setNewKeyData({
         key: response.apiKey,
@@ -62,13 +67,17 @@ export function ApiKeysPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure? This will immediately invalidate the key."))
-      return;
+  const handleDeleteClick = (key: any) => {
+    setDeletingKey({ id: key.id, name: key.name });
+  };
+
+  const confirmDelete = async () => {
+    if (!deletingKey) return;
     const tId = toast.loading("Revoking key...");
     try {
-      await deleteMutation.mutateAsync(id);
+      await deleteMutation.mutateAsync(deletingKey.id);
       toast.success("Key revoked", { id: tId });
+      setDeletingKey(null);
     } catch (error: any) {
       toast.error("Revocation failed", { id: tId });
     }
@@ -150,14 +159,17 @@ export function ApiKeysPage() {
               </div>
             ) : (
               liveKeys.map((key: any) => (
-                <div key={key.id} className="p-4 rounded-xl bg-slate-900/40 border border-white/5 group hover:border-emerald-500/20 transition-all">
+                <div
+                  key={key.id}
+                  className="p-4 rounded-xl bg-slate-900/40 border border-white/5 group hover:border-emerald-500/20 transition-all"
+                >
                   <div className="flex items-start justify-between mb-2">
                     <span className="text-sm font-bold text-white mb-1 block">
                       {key.name}
                     </span>
                     <Button
                       variant="outline"
-                      onClick={() => handleDelete(key.id)}
+                      onClick={() => handleDeleteClick(key)}
                       className="h-8 w-8 p-0 text-slate-600 hover:text-red-400 hover:bg-red-500/10 border-none"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -197,14 +209,17 @@ export function ApiKeysPage() {
               </div>
             ) : (
               testKeys.map((key: any) => (
-                <div key={key.id} className="p-4 rounded-xl bg-slate-900/40 border border-white/5 group hover:border-orange-500/20 transition-all">
+                <div
+                  key={key.id}
+                  className="p-4 rounded-xl bg-slate-900/40 border border-white/5 group hover:border-orange-500/20 transition-all"
+                >
                   <div className="flex items-start justify-between mb-2">
                     <span className="text-sm font-bold text-white mb-1 block">
                       {key.name}
                     </span>
                     <Button
                       variant="outline"
-                      onClick={() => handleDelete(key.id)}
+                      onClick={() => handleDeleteClick(key)}
                       className="h-8 w-8 p-0 text-slate-600 hover:text-red-400 hover:bg-red-500/10 border-none"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -228,9 +243,14 @@ export function ApiKeysPage() {
       <div className="p-6 rounded-2xl border border-blue-500/20 bg-blue-500/5 flex items-start gap-4">
         <Info className="h-6 w-6 text-blue-500 shrink-0" />
         <div className="space-y-1">
-          <h4 className="font-bold text-white text-sm">Security Best Practices</h4>
+          <h4 className="font-bold text-white text-sm">
+            Security Best Practices
+          </h4>
           <p className="text-xs text-blue-400/80 leading-relaxed">
-            API keys provide full access to your organization&apos;s data. Never commit them to GitHub or expose them in client-side code. If you suspect a key is compromised, revoke it and create a new one immediately.
+            API keys provide full access to your organization&apos;s data. Never
+            commit them to GitHub or expose them in client-side code. If you
+            suspect a key is compromised, revoke it and create a new one
+            immediately.
           </p>
         </div>
       </div>
@@ -245,7 +265,7 @@ export function ApiKeysPage() {
             <p className="text-sm text-slate-400 mb-6">
               Give your key a name to help you identify it later.
             </p>
-            
+
             <input
               type="text"
               placeholder="e.g. My Website"
@@ -259,8 +279,8 @@ export function ApiKeysPage() {
               <Button
                 variant="outline"
                 onClick={() => {
-                   setIsCreating(null);
-                   setKeyName("");
+                  setIsCreating(null);
+                  setKeyName("");
                 }}
                 className="flex-1"
               >
@@ -277,6 +297,18 @@ export function ApiKeysPage() {
           </div>
         </div>
       )}
+
+      {/* Confirmation Dialog */}
+      <ConfirmActionDialog
+        isOpen={!!deletingKey}
+        onOpenChange={(isOpen) => !isOpen && setDeletingKey(null)}
+        onConfirm={confirmDelete}
+        title="Revoke API Key"
+        description={`Any applications actively using the ${deletingKey?.name} key will immediately stop working.`}
+        expectedText={`DELETE ${deletingKey?.name}`}
+        confirmButtonText="Revoke Key"
+        isLoading={deleteMutation.isPending}
+      />
     </div>
   );
 }
