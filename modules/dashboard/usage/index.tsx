@@ -353,9 +353,9 @@ export function UsagePage() {
                               <Search className="h-3.5 w-3.5" />
                             </Button>
                           )}
-                          {job.success && job.url && (
+                          {job.success && (
                             <Link
-                              href={job.url}
+                              href={`https://api.pdfbridge.xyz/api/v1/jobs/${job.id}/download`}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="inline-block text-white"
