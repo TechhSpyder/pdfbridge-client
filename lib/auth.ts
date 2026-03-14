@@ -5,10 +5,11 @@ import { organization, emailOTP } from "better-auth/plugins";
 
 // Better-Auth instance for the Next.js process
 export const auth = betterAuth({
-  database: prismaAdapter(prisma, {
+  database: process.env.NEXT_RUNTIME === "edge" ? undefined : prismaAdapter(prisma, {
     provider: "postgresql",
   }),
   trustedOrigins: ["http://localhost:3000"],
+  baseURL: "http://localhost:3000",
   emailAndPassword: {
     enabled: true,
   },
@@ -32,34 +33,6 @@ export const auth = betterAuth({
       sendVerificationOnSignUp: true,
     }),
   ],
-  databaseHooks: {
-    user: {
-      create: {
-        after: async (user) => {
-          const freePlan = await prisma.plan.findFirst({
-            where: { name: "Free" },
-          });
-
-          if (freePlan) {
-            const org = await prisma.organization.create({
-              data: {
-                name: "My Workspace",
-                planId: freePlan.id,
-              },
-            });
-
-            await prisma.membership.create({
-              data: {
-                userId: user.id,
-                organizationId: org.id,
-                role: "OWNER",
-              },
-            });
-          }
-        },
-      },
-    },
-  },
   session: {
     expiresIn: 60 * 60 * 24 * 7, // 7 days
     updateAge: 60 * 60 * 24, // 1 day

@@ -6,11 +6,9 @@ import { PrismaNeon } from "@prisma/adapter-neon";
 // --- Helpers ---
 
 const getAppPrisma = () => {
+  if (process.env.NEXT_RUNTIME === "edge") return null as any;
   const url = process.env.DATABASE_URL;
   if (!url) {
-    // For Prisma 7, we don't provide a URL in the constructor if we want it to be handled by the config
-    // or we use provide it via datasources object if absolutely necessary.
-    // However, during build time, we should just return a client that will fail gracefully if used.
     return new AppPrismaClient();
   }
   const pool = new Pool({ connectionString: url });

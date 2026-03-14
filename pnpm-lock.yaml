@@ -2187,7 +2187,7 @@ packages:
       react: ^18 || ^19
 
   '@techhspyder/pdfbridge-node@file:../pdfbridge-node/techhspyder-pdfbridge-node-1.1.1.tgz':
-    resolution: {integrity: sha512-/SyNKxJsF4sJfkWnQh2NW4KuJQFtq44znUu4y0m6TI0NS2ysT0Mb/nq+Covkg9loMtOrdvsm5HKNGxuWfAvt0A==, tarball: file:../pdfbridge-node/techhspyder-pdfbridge-node-1.1.1.tgz}
+    resolution: {integrity: sha512-eDI5kXi9ZTGEnUwFLL0cMN4aD2AxotIXTLs4vvp7QNmrvxV9dVpiSbiJm0IEUqOPAEK5nS9988yPiaP8FRpKfQ==, tarball: file:../pdfbridge-node/techhspyder-pdfbridge-node-1.1.1.tgz}
     version: 1.1.1
     engines: {node: '>=18'}
 

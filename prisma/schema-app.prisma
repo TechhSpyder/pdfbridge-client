@@ -9,56 +9,57 @@ datasource db {
 
 model User {
   id                         String       @id @default(uuid())
-  name                       String?
   email                      String       @unique
-  emailVerified              Boolean      @default(false)
-  image                      String?
   isActive                   Boolean      @default(true)
   createdAt                  DateTime     @default(now())
-  updatedAt                  DateTime     @updatedAt @default(now())
   welcomeEmailSent           Boolean      @default(false)
   notificationBillingUpdates Boolean      @default(true)
   notificationUsageAlerts    Boolean      @default(true)
-  role                       String       @default("user") // "user" or "platform-owner"
   lastActiveAt               DateTime?
-  memberships                Membership[]
+  emailVerified              Boolean      @default(false)
+  image                      String?
+  name                       String?
+  updatedAt                  DateTime     @default(now()) @updatedAt
+  role                       String       @default("user")
   conversions                Conversion[]
+  memberships                Membership[]
   webhookLogs                WebhookLog[]
-  sessions                   Session[]
   accounts                   Account[]
+  sessions                   Session[]
 }
 
 model Organization {
-  id                     String       @id @default(uuid())
+  id                     String                  @id @default(uuid())
   name                   String
   planId                 String
-  stripeCustomerId       String?      @unique
-  lemonSqueezyCustomerId String?      @unique
-  paystackCustomerCode   String?      @unique
+  stripeCustomerId       String?                 @unique
+  lemonSqueezyCustomerId String?                 @unique
+  paystackCustomerCode   String?                 @unique
   paddleCustomerId       String?
   paddleSubscriptionId   String?
-  ipWhitelist            String[]     @default([])
+  ipWhitelist            String[]                @default([])
   planStartedAt          DateTime?
-  billingInterval        String       @default("month")
-  createdAt              DateTime     @default(now())
-  memberships            Membership[]
+  billingInterval        String                  @default("month")
+  createdAt              DateTime                @default(now())
   apiKeys                ApiKey[]
+  auditLogs              AuditLog[]
   conversions            Conversion[]
-  usage                  Usage[]
-  templates              Template[]
-  webhookLogs            WebhookLog[]
-  invites                Invite[]
-  vendors                VendorIdentity[]
-  integrations           IntegrationConnection[]
   financialDocuments     FinancialDocument[]
-  plan                   Plan         @relation(fields: [planId], references: [id])
+  integrations           IntegrationConnection[]
+  invites                Invite[]
+  memberships            Membership[]
+  plan                   Plan                    @relation(fields: [planId], references: [id])
+  templates              Template[]
+  usage                  Usage[]
+  vendors                VendorIdentity[]
+  webhookLogs            WebhookLog[]
 }
 
 model Membership {
   id             String       @id @default(uuid())
   organizationId String
   userId         String
-  role           String       @default("MEMBER") // OWNER, MEMBER
+  role           String       @default("MEMBER")
   createdAt      DateTime     @default(now())
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -68,13 +69,15 @@ model Membership {
 
 model ApiKey {
   id             String       @id @default(uuid())
-  organizationId String
-  userId         String // Who created/last used it
+  userId         String
   keyHash        String       @unique
   type           String
   lastUsedAt     DateTime?
-  expiresAt      DateTime?
   createdAt      DateTime     @default(now())
+  organizationId String
+  expiresAt      DateTime?
+  hint           String?
+  name           String       @default("Default Key")
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@index([keyHash])
@@ -90,37 +93,37 @@ model Plan {
   paystackPlanCode            String?        @unique
   priceNgn                    Int            @default(0)
   priceUsd                    Int            @default(0)
-  priceNgnAnnual              Int            @default(0)
-  priceUsdAnnual              Int            @default(0)
-  maxSeats                    Int            @default(1)
-  aiTemplateLimit             Int            @default(0)
   allowIpWhitelisting         Boolean        @default(false)
   allowCustomHeaders          Boolean        @default(false)
   allowWebhooks               Boolean        @default(false)
-  allowAi                     Boolean        @default(false)
-  allowTailwind               Boolean        @default(false)
-  allowGhostMode              Boolean        @default(false)
   lemonSqueezyVariantIdAnnual String?        @unique
-  paddlePriceId               String?
-  paddlePriceIdAnnual         String?
   maxFileSize                 Int            @default(10485760)
   paystackPlanCodeAnnual      String?        @unique
+  priceNgnAnnual              Int            @default(0)
+  priceUsdAnnual              Int            @default(0)
   rateLimitPerMin             Int            @default(10)
   retentionDays               Int            @default(7)
+  allowAi                     Boolean        @default(false)
+  allowTailwind               Boolean        @default(false)
+  paddlePriceId               String?
+  paddlePriceIdAnnual         String?
+  allowGhostMode              Boolean        @default(false)
   aiLimit                     Int            @default(0)
+  aiTemplateLimit             Int            @default(0)
+  maxSeats                    Int            @default(1)
   organizations               Organization[]
 }
 
 model Usage {
-  id                String       @id @default(uuid())
-  organizationId    String
-  month             Int
-  year              Int
-  count             Int          @default(0)
-  aiCount           Int          @default(0)
-  aiTemplateCount   Int          @default(0)
-  createdAt         DateTime     @default(now())
-  organization      Organization @relation(fields: [organizationId], references: [id])
+  id              String       @id @default(uuid())
+  month           Int
+  year            Int
+  count           Int          @default(0)
+  createdAt       DateTime     @default(now())
+  aiCount         Int          @default(0)
+  aiTemplateCount Int          @default(0)
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id])
 
   @@unique([organizationId, month, year])
   @@index([organizationId, month, year])
@@ -128,28 +131,28 @@ model Usage {
 
 model Conversion {
   id             String       @id @default(uuid())
-  organizationId String
   userId         String
   url            String?
-  htmlBody       String?
   htmlLength     Int?
   success        Boolean      @default(false)
   errorMsg       String?
   duration       Int
-  creditsUsed    Int          @default(1)
-  fileSize       Int?
   createdAt      DateTime     @default(now())
   status         String       @default("PENDING")
   retentionDays  Int          @default(7)
+  aiMetadata     Json?
+  creditsUsed    Int          @default(1)
+  fileSize       Int?
+  htmlBody       String?
   isGhostMode    Boolean      @default(false)
   isTestMode     Boolean      @default(false)
-  aiMetadata     Json?
-  s3Key          String?
   metadata       Json?
+  s3Key          String?
   webhookUrl     String?
+  organizationId String
   idempotencyKey String?
-  user           User         @relation(fields: [userId], references: [id])
   organization   Organization @relation(fields: [organizationId], references: [id])
+  user           User         @relation(fields: [userId], references: [id])
   webhookLogs    WebhookLog[]
 
   @@unique([organizationId, idempotencyKey])
@@ -189,16 +192,16 @@ model WebhookLog {
   id             String       @id @default(uuid())
   conversionId   String
   userId         String
-  organizationId String
   url            String
   payload        Json
   statusCode     Int?
   responseBody   String?
   duration       Int?
   createdAt      DateTime     @default(now())
+  organizationId String
   conversion     Conversion   @relation(fields: [conversionId], references: [id], onDelete: Cascade)
-  user           User         @relation(fields: [userId], references: [id])
   organization   Organization @relation(fields: [organizationId], references: [id])
+  user           User         @relation(fields: [userId], references: [id])
 
   @@index([conversionId])
   @@index([userId])
@@ -209,8 +212,8 @@ model Template {
   id             String       @id @default(uuid())
   organizationId String
   name           String
-  html           String       @db.Text
-  css            String?      @db.Text
+  html           String
+  css            String?
   variables      String[]     @default([])
   prompt         String?
   createdAt      DateTime     @default(now())
@@ -230,18 +233,36 @@ model Invite {
   createdAt      DateTime     @default(now())
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
+  @@unique([organizationId, email])
   @@index([token])
   @@index([organizationId])
-  @@unique([organizationId, email])
+}
+
+model AuditLog {
+  id             String       @id @default(uuid())
+  organizationId String
+  userId         String?
+  action         String
+  resource       String
+  resourceId     String?
+  metadata       Json?
+  ip             String?
+  userAgent      String?
+  createdAt      DateTime     @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, createdAt])
+  @@index([userId, createdAt])
+  @@index([action])
 }
 
 model VendorIdentity {
   id             String       @id @default(uuid())
   organizationId String
-  originalName   String       // The raw name extracted
-  normalizedName String       // The standardized name
-  category       String?      // Optional classification (e.g. 'Software', 'Hosting')
-  confidence     Float?       // Track confidence of historical matches
+  originalName   String
+  normalizedName String
+  category       String?
+  confidence     Float?
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
@@ -251,12 +272,12 @@ model VendorIdentity {
 }
 
 model Integration {
-  id          String   @id // e.g., 'xero', 'quickbooks'
-  name        String   // e.g., 'Xero'
-  category    String   // e.g., 'ACCOUNTING'
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id          String                  @id
+  name        String
+  category    String
+  isActive    Boolean                 @default(true)
+  createdAt   DateTime                @default(now())
+  updatedAt   DateTime                @updatedAt
   connections IntegrationConnection[]
 }
 
@@ -264,18 +285,17 @@ model IntegrationConnection {
   id             String       @id @default(uuid())
   organizationId String
   integrationId  String
-  tenantId       String?      // Xero specific - the actual company file connected
-  tenantName     String?      // e.g., 'Demo Company (Global)'
-  accessToken    String       @db.Text
-  refreshToken   String?      @db.Text
-  idToken        String?      @db.Text
+  tenantId       String?
+  tenantName     String?
+  accessToken    String
+  refreshToken   String?
+  idToken        String?
   expiresAt      DateTime?
-  status         String       @default("ACTIVE") // ACTIVE, EXPIRED, DISCONNECTED
+  status         String       @default("ACTIVE")
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
-
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   integration    Integration  @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@unique([organizationId, integrationId])
   @@index([organizationId])
@@ -284,8 +304,8 @@ model IntegrationConnection {
 model FinancialDocument {
   id             String              @id @default(uuid())
   organizationId String
-  type           String              @default("BILL") // BILL, INVOICE, RECEIPT
-  status         String              @default("PENDING") // DRAFT, PENDING, DISPATCHED, SYNCED, VOID
+  type           String              @default("BILL")
+  status         String              @default("PENDING")
   vendorName     String?
   vendorEmail    String?
   invoiceNumber  String?
@@ -294,13 +314,13 @@ model FinancialDocument {
   taxAmount      Decimal?            @db.Decimal(20, 4)
   date           DateTime?
   dueDate        DateTime?
-  s3Key          String?             // Reference to the original file
-  metadata       Json?               // Full AI extraction result
-  externalId     String?             // ID in the external ERP (QBO/Xero)
-  externalUrl    String?             // Link to the document in ERP
-  isTestMode     Boolean             @default(false)
+  s3Key          String?
+  metadata       Json?
+  externalId     String?
+  externalUrl    String?
   createdAt      DateTime            @default(now())
   updatedAt      DateTime            @updatedAt
+  isTestMode     Boolean             @default(false)
   organization   Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   lineItems      FinancialLineItem[]
 
@@ -316,8 +336,8 @@ model FinancialLineItem {
   quantity    Decimal           @default(1) @db.Decimal(20, 4)
   unitPrice   Decimal           @db.Decimal(20, 4)
   totalPrice  Decimal           @db.Decimal(20, 4)
-  accountCode String?           // ERP-specific account code mapping
-  taxCode     String?           // ERP-specific tax code mapping
+  accountCode String?
+  taxCode     String?
   document    FinancialDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
 
   @@index([documentId])
@@ -342,7 +362,6 @@ model Account {
   accountId             String
   providerId            String
   userId                String
-  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   accessToken           String?
   refreshToken          String?
   idToken               String?
@@ -352,12 +371,13 @@ model Account {
   password              String?
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("account")
 }
 
 model Verification {
-  id         String   @id
+  id         String    @id
   identifier String
   value      String
   expiresAt  DateTime

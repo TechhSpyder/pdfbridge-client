@@ -6,29 +6,21 @@ const isPublicRoute = (pathname: string) => {
     "/",
     "/sign-in",
     "/sign-up",
-    "/forgot-password",
-    "/reset-password",
-    "/oauth-callback",
+    "/api/auth",
+    "/api/health",
+    "/pricing",
+    "/template-gallery",
     "/docs",
+    "/blog",
+    "/legal",
     "/privacy",
     "/terms",
-    "/changelog",
-    "/contact",
-    "/security",
-    "/features",
-    "/frameworks",
-    "/for",
-    "/use-cases",
-    "/solutions",
-    "/sitemap",
-    "/robots",
-    "/llms",
-    "/insights",
-    "/ingest",
+    "/monitoring",
+    "/api/public",
+    "/api/v1/convert", // Public conversion endpoint
+    "/api/v1/jobs",    // Job status is public with ID
   ];
-  return publicPaths.some((path) => pathname === path || pathname.startsWith(`${path}/`)) || 
-         pathname.endsWith(".txt") || 
-         pathname.endsWith(".xml");
+  return publicPaths.some(path => pathname.startsWith(path));
 };
 
 const RETURNING_COOKIE = "pdfbridge_returning";
