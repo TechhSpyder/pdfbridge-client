@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSession, authClient } from "@/lib/auth-client";
+import { useUser, UserProfile, useAuth } from "@clerk/nextjs";
 import { useMe } from "@/modules/hooks/queries";
 import { Button, GlowCard, SmartContactLink, UserAvatar } from "@/modules/app";
 import {
@@ -489,15 +489,10 @@ function IntegrationsTab({ organizationId }: { organizationId?: string }) {
               </div>
             </div>
 
-            {xeroConnection?.status === "ACTIVE" ? (
+            {xeroConnection ? (
               <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-400 border border-emerald-500/20">
                 <div className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
                 Connected
-              </span>
-            ) : xeroConnection?.status === "EXPIRED" ? (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-yellow-500/10 px-2.5 py-1 text-xs font-medium text-yellow-400 border border-yellow-500/20">
-                <div className="h-1.5 w-1.5 rounded-full bg-yellow-400 animate-pulse" />
-                Reconnect required
               </span>
             ) : (
               <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-800 px-2.5 py-1 text-xs font-medium text-slate-400 border border-slate-700">
@@ -510,39 +505,20 @@ function IntegrationsTab({ organizationId }: { organizationId?: string }) {
             {xeroConnection ? (
               <>
                 <div className="text-xs text-slate-400 flex flex-col gap-1">
-                  <span>
-                    {xeroConnection.status === "EXPIRED"
-                      ? "Last synced to:"
-                      : "Syncing to tenant:"}
-                  </span>
-                  <strong
-                    className={`${xeroConnection.status === "EXPIRED" ? "text-slate-500" : "text-white"}`}
-                  >
+                  <span>Syncing to tenant:</span>
+                  <strong className="text-white">
                     {xeroConnection.tenantName || "Unknown Company"}
                   </strong>
                 </div>
-                <div className="flex gap-2">
-                  {xeroConnection.status === "EXPIRED" && (
-                    <Button
-                      onClick={() => handleConnect("xero")}
-                      disabled={connecting === "xero"}
-                      className="bg-yellow-600 hover:bg-yellow-500 text-white font-bold h-8 text-xs px-3"
-                    >
-                      {connecting === "xero" ? "Handshake..." : "Reconnect"}
-                    </Button>
-                  )}
-                  <Button
-                    onClick={() => handleDisconnect("xero")}
-                    variant="outline"
-                    disabled={disconnectMutation.isPending}
-                    className="text-red-400 border-red-500/10 hover:text-red-300 hover:bg-red-400/10 h-8 text-xs px-3"
-                  >
-                    <Unplug className="w-3 h-3 mr-2" />
-                    {xeroConnection.status === "EXPIRED"
-                      ? "Remove"
-                      : "Disconnect"}
-                  </Button>
-                </div>
+                <Button
+                  onClick={() => handleDisconnect("xero")}
+                  variant="outline"
+                  disabled={disconnectMutation.isPending}
+                  className="text-red-400 border-red-500/10 hover:text-red-300 hover:bg-red-400/10 h-8 text-xs px-3"
+                >
+                  <Unplug className="w-3 h-3 mr-2" />
+                  Disconnect
+                </Button>
               </>
             ) : (
               <div className="w-full flex justify-end">
@@ -583,15 +559,10 @@ function IntegrationsTab({ organizationId }: { organizationId?: string }) {
               </div>
             </div>
 
-            {quickbooksConnection?.status === "ACTIVE" ? (
+            {quickbooksConnection ? (
               <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-400 border border-emerald-500/20">
                 <div className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
                 Connected
-              </span>
-            ) : quickbooksConnection?.status === "EXPIRED" ? (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-yellow-500/10 px-2.5 py-1 text-xs font-medium text-yellow-400 border border-yellow-500/20">
-                <div className="h-1.5 w-1.5 rounded-full bg-yellow-400 animate-pulse" />
-                Reconnect required
               </span>
             ) : (
               <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-800 px-2.5 py-1 text-xs font-medium text-slate-400 border border-slate-700">
@@ -604,41 +575,20 @@ function IntegrationsTab({ organizationId }: { organizationId?: string }) {
             {quickbooksConnection ? (
               <>
                 <div className="text-xs text-slate-400 flex flex-col gap-1">
-                  <span>
-                    {quickbooksConnection.status === "EXPIRED"
-                      ? "Last synced to:"
-                      : "Syncing to company:"}
-                  </span>
-                  <strong
-                    className={`${quickbooksConnection.status === "EXPIRED" ? "text-slate-500" : "text-white"}`}
-                  >
+                  <span>Syncing to company:</span>
+                  <strong className="text-white">
                     {quickbooksConnection.tenantName || "QuickBooks Company"}
                   </strong>
                 </div>
-                <div className="flex gap-2">
-                  {quickbooksConnection.status === "EXPIRED" && (
-                    <Button
-                      onClick={() => handleConnect("quickbooks")}
-                      disabled={connecting === "quickbooks"}
-                      className="bg-yellow-600 hover:bg-yellow-500 text-white font-bold h-8 text-xs px-3"
-                    >
-                      {connecting === "quickbooks"
-                        ? "Handshake..."
-                        : "Reconnect"}
-                    </Button>
-                  )}
-                  <Button
-                    onClick={() => handleDisconnect("quickbooks")}
-                    variant="outline"
-                    disabled={disconnectMutation.isPending}
-                    className="text-red-400 border-red-500/10 hover:text-red-300 hover:bg-red-400/10 h-8 text-xs px-3"
-                  >
-                    <Unplug className="w-3 h-3 mr-2" />
-                    {quickbooksConnection.status === "EXPIRED"
-                      ? "Remove"
-                      : "Disconnect"}
-                  </Button>
-                </div>
+                <Button
+                  onClick={() => handleDisconnect("quickbooks")}
+                  variant="outline"
+                  disabled={disconnectMutation.isPending}
+                  className="text-red-400 border-red-500/10 hover:text-red-300 hover:bg-red-400/10 h-8 text-xs px-3"
+                >
+                  <Unplug className="w-3 h-3 mr-2" />
+                  Disconnect
+                </Button>
               </>
             ) : (
               <div className="w-full flex justify-end">

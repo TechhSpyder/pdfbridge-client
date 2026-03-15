@@ -1,44 +1,52 @@
 import { PrismaClient as BlogPrismaClient } from "@prisma/client";
 import { PrismaClient as AppPrismaClient } from "@prisma/client-app";
-import { Pool } from "@neondatabase/serverless";
-import { PrismaNeon } from "@prisma/adapter-neon";
 
-// --- Helpers ---
+// We use dynamic imports for drivers to ensure they are NEVER pulled into the Edge runtime.
+// Next.js middleware (Edge) will NOT follow these into the bundle if handled correctly.
 
 const getAppPrisma = () => {
-  if (process.env.NEXT_RUNTIME === "edge") return null as any;
-  const url = process.env.DATABASE_URL;
-  if (!url) {
-    return new AppPrismaClient();
+  if (typeof window === "undefined" && process.env.NEXT_RUNTIME === "edge") {
+    return null as any;
   }
+  
+  const url = process.env.DATABASE_URL;
+  if (!url) return new AppPrismaClient();
+
+  // Load drivers only when in Node.js
+  const { Pool } = require("@neondatabase/serverless");
+  const { PrismaNeon } = require("@prisma/adapter-neon");
+
   const pool = new Pool({ connectionString: url });
-  const adapter = new PrismaNeon(pool.options);
+  const adapter = new PrismaNeon(pool);
   return new AppPrismaClient({ adapter });
 };
 
 const getBlogPrisma = () => {
-  const url = process.env.BLOG_DATABASE_URL || process.env.DATABASE_URL; // Fallback
-  if (!url) {
-    return new BlogPrismaClient();
+  if (typeof window === "undefined" && process.env.NEXT_RUNTIME === "edge") {
+    return null as any;
   }
+  const url = process.env.BLOG_DATABASE_URL || process.env.DATABASE_URL;
+  if (!url) return new BlogPrismaClient();
+
+  const { Pool } = require("@neondatabase/serverless");
+  const { PrismaNeon } = require("@prisma/adapter-neon");
+
   const pool = new Pool({ connectionString: url });
-  const adapter = new PrismaNeon(pool.options);
+  const adapter = new PrismaNeon(pool);
   return new BlogPrismaClient({ adapter });
 };
 
-// --- Singleton Pattern for Next.js ---
+// --- Singleton Pattern ---
 
 declare const globalThis: {
-  prismaAppGlobal: ReturnType<typeof getAppPrisma>;
-  prismaBlogGlobal: ReturnType<typeof getBlogPrisma>;
+  prismaAppGlobal: any;
+  prismaBlogGlobal: any;
 } & typeof global;
 
-const prisma = globalThis.prismaAppGlobal ?? getAppPrisma();
-const blogPrisma = globalThis.prismaBlogGlobal ?? getBlogPrisma();
+export const prisma = globalThis.prismaAppGlobal ?? getAppPrisma();
+export const blogPrisma = globalThis.prismaBlogGlobal ?? getBlogPrisma();
 
 if (process.env.NODE_ENV !== "production") {
   globalThis.prismaAppGlobal = prisma;
   globalThis.prismaBlogGlobal = blogPrisma;
 }
-
-export { prisma, blogPrisma };

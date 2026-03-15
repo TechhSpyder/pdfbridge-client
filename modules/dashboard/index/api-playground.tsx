@@ -7,7 +7,7 @@ import {
 } from "@/modules/hooks/queries";
 import { cn } from "@/utils";
 import { useApiClient } from "@/utils/api-client";
-import { Loader2, Sparkles, Terminal, Upload, FileText } from "lucide-react";
+import { Loader2, Sparkles, Terminal, Upload } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { Highlight, themes } from "prism-react-renderer";
 import { toast } from "sonner";
@@ -23,37 +23,40 @@ function generateSnippet(
   extractMetadata: boolean,
   webhookUrl: string,
   uniqueVariables: string[],
+  fallbackKey?: string,
 ) {
+  const apiKey = fallbackKey || "YOUR_API_KEY";
+
   if (activeTab === "file") {
     const endpoint = "https://pdfbridge.xyz/api/v1/normalize-invoice";
     if (lang === "curl") {
       return `curl -X POST ${endpoint} \\
-  -H "Authorization: Bearer YOUR_API_KEY" \\
+  -H "Authorization: Bearer ${apiKey}" \\
   -F "file=@/path/to/your/invoice.pdf"${mode === "test" ? ' \\\n  -F "testMode=true"' : ""}`;
     }
     if (lang === "python") {
       return `import requests
-
+ 
 url = "${endpoint}"
 files = {'file': open('invoice.pdf', 'rb')}
 data = {'testMode': 'true'} if "${mode}" == "test" else {}
-headers = {"Authorization": "Bearer YOUR_API_KEY"}
-
+headers = {"Authorization": "Bearer ${apiKey}"}
+ 
 response = requests.post(url, headers=headers, files=files, data=data)
 print(response.json())`;
     }
     return `const formData = new FormData();
 formData.append("file", fileObject);
 ${mode === "test" ? 'formData.append("testMode", "true");' : ""}
-
+ 
 const response = await fetch("${endpoint}", {
   method: "POST",
   headers: {
-    "Authorization": "Bearer YOUR_API_KEY"
+    "Authorization": "Bearer ${apiKey}"
   },
   body: formData
 });
-
+ 
 const data = await response.json();
 console.log(data);`;
   }
@@ -76,7 +79,7 @@ console.log(data);`;
 
   if (lang === "curl") {
     return `curl -X POST ${endpoint} \\
-  -H "Authorization: Bearer YOUR_API_KEY" \\
+  -H "Authorization: Bearer ${apiKey}" \\
   -H "Content-Type: application/json" \\
   -d '${payloadStr}'`;
   }
@@ -84,14 +87,14 @@ console.log(data);`;
   if (lang === "python") {
     return `import requests
 import json
-
+ 
 url = "${endpoint}"
 headers = {
-    "Authorization": "Bearer YOUR_API_KEY",
+    "Authorization": "Bearer ${apiKey}",
     "Content-Type": "application/json"
 }
 payload = ${payloadStr.replace(/true/g, "True").replace(/false/g, "False")}
-
+ 
 response = requests.post(url, headers=headers, json=payload)
 print(response.json())`;
   }
@@ -99,12 +102,12 @@ print(response.json())`;
   return `const response = await fetch("${endpoint}", {
   method: "POST",
   headers: {
-    "Authorization": "Bearer YOUR_API_KEY",
+    "Authorization": "Bearer ${apiKey}",
     "Content-Type": "application/json"
   },
   body: JSON.stringify(${payloadStr.replace(/\n/g, "\n  ")})
 });
-
+ 
 const data = await response.json();
 console.log(data);`;
 }
@@ -123,13 +126,15 @@ export function ApiPlayground() {
   const [snippetLang, setSnippetLang] = useState<"curl" | "node" | "python">(
     "node",
   );
-  const [currentToastId, setCurrentToastId] = useState<string | number | null>(
-    null,
-  );
+
   const api = useApiClient();
+  const { data: me } = useMe();
   const saveMutation = useSaveTemplate();
   const normalizeMutation = useNormalizeInvoice();
   const { data: jobStatus } = useJobStatus(activeJobId || "");
+
+  const userKeys = me?.apiKeys || [];
+  const currentKeyHint = userKeys.find((k: any) => k.type === mode)?.hint;
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
@@ -162,23 +167,21 @@ export function ApiPlayground() {
   useEffect(() => {
     if (!jobStatus || !activeJobId) return;
 
-    const status = (jobStatus as any).state || (jobStatus as any).status;
-
-    if (status === "COMPLETED" || status === "SUCCESS" || status === "done") {
+    if (jobStatus.status === "COMPLETED") {
       toast.success("PDF Generated!", {
         id: currentToastId || undefined,
         description: "Your document is ready for download.",
         action: {
           label: "Download",
-          onClick: () => window.open((jobStatus as any)?.result?.url, "_blank"),
+          onClick: () => window.open(jobStatus?.result?.url, "_blank"),
         },
       });
       setActiveJobId(null);
-      setCurrentToastId(null);
-    } else if (status === "FAILED") {
+    } else if (jobStatus.status === "FAILED") {
       toast.error("Generation Failed", {
         id: currentToastId || undefined,
-        description: (jobStatus as any).result?.error || "An unknown error occurred.",
+        description:
+          (jobStatus as any).result?.error || "An unknown error occurred.",
       });
       setActiveJobId(null);
       setCurrentToastId(null);
@@ -498,21 +501,23 @@ export function ApiPlayground() {
               Integration Code
             </span>
           </div>
-          <div className="flex gap-1 pr-2">
-            {(["node", "python", "curl"] as const).map((lang) => (
-              <button
-                key={lang}
-                onClick={() => setSnippetLang(lang)}
-                className={cn(
-                  "px-3 py-1.5 text-[10px] font-bold uppercase rounded-md transition-all cursor-pointer",
-                  snippetLang === lang
-                    ? "bg-slate-800/80 text-white"
-                    : "text-slate-500 hover:text-slate-300 hover:bg-white/5",
-                )}
-              >
-                {lang}
-              </button>
-            ))}
+          <div className="flex items-center gap-4 pr-4">
+            <div className="flex gap-1">
+              {(["node", "python", "curl"] as const).map((lang) => (
+                <button
+                  key={lang}
+                  onClick={() => setSnippetLang(lang)}
+                  className={cn(
+                    "px-3 py-1.5 text-[10px] font-bold uppercase rounded-md transition-all cursor-pointer",
+                    snippetLang === lang
+                      ? "bg-slate-800/80 text-white"
+                      : "text-slate-500 hover:text-slate-300 hover:bg-white/5",
+                  )}
+                >
+                  {lang}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
         {/* Code Content */}
@@ -535,6 +540,7 @@ export function ApiPlayground() {
               extractMetadata && allowAi,
               webhookUrl,
               uniqueVariables,
+              currentKeyHint,
             )}
           >
             {({ className, style, tokens, getLineProps, getTokenProps }) => (
@@ -573,6 +579,7 @@ export function ApiPlayground() {
                   extractMetadata && allowAi,
                   webhookUrl,
                   uniqueVariables,
+                  currentKeyHint,
                 ),
               );
               toast.success("Snippet copied to clipboard");

@@ -183,18 +183,34 @@ export default async function InsightArticlePage({ params }: PostPageProps) {
               <div className="flex items-center gap-2">
                 <Calendar size={14} className="text-blue-500" />
                 <span className="text-slate-400">
-                  Published <time dateTime={new Date(post.createdAt).toISOString()}>{new Date(post.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</time>
+                  Published{" "}
+                  <time dateTime={new Date(post.createdAt).toISOString()}>
+                    {new Date(post.createdAt).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
+                  </time>
                 </span>
               </div>
 
-              {post.updatedAt && new Date(post.updatedAt).getTime() !== new Date(post.createdAt).getTime() && (
-                <div className="flex items-center gap-2">
-                  <div className="h-1 w-1 bg-white/20 rounded-full" />
-                  <span className="text-slate-400">
-                    Updated <time dateTime={new Date(post.updatedAt).toISOString()}>{new Date(post.updatedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</time>
-                  </span>
-                </div>
-              )}
+              {post.updatedAt &&
+                new Date(post.updatedAt).getTime() !==
+                  new Date(post.createdAt).getTime() && (
+                  <div className="flex items-center gap-2">
+                    <div className="h-1 w-1 bg-white/20 rounded-full" />
+                    <span className="text-slate-400">
+                      Updated{" "}
+                      <time dateTime={new Date(post.updatedAt).toISOString()}>
+                        {new Date(post.updatedAt).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </time>
+                    </span>
+                  </div>
+                )}
             </div>
 
             <div className="flex items-center gap-2">
@@ -250,52 +266,53 @@ export default async function InsightArticlePage({ params }: PostPageProps) {
                 __html: sanitizeHtml(
                   post.content.replace(
                     /<tbody>\s*(<tr>(?:\s*<th[^>]*>[\s\S]*?<\/th>)+\s*<\/tr>)/gi,
-                    "<thead>$1</thead><tbody>"
+                    "<thead>$1</thead><tbody>",
                   ),
                   {
-                  allowedTags: sanitizeHtml.defaults.allowedTags.concat([
-                    "img",
-                    "table",
-                    "thead",
-                    "tbody",
-                    "tr",
-                    "th",
-                    "td",
-                    "pre",
-                    "code",
-                    "span",
-                    "br",
-                    "hr",
-                    "u",
-                    "s",
-                    "strong",
-                    "b",
-                    "em",
-                    "i",
-                    "div",
-                  ]),
-                  allowedAttributes: {
-                    ...sanitizeHtml.defaults.allowedAttributes,
-                    "*": ["class", "style"],
-                    a: ["href", "name", "target", "class", "style"],
-                  },
-                  allowedClasses: {
-                    "*": ["*"],
-                  },
-                  allowedStyles: {
-                    "*": {
-                      "text-align": [
-                        /^left$/,
-                        /^right$/,
-                        /^center$/,
-                        /^justify$/,
-                      ],
-                      "font-weight": [/.*/],
-                      "font-style": [/.*/],
-                      "text-decoration": [/.*/],
+                    allowedTags: sanitizeHtml.defaults.allowedTags.concat([
+                      "img",
+                      "table",
+                      "thead",
+                      "tbody",
+                      "tr",
+                      "th",
+                      "td",
+                      "pre",
+                      "code",
+                      "span",
+                      "br",
+                      "hr",
+                      "u",
+                      "s",
+                      "strong",
+                      "b",
+                      "em",
+                      "i",
+                      "div",
+                    ]),
+                    allowedAttributes: {
+                      ...sanitizeHtml.defaults.allowedAttributes,
+                      "*": ["class", "style"],
+                      a: ["href", "name", "target", "class", "style"],
+                    },
+                    allowedClasses: {
+                      "*": ["*"],
+                    },
+                    allowedStyles: {
+                      "*": {
+                        "text-align": [
+                          /^left$/,
+                          /^right$/,
+                          /^center$/,
+                          /^justify$/,
+                        ],
+                        "font-weight": [/.*/],
+                        "font-style": [/.*/],
+                        "text-decoration": [/.*/],
+                      },
                     },
                   },
-                }),
+                ),
               }}
             />
           </div>

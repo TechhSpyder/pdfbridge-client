@@ -10,37 +10,57 @@ import { useState } from "react";
 
 interface QuickStartPipelineProps {
   testKeyFull: string;
+  hasKeys?: boolean;
 }
 
-export function QuickStartPipeline({ testKeyFull }: QuickStartPipelineProps) {
+export function QuickStartPipeline({
+  testKeyFull,
+  hasKeys = false,
+}: QuickStartPipelineProps) {
   const clipboard = useClipboard();
   const [keyCopied, setKeyCopied] = useState(false);
 
   const handleCopyKey = () => {
-    clipboard.copy(testKeyFull, "Test Key copied to clipboard.");
+    if (hasKeys) {
+        toast.info("Key already created and hidden. Manage or roll keys in settings.");
+        return;
+    }
+    clipboard.copy(testKeyFull, "API Key Hint copied to clipboard.");
     setKeyCopied(true);
-    toast.success("Test Key copied! You're ready to make your first request.");
+    toast.success("Key copied! You're ready to make your first request.");
   };
 
   const steps = [
     {
       id: "copy-key",
       icon: <Key className="h-5 w-5" />,
-      title: "Copy your Test API Key",
-      description: "You'll need this to authenticate your first request.",
-      isComplete: keyCopied,
-      action: (
-        <Button
-          onClick={handleCopyKey}
-          variant={keyCopied ? "outline" : "primary"}
-          className={cn(
-            "text-xs h-8 px-4",
-            !keyCopied && "bg-blue-600 hover:bg-blue-500 text-white font-bold"
-          )}
-        >
-          {keyCopied ? "Copied!" : "Copy Test Key"}
-        </Button>
+      title: !hasKeys 
+        ? "Generate your API Key" 
+        : "API Key Active",
+      description: !hasKeys
+        ? "Create your first set of keys to start building today."
+        : "You have active keys. Check the Playground or manage them in Settings.",
+      isComplete: hasKeys,
+      action: !hasKeys ? (
+        <Link href="/dashboard/api-keys">
+          <Button
+            variant="primary"
+            className="text-xs h-8 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold"
+          >
+            Generate Key
+          </Button>
+        </Link>
+      ) : (
+        <Link href="/dashboard/api-keys">
+            <Button
+              variant="outline"
+              className="text-xs h-8 px-4 border-slate-700 hover:bg-white/5"
+            >
+              Manage Keys
+            </Button>
+        </Link>
       ),
+
     },
     {
       id: "test-api",

@@ -5,9 +5,11 @@ import { organization, emailOTP } from "better-auth/plugins";
 
 // Better-Auth instance for the Next.js process
 export const auth = betterAuth({
-  database: process.env.NEXT_RUNTIME === "edge" ? undefined : prismaAdapter(prisma, {
+  database: !prisma ? undefined : prismaAdapter(prisma as any, {
     provider: "postgresql",
   }),
+
+
   trustedOrigins: ["http://localhost:3000"],
   baseURL: "http://localhost:3000",
   emailAndPassword: {
@@ -24,14 +26,6 @@ export const auth = betterAuth({
   },
   plugins: [
     organization(),
-    emailOTP({
-      async sendVerificationOTP(data, request) {
-        // In the client, we use the same log logic as the API for now,
-        // but we've synchronized RESEND_API_KEY so it can eventually send emails directly.
-        console.log(`[CLIENT-AUTH] OTP for ${data.email}: ${data.otp}`);
-      },
-      sendVerificationOnSignUp: true,
-    }),
   ],
   session: {
     expiresIn: 60 * 60 * 24 * 7, // 7 days

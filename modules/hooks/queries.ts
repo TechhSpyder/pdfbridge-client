@@ -11,11 +11,34 @@ export const useMe = () => {
   });
 };
 
-export const useRotateKey = () => {
+export const useApiKeys = () => {
   const api = useApiClient();
+  return useQuery({
+    queryKey: ["api-keys"],
+    queryFn: () => api.get("/api/v1/keys"),
+  });
+};
+
+export const useCreateKey = () => {
+  const api = useApiClient();
+  const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (type: "test" | "live" = "live") =>
-      api.post("/api/v1/keys/rotate", { type }),
+    mutationFn: (data: { name: string; type: "test" | "live" }) =>
+      api.post("/api/v1/keys", data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["api-keys"] });
+    },
+  });
+};
+
+export const useDeleteKey = () => {
+  const api = useApiClient();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.delete(`/api/v1/keys/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["api-keys"] });
+    },
   });
 };
 

@@ -7,13 +7,15 @@ import { useMemo } from "react";
  */
 export const usePDFBridge = (organizationId?: string) => {
   const envUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3003";
-  const baseUrl = envUrl.endsWith("/api/v1") ? envUrl : `${envUrl.replace(/\/$/, "")}/api/v1`;
+  const baseUrl = envUrl.endsWith("/api/v1")
+    ? envUrl
+    : `${envUrl.replace(/\/$/, "")}/api/v1`;
 
   return useMemo(() => {
-    // Note: Better-Auth is cookie-based. The SDK must support 'credentials: include' 
+    // Note: Better-Auth is cookie-based. The SDK must support 'credentials: include'
     // in its internal fetch requests. If the SDK is techhspyder/pdfbridge-node,
     // it typically allows passing a custom fetch or configuration.
-    
+
     const client = new Proxy({} as any, {
       get: (target, prop) => {
         return async (...args: any[]) => {
@@ -34,7 +36,7 @@ export const usePDFBridge = (organizationId?: string) => {
 
           return (sdk as any)[prop](...args);
         };
-      }
+      },
     });
 
     return client as PDFBridge;

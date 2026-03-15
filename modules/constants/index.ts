@@ -13,20 +13,42 @@ import {
   Library,
 } from "lucide-react";
 
-export const NAV_LINKS = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/dashboard/api-keys", label: "API Keys", icon: Key },
-  { href: "/dashboard/lab", label: "AI Template Lab", icon: Sparkles },
-  { href: "/dashboard/templates", label: "My Templates", icon: Library },
-  { href: "/dashboard/ledger", label: "Financial Ledger", icon: Banknote },
-  { href: "/dashboard/usage", label: "Usage", icon: Activity },
-  { href: "/insights", label: "Insights", icon: Compass },
-  { href: "/dashboard/blog", label: "Blog Journal", icon: PenTool },
-  { href: "/dashboard/docs", label: "Documentation", icon: BookOpen },
-  { href: "/dashboard/team", label: "Team Settings", icon: Users },
-  { href: "/dashboard/settings", label: "Settings", icon: Settings },
-  { href: "/dashboard/billing", label: "Billing", icon: Banknote },
+export const NAV_GROUPS = [
+  {
+    label: "General",
+    links: [
+      { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+      { href: "/dashboard/ledger", label: "Financial Ledger", icon: Banknote },
+      { href: "/dashboard/usage", label: "Usage", icon: Activity },
+      { href: "/insights", label: "Insights", icon: Compass },
+    ],
+  },
+  {
+    label: "Engineering",
+    links: [
+      { href: "/dashboard/api-keys", label: "API Keys", icon: Key },
+      { href: "/dashboard/lab", label: "AI Template Lab", icon: Sparkles },
+      { href: "/dashboard/templates", label: "My Templates", icon: Library },
+      { href: "/dashboard/blog", label: "Blog Journal", icon: PenTool },
+    ],
+  },
+  {
+    label: "Resources",
+    links: [
+      { href: "/dashboard/docs", label: "Documentation", icon: BookOpen },
+    ],
+  },
+  {
+    label: "Account",
+    links: [
+      { href: "/dashboard/team", label: "Team Settings", icon: Users },
+      { href: "/dashboard/settings", label: "Settings", icon: Settings },
+      { href: "/dashboard/billing", label: "Billing", icon: Banknote },
+    ],
+  },
 ];
+
+export const NAV_LINKS = NAV_GROUPS.flatMap((g) => g.links);
 
 export const PLAN_METADATA: any = {
   "Test Mode": {
