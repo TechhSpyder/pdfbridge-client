@@ -311,7 +311,7 @@ export function BillingPage() {
     }
   };
 
-  const planOrder = ["Free", "Developer", "Automation", "Resilience"];
+  const planOrder = ["Builder", "Startup", "Growth", "Scale", "Enterprise"];
   const plans = (plansData || [])
     .filter((p: any) => p.name !== "Test" && p.name !== "Test Mode")
     .sort(
@@ -325,11 +325,11 @@ export function BillingPage() {
         <div className="flex flex-col justify-between gap-8">
           <div className="space-y-2">
             <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
-              Upgrade your <span className="text-blue-500">Infrastructure</span>
+              Infrastructure-Grade <span className="text-blue-500">Scaling</span>
             </h1>
             <p className="text-lg text-slate-400 max-w-2xl">
-              Scale your PDF generation from side projects to enterprise
-              clusters with our globally distributed edge network.
+              Provision globally distributed PDF infrastructure. Seamlessly
+              scale from sandboxes to enterprise-grade clusters.
             </p>
           </div>
 

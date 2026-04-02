@@ -13,37 +13,37 @@ export function FAQ() {
     {
       question: "Is my data safe?",
       answer:
-        "Yes. PDFs are generated in isolated, transient browser instances, and your content is never retained longer than necessary. All data is encrypted in transit and at rest.",
+        "Yes. Documents are processed in isolated environments with strict data handling controls. All data is encrypted in transit and at rest, and content is never retained longer than necessary.",
     },
     {
-      question: "Do you support JavaScript-heavy pages?",
+      question: "Do you support complex document layouts?",
       answer:
-        "Absolutely. We fully render modern JavaScript frameworks like React, Vue, and Svelte before generating your PDF, so dynamic content appears exactly as expected.",
+        "Absolutely. Our engine processes modern web-based layouts and complex financial tables with high fidelity before normalizing them into your desired format.",
     },
     {
-      question: "How many PDFs can I generate per month?",
+      question: "How many documents can I process per month?",
       answer:
-        "Usage depends on your plan. Each plan includes a monthly conversion allowance, with higher limits available as you scale.",
+        "Usage is based on your selected plan. Each tier includes a monthly processing allowance, with automated overage support as you scale.",
     },
     {
-      question: "What happens if I hit my monthly limit?",
+      question: "What happens if I hit my plan limit?",
       answer:
-        "You can upgrade at any time to increase your limit. We’ll never block requests without clearly notifying you first.",
+        "Our infrastructure is designed to scale with your workload. We never drop jobs — you’ll simply be billed for additional volume at your plan&apos;s rate.",
     },
     {
-      question: "Can I control where my PDFs are stored?",
+      question: "Can I control data residency?",
       answer:
-        "Yes. Paid plans support custom storage destinations, so you stay in full control of where your generated PDFs live.",
+        "Yes. Advanced plans support custom storage destinations and regional processing options to ensure compliance with strict data residency requirements.",
     },
     {
-      question: "Are there rate limits?",
+      question: "Are there infrastructure rate limits?",
       answer:
-        "All plans include sensible rate limits to ensure platform stability. Pro and Business plans offer significantly higher limits and custom tuning.",
+        "All plans include enterprise-grade throughput. Higher tiers offer dedicated infrastructure and custom rate tuning for high-volume pipelines.",
     },
     {
-      question: "Do you offer refunds?",
+      question: "How do I sync to my accounting systems?",
       answer:
-        "If something doesn’t work as expected, reach out and we’ll make it right. We’re focused on long-term developer trust.",
+        "You can deliver validated data directly via webhooks or pull it through our API. We provide SDKs for all major languages to facilitate rapid integration.",
     },
   ];
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useLedger, useNormalizeInvoice } from "@/modules/hooks/queries";
+import { useLedger, useIngestDocument } from "@/modules/hooks/queries";
 import { cn } from "@/utils";
 import { Button } from "@/modules/app/button";
 import {
@@ -30,15 +30,15 @@ export function LedgerPage() {
   const [page, setPage] = useState(1);
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
   const { data, isLoading, error } = useLedger(page, 10, 5000);
-  const normalizeMutation = useNormalizeInvoice();
+  const ingestMutation = useIngestDocument();
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
       if (acceptedFiles.length > 0) {
-        normalizeMutation.mutate({ file: acceptedFiles[0], testMode: true });
+        ingestMutation.mutate({ file: acceptedFiles[0], testMode: true });
       }
     },
-    [normalizeMutation],
+    [ingestMutation],
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -91,7 +91,7 @@ export function LedgerPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <Title
           title="Financial Ledger"
-          description="Real-time monitor for AI extractions and accounting dispatches."
+          description="Real-time monitor for invoice ingestion and accounting dispatches."
           icon={<Banknote className="h-8 w-8 text-emerald-500" />}
         />
 
@@ -106,14 +106,14 @@ export function LedgerPage() {
             )}
           >
             <input {...getInputProps()} />
-            {normalizeMutation.isPending ? (
+            {ingestMutation.isPending ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
               <Upload className="h-4 w-4" />
             )}
-            {normalizeMutation.isPending
-              ? "Processing..."
-              : "Quick Test Upload"}
+            {ingestMutation.isPending
+              ? "Ingesting..."
+              : "Ingest Document"}
           </div>
         </div>
       </div>
@@ -124,7 +124,7 @@ export function LedgerPage() {
             <thead>
               <tr className="border-b border-white/5 bg-black/20 text-slate-500">
                 <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-wider">
-                  Document / Vendor
+                  Invoice / Vendor
                 </th>
                 <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-wider">
                   Amount
@@ -268,7 +268,7 @@ export function LedgerPage() {
       {/* Document Inspector Slide-over */}
       <AnimatePresence>
         {selectedDocId && (
-          <DocumentInspector
+          <InvoiceInspector
             docId={selectedDocId}
             onClose={() => setSelectedDocId(null)}
           />
@@ -340,7 +340,7 @@ function IntegrationIcon({
 
 import { useLedgerDocument } from "@/modules/hooks/queries";
 
-function DocumentInspector({
+function InvoiceInspector({
   docId,
   onClose,
 }: {
@@ -375,7 +375,7 @@ function DocumentInspector({
             </div>
             <div>
               <h2 className="text-xl font-bold text-white leading-tight">
-                Document Inspector
+                Invoice Inspector
               </h2>
               <div className="flex items-center gap-2 mt-1">
                 <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">
@@ -531,7 +531,7 @@ function DocumentInspector({
 
               <div className="pt-8 border-t border-white/5">
                 <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-4">
-                  Raw AI JSON Payload
+                  Extracted Intelligence (JSON)
                 </label>
                 <div className="p-4 bg-black rounded-2xl border border-white/10 font-mono text-[11px] text-slate-400 overflow-x-auto shadow-inner">
                   <pre>{JSON.stringify(doc.metadata || {}, null, 2)}</pre>

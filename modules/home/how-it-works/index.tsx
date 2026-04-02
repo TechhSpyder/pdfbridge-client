@@ -1,28 +1,25 @@
 "use client";
 
 import { useScrollAnimation } from "@/modules/hooks/use-scroll-animation";
-import { Key, Send, Download } from "lucide-react";
+import { Send, Download, RefreshCw } from "lucide-react";
 
 const steps = [
   {
     step: "01",
-    title: "Grab your API key",
-    description:
-      "Sign up and get your unique API key in seconds. No setup, no waiting.",
-    icon: Key,
-  },
-  {
-    step: "02",
-    title: "Send your request",
-    description:
-      "POST your URL or raw HTML to our API endpoint. We handle the rendering.",
+    title: "Submit invoice",
+    description: "Upload a PDF, image, or URL. Our ingestion layer handles multi-format inputs instantly.",
     icon: Send,
   },
   {
+    step: "02",
+    title: "Process",
+    description: "We extract structured data, validate financial accuracy, and normalize into clean formats.",
+    icon: RefreshCw,
+  },
+  {
     step: "03",
-    title: "Download PDF & Extract JSON",
-    description:
-      "Receive a persistent Secure Storage link instantly, alongside AI-extracted JSON metadata ready for your database.",
+    title: "Receive",
+    description: "Get structured JSON + a normalized output + system-ready data via a single API call.",
     icon: Download,
   },
 ];
@@ -43,7 +40,7 @@ export function HowItWorks() {
             How It Works
           </h2>
           <p className="mt-4 text-muted-foreground">
-            Generate production-ready PDFs in three simple steps.
+            Process financial invoices in three simple steps.
           </p>
         </div>
 

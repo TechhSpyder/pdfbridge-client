@@ -20,7 +20,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { useLenis } from "lenis/react";
 import { useActiveSection } from "../hooks/use-active-section";
-import { cn } from "@/utils";
+import { cn, formatAddress } from "@/utils";
 import Link from "next/link";
 import { ScrollProgressBar } from "./scroll-progress";
 import { authClient } from "@/lib/auth-client";
@@ -62,8 +62,8 @@ const NAV_ITEMS: NavItem[] = [
     type: "dropdown",
     items: [
       {
-        title: "AI Layout Extraction",
-        href: "/features/ai-overview",
+        title: "Engine Layout Extraction",
+        href: "/features/engine-overview",
         description: "Parse PDFs back into structured JSON payloads.",
         icon: <Sparkles size={18} />,
       },
@@ -77,7 +77,7 @@ const NAV_ITEMS: NavItem[] = [
       {
         title: "React Components to PDF",
         href: "/frameworks/react-to-pdf",
-        description: "Pixel-perfect conversion for modern frontend frameworks.",
+        description: "Pixel-perfect rendering for modern frontend frameworks.",
         icon: <Code2 size={18} />,
       },
       {
@@ -97,7 +97,7 @@ const NAV_ITEMS: NavItem[] = [
       {
         title: "Invoice PDF API",
         href: "/use-cases/invoice-pdf-api",
-        description: "Generate branded, scalable invoices from HTML templates.",
+        description: "Process branded, scalable invoices from HTML templates.",
         icon: <FileText size={18} />,
       },
       {
@@ -146,6 +146,9 @@ export function Navbar() {
       (i) => (i as ScrollNavItem).id,
     ),
   );
+
+  const walletAddress = (user as any)?.walletAddress as string | undefined;
+  const compactDisplay = formatAddress(walletAddress);
   const scrollTo = (id: string) => {
     if (pathname !== "/") {
       router.push(`/#${id}`);
@@ -291,13 +294,28 @@ export function Navbar() {
                       />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold text-white truncate">
-                          {user?.name || "User"}
+                          {user?.name || (walletAddress ? "Solana Wallet" : "User")}
                         </p>
                         <p className="text-xs text-slate-500 truncate">
-                          {user?.email}
+                          {compactDisplay || user?.email}
                         </p>
                       </div>
                     </div>
+
+                    {walletAddress && (
+                      <button
+                        onClick={() => {
+                          const { navigator } = window;
+                          if (navigator && navigator.clipboard) {
+                            navigator.clipboard.writeText(walletAddress);
+                          }
+                        }}
+                        className="flex items-center gap-3 px-3 py-2 text-slate-400 w-full hover:text-white hover:bg-white/5 border border-transparent rounded-lg text-sm font-medium transition-all duration-200 group mb-1"
+                      >
+                         <Image src="/svg/copy_icon.svg" alt="Copy" width={16} height={16} className="text-slate-500 group-hover:text-slate-300" />
+                         Copy Wallet Address
+                      </button>
+                    )}
 
                     <SmartContactLink
                       email="hello@techhspyder.com"

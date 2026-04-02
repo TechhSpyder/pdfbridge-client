@@ -102,7 +102,7 @@ export default function ReactToPDFPage() {
                <LayoutTemplate className="text-cyan-400" size={24} />
             </div>
             <h3 className="text-xl font-black mb-3">Server Components</h3>
-            <p className="text-sm text-slate-400 font-medium leading-relaxed">Pass the output of JSX natively from your React Server Components directly to our /convert REST endpoint.</p>
+            <p className="text-sm text-slate-400 font-medium leading-relaxed">Pass the output of JSX natively from your React Server Components directly to our /process REST endpoint.</p>
           </div>
           <div className="p-8 rounded-3xl bg-slate-900/50 border border-white/10 backdrop-blur-xl hover:border-cyan-500/30 transition-colors">
             <div className="h-12 w-12 rounded-2xl bg-cyan-500/10 flex items-center justify-center mb-6">
@@ -135,7 +135,7 @@ export async function POST(req) {
   const htmlString = renderToStaticMarkup(<InvoiceTemplate data={data} />);
 
   // 2. Fire it to PDFBridge
-  const response = await fetch("https://api.pdfbridge.xyz/api/v1/convert", {
+  const response = await fetch("https://api.pdfbridge.xyz/api/v1/process", {
     method: "POST",
     headers: {
       "x-api-key": \`\${process.env.PDFBRIDGE_API_KEY}\`,
@@ -175,3 +175,5 @@ export async function POST(req) {
     </div>
   );
 }
+
+

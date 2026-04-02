@@ -51,7 +51,7 @@ export default function SignUpPage() {
         >
           Privacy Policy
         </Link>
-        , and
+        , and{" "}
         <Link
           href="/dpa"
           className="text-blue-500 hover:text-blue-400 transition underline underline-offset-4"

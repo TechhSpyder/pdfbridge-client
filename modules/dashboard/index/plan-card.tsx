@@ -132,7 +132,7 @@ export function PlanCard({
                   <Check className="h-3 w-3 text-emerald-500" />
                 </div>
                 <span className="text-sm text-slate-400">
-                  {plan.limit.toLocaleString()} Conversions / month
+                  {plan.limit.toLocaleString()} Processed Documents / month
                 </span>
               </li>
             )}

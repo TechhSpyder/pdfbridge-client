@@ -1,4 +1,4 @@
-import { AiLabPage } from "@/modules/dashboard/ai-lab";
+import { AiLabPage } from "@/modules/dashboard/intelligence-lab";
 import {
   dehydrate,
   HydrationBoundary,
@@ -16,7 +16,7 @@ export default async function Page() {
       queryFn: () => api.get("/api/v1/me"),
     });
   } catch (error) {
-    console.error("AI Lab prefetch error:", error);
+    console.error("Intelligence Lab prefetch error:", error);
   }
 
   return (

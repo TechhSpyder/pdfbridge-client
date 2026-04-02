@@ -25,11 +25,16 @@ export function PuppeteerVs() {
           }`}
         >
           <h2 className="text-3xl font-semibold tracking-tight">
-            Why Not Just Use Puppeteer?
+            You can build this yourself.
           </h2>
           <p className="mt-4 text-muted-foreground">
-            You can. But at scale, you&apos;ll manage a lot more than PDF
-            generation.
+            Most teams underestimate the complexity of financial document
+            processing.
+            <br />
+            <br />
+            You can build it.
+            <br />
+            But then you&apos;re managing more than just your product.
           </p>
         </div>
 
@@ -41,13 +46,18 @@ export function PuppeteerVs() {
           {/* Puppeteer column */}
           <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-8 space-y-4">
             <h3 className="text-lg font-semibold text-red-400">
-              Self-Hosted Puppeteer
+              Self-Hosted Infrastructure
             </h3>
             <p className="text-sm text-muted-foreground">
-              You&apos;ll also be managing:
+              You&apos;ll be managing:
             </p>
             <ul className="space-y-2">
-              {puppeteerPains.map((pain) => (
+              {[
+                "Browser lifecycle",
+                "Scaling infrastructure",
+                "Failure recovery",
+                "Rendering inconsistencies",
+              ].map((pain) => (
                 <li
                   key={pain}
                   className="flex items-center gap-2 text-sm text-muted-foreground"
@@ -57,9 +67,8 @@ export function PuppeteerVs() {
                 </li>
               ))}
             </ul>
-            <p className="pt-2 text-sm font-medium text-foreground/60 italic">
-              Your team should focus on building product <br /> not maintaining
-              browser infrastructure.
+            <p className="pt-2 text-sm font-medium text-foreground/60 italic leading-relaxed">
+              That&apos;s not your product. <br /> PDFBridge handles it for you.
             </p>
           </div>
 
@@ -67,14 +76,22 @@ export function PuppeteerVs() {
           <div className="rounded-2xl border border-blue-500/20 bg-blue-500/5 p-8 space-y-4 flex flex-col justify-between">
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-blue-400">PDFBridge</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                PDFBridge abstracts the entire rendering layer. You send a URL
-                or HTML. We handle the infrastructure, concurrency, retries, and
-                security. You get back a PDF.
+              <p className="mt-2 text-sm text-blue-400/80 leading-relaxed font-medium">
+                PDFBridge abstracts the entire infrastructure and extraction
+                layer.
               </p>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                If it looks right in the browser, it looks right in the PDF.
+                You send a document. We handle the orchestration, validation,
+                extraction, and security.
               </p>
+              <div className="pt-2 space-y-2 font-medium text-blue-400 text-sm italic opacity-90">
+                <p>We extract financial data.</p>
+                <p>We normalize messy documents.</p>
+                <p>We validate financial accuracy.</p>
+                <p className="font-bold text-blue-300 pt-2 uppercase tracking-tight">
+                  All in a single API call.
+                </p>
+              </div>
             </div>
             <Link
               href="/insights/puppeteer-pdf-alternative"

@@ -31,9 +31,9 @@ export function TeamSettingsClient() {
   const { data: teamData, isLoading } = useQuery({
     queryKey: ["team", orgId],
     queryFn: async () => {
-       if (!orgId) return null;
-       const res = await api.get(`/api/v1/organizations/${orgId}/members`);
-       return res;
+      if (!orgId) return null;
+      const res = await api.get(`/api/v1/organizations/${orgId}/members`);
+      return res;
     },
     enabled: !!orgId,
     refetchInterval: 5000,
@@ -86,21 +86,22 @@ export function TeamSettingsClient() {
     inviteMutation.mutate(inviteEmail);
   };
 
-  const members = teamData?.members || [];
-  const invites = teamData?.invites || [];
-  const seatLimit = teamData?.seatLimit || 1;
-  const seatsUsed = teamData?.seatsUsed || 0;
+  const members = teamData?.data?.members || [];
+  const invites = teamData?.data?.invites || [];
+  const seatLimit = teamData?.data?.seatLimit || 1;
+  const seatsUsed = teamData?.data?.seatsUsed || 0;
   const isAtLimit = seatsUsed >= seatLimit;
 
-  // Better-Auth role check
-  const user = session?.user as any;
-  const isOwner = user?.role === "owner" || user?.role === "OWNER";
+  // Detect role from membership data for accuracy
+  const isOwner = teamData?.data?.members?.some(
+    (m: any) => m.email === session?.user?.email && m.role === "OWNER",
+  );
 
   return (
     <>
       {isLoading ? (
         <div className="space-y-8 animate-pulse">
-           <div className="grid md:grid-cols-3 grid-cols-1 gap-4">
+          <div className="grid md:grid-cols-3 grid-cols-1 gap-4">
             <div className="col-span-1 h-36 bg-slate-800/40 rounded-xl border border-white/5"></div>
             <div className="col-span-1 md:col-span-2 h-36 bg-slate-800/40 rounded-xl border border-white/5"></div>
           </div>
@@ -117,10 +118,18 @@ export function TeamSettingsClient() {
                 title="Seats Used"
                 content={
                   <div className="mt-4 flex items-end gap-2">
-                    <span className="text-4xl font-bold text-white tracking-tight">
-                      {seatsUsed}
-                    </span>
-                    <span className="text-slate-400 mb-1">/ {seatLimit}</span>
+                    {isLoading || !teamData ? (
+                      <div className="h-9 w-20 animate-pulse bg-slate-800 rounded-md" />
+                    ) : (
+                      <>
+                        <span className="text-4xl font-bold text-white tracking-tight">
+                          {seatsUsed}
+                        </span>
+                        <span className="text-slate-400 mb-1">
+                          / {seatLimit}
+                        </span>
+                      </>
+                    )}
                   </div>
                 }
               />
@@ -190,12 +199,17 @@ export function TeamSettingsClient() {
                     <tr>
                       <th className="px-6 py-4 font-medium">Email</th>
                       <th className="px-6 py-4 font-medium">Role</th>
-                      <th className="px-6 py-4 font-medium text-right">Actions</th>
+                      <th className="px-6 py-4 font-medium text-right">
+                        Actions
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5">
                     {invites.map((invite: any) => (
-                      <tr key={invite.id} className="hover:bg-white/5 transition-colors">
+                      <tr
+                        key={invite.id}
+                        className="hover:bg-white/5 transition-colors"
+                      >
                         <td className="px-6 py-4 text-white flex items-center gap-3">
                           <Mail className="h-4 w-4 text-slate-500" />
                           {invite.email}
@@ -208,7 +222,9 @@ export function TeamSettingsClient() {
                         <td className="px-6 py-4 text-right">
                           {isOwner && (
                             <button
-                              onClick={() => removeMemberMutation.mutate(invite.id)}
+                              onClick={() =>
+                                removeMemberMutation.mutate(invite.id)
+                              }
                               disabled={removeMemberMutation.isPending}
                               className="text-slate-500 hover:text-red-400 transition-colors p-2 hover:bg-red-500/10 rounded-lg inline-flex"
                             >
@@ -234,14 +250,19 @@ export function TeamSettingsClient() {
                   <tr>
                     <th className="px-6 py-4 font-medium">User</th>
                     <th className="px-6 py-4 font-medium">Role</th>
-                    <th className="px-6 py-4 font-medium text-right">Actions</th>
+                    <th className="px-6 py-4 font-medium text-right">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
                   {members.map((member: any) => {
                     const isCurrentUser = member.email === session?.user?.email;
                     return (
-                      <tr key={member.id} className="hover:bg-white/5 transition-colors">
+                      <tr
+                        key={member.id}
+                        className="hover:bg-white/5 transition-colors"
+                      >
                         <td className="px-6 py-4 text-white font-medium flex items-center gap-3">
                           <UserAvatar
                             name={member.name}
@@ -251,29 +272,39 @@ export function TeamSettingsClient() {
                           <div className="flex flex-col">
                             <span>{member.email}</span>
                             {isCurrentUser && (
-                              <span className="text-[10px] w-fit bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded uppercase tracking-wider font-bold">You</span>
+                              <span className="text-[10px] w-fit bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded uppercase tracking-wider font-bold">
+                                You
+                              </span>
                             )}
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <span className={`px-2 py-1 rounded text-[10px] font-bold tracking-widest border uppercase ${member.role === 'OWNER' ? 'bg-amber-500/10 border-amber-500/30 text-amber-500' : 'bg-slate-800 border-slate-700 text-slate-300'}`}>
+                          <span
+                            className={`px-2 py-1 rounded text-[10px] font-bold tracking-widest border uppercase ${member.role === "OWNER" ? "bg-amber-500/10 border-amber-500/30 text-amber-500" : "bg-slate-800 border-slate-700 text-slate-300"}`}
+                          >
                             {member.role}
                           </span>
                         </td>
                         <td className="px-6 py-4 text-right">
-                          {isOwner && !isCurrentUser && member.role !== 'OWNER' && (
-                            <button
-                              onClick={() => {
-                                if (window.confirm(`Are you sure you want to remove ${member.email}?`)) {
-                                  removeMemberMutation.mutate(member.id);
-                                }
-                              }}
-                              disabled={removeMemberMutation.isPending}
-                              className="text-slate-500 hover:text-red-400 transition-colors p-2 hover:bg-red-500/10 rounded-lg inline-flex"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </button>
-                          )}
+                          {isOwner &&
+                            !isCurrentUser &&
+                            member.role !== "OWNER" && (
+                              <button
+                                onClick={() => {
+                                  if (
+                                    window.confirm(
+                                      `Are you sure you want to remove ${member.email}?`,
+                                    )
+                                  ) {
+                                    removeMemberMutation.mutate(member.id);
+                                  }
+                                }}
+                                disabled={removeMemberMutation.isPending}
+                                className="text-slate-500 hover:text-red-400 transition-colors p-2 hover:bg-red-500/10 rounded-lg inline-flex"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            )}
                         </td>
                       </tr>
                     );

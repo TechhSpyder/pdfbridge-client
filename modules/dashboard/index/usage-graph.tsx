@@ -1,10 +1,10 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { useConversionStats } from "../../hooks/queries";
+import { useProcessingStats } from "../../hooks/queries";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 
 export function UsageGraph() {
-  const { data: stats, isLoading } = useConversionStats(30000);
+  const { data: stats, isLoading } = useProcessingStats(30000);
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
   if (isLoading) {
@@ -12,7 +12,7 @@ export function UsageGraph() {
       <div className="h-48 flex flex-col items-center justify-center space-y-3 border border-dashed border-white/5 rounded-2xl">
         <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
         <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest animate-pulse">
-          Analyzing Performance...
+          Real-time Telemetry...
         </p>
       </div>
     );

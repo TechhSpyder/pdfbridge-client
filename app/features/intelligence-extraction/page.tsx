@@ -3,23 +3,23 @@ import Link from "next/link";
 import { BrainCircuit, Code, Database, FileDigit, ArrowRight } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "AI PDF Extraction API | Parse Unstructured PDFs to JSON | PDFBridge",
+  title: "Document Intelligence Extraction Engine | Parse Unstructured PDFs to JSON | PDFBridge",
   description:
-    "Transform messy, unstructured PDFs into clean, predictable JSON using our AI PDF Extraction API. Built for developers handling invoices, receipts, and forms.",
+    "Transform messy, unstructured PDFs into clean, predictable JSON using our Document Intelligence Extraction Engine. Built for developers handling invoices, receipts, and forms.",
   keywords: [
     "ai pdf extraction api", "parse pdf to json", "llm pdf parsing", 
     "extract data from pdf api", "ocr and ai extraction", "pdf data extraction tool",
     "unstructured pdf to structured data"
   ],
   alternates: {
-    canonical: "https://pdfbridge.xyz/features/ai-pdf-extraction",
+    canonical: "https://pdfbridge.xyz/features/intelligence-extraction",
   },
 };
 
 const articleSchema = {
   "@context": "https://schema.org",
   "@type": "Article",
-  "headline": "The Best AI PDF Extraction API for Developers",
+  "headline": "The Best Document Intelligence Extraction Engine for Developers",
   "description": "Learn how PDFBridge turns unstructured PDFs directly into structured JSON objects using state-of-the-art LLMs.",
   "author": {
     "@type": "Organization",
@@ -38,10 +38,10 @@ export default function AIPDFExtractionPage() {
         <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-500/10 blur-[150px] rounded-full pointer-events-none" />
 
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-black uppercase tracking-widest mb-8">
-          <BrainCircuit size={16} /> Native AI Integration
+          <BrainCircuit size={16} /> Native Intelligence Integration
         </div>
         <h1 className="text-5xl md:text-7xl font-black tracking-tighter mb-8 leading-tight">
-          AI PDF Extraction API. <br />
+          Document Intelligence Extraction Engine. <br />
           <span className="text-slate-400 font-medium">Unstructured PDFs to Clean JSON.</span>
         </h1>
         <p className="text-xl text-slate-400 leading-relaxed max-w-3xl mx-auto mb-10">
@@ -63,7 +63,7 @@ export default function AIPDFExtractionPage() {
           <div className="p-8 rounded-3xl bg-slate-900 border border-white/5">
             <Database className="w-8 h-8 text-indigo-400 mb-4" />
             <h3 className="text-2xl font-bold mb-3">Any Layout, Any Format</h3>
-            <p className="text-slate-400 leading-relaxed">Vendors change invoice layouts constantly. Traditional OCR tools break the moment a table moves 10 pixels. AI extraction understands context so it never breaks.</p>
+            <p className="text-slate-400 leading-relaxed">Vendors change invoice layouts constantly. Traditional OCR tools break the moment a table moves 10 pixels. Engine extraction understands context so it never breaks.</p>
           </div>
           <div className="p-8 rounded-3xl bg-slate-900 border border-white/5">
             <Code className="w-8 h-8 text-indigo-400 mb-4" />
@@ -125,3 +125,5 @@ export default function AIPDFExtractionPage() {
     </div>
   );
 }
+
+

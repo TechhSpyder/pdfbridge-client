@@ -6,7 +6,7 @@ import { FileText, Link, Globe, CheckCircle } from "lucide-react";
 import Image from "next/image";
 
 export default function TransformationAnimation() {
-  const [stage, setStage] = useState(0); // 0: URL, 1: Loading, 2: Webpage, 3: PDF Ready
+  const [stage, setStage] = useState(0); // 0: URL, 1: Loading, 2: Webpage, 3: Output Ready
   const [displayText, setDisplayText] = useState("");
   const targetUrl = "https://pdfbridge.xyz/docs";
 
@@ -17,13 +17,13 @@ export default function TransformationAnimation() {
 
       let i = 0;
       const typingInterval = setInterval(() => {
-        setDisplayText(targetUrl.slice(0, i));
+        setDisplayText("vendor_invoice_1092.pdf");
         i++;
-        if (i > targetUrl.length) {
+        if (i > "vendor_invoice_1092.pdf".length) {
           clearInterval(typingInterval);
           setTimeout(() => setStage(1), 800);
-          setTimeout(() => setStage(2), 2200);
-          setTimeout(() => setStage(3), 4500);
+          setTimeout(() => setStage(2), 2500);
+          setTimeout(() => setStage(3), 5000);
         }
       }, 50);
     };
@@ -67,7 +67,7 @@ export default function TransformationAnimation() {
 
             <div className="space-y-4">
               <div className="h-14 bg-slate-900/50 border border-slate-700/50 rounded-xl px-4 flex items-center">
-                <Globe className="w-4 h-4 text-slate-500 mr-3" />
+                <FileText className="w-4 h-4 text-slate-500 mr-3" />
                 <span className="text-slate-300 font-mono text-sm tracking-tight">
                   {displayText}
                   <motion.span
@@ -82,7 +82,7 @@ export default function TransformationAnimation() {
                 whileTap={{ scale: 0.98 }}
                 className="h-12 bg-blue-600 rounded-xl flex items-center justify-center font-semibold text-sm shadow-lg shadow-blue-500/20"
               >
-                Capture Page
+                Ingest Document
               </motion.div>
             </div>
           </motion.div>
@@ -112,10 +112,10 @@ export default function TransformationAnimation() {
             </div>
             <div className="text-center">
               <h3 className="text-lg font-semibold text-slate-200">
-                Capturing DOM...
+                Engine Processing...
               </h3>
               <p className="text-sm text-slate-500">
-                Executing JavaScript & Styles
+                Extracting Line Items & Metadata
               </p>
             </div>
           </motion.div>
@@ -134,18 +134,22 @@ export default function TransformationAnimation() {
               <div className="w-2 h-2 rounded-full bg-red-500/50" />
               <div className="w-2 h-2 rounded-full bg-amber-500/50" />
               <div className="w-2 h-2 rounded-full bg-emerald-500/50" />
+              <span className="ml-2 text-[10px] font-mono text-emerald-400">Response 200 OK</span>
             </div>
             <motion.div
-              className="relative aspect-video overflow-hidden"
-              initial={{ filter: "blur(10px)" }}
-              animate={{ filter: "blur(0px)" }}
+              className="relative aspect-video overflow-hidden bg-black/90 p-4"
             >
-              <Image
-                src="/webp/mock_webpage_1_1x.webp"
-                alt="Webpage Preview"
-                fill
-                className="object-cover brightness-90 contrast-110"
-              />
+              <pre className="text-emerald-400 font-mono text-[10px] sm:text-xs">
+{`{
+  "totalAmount": 1092.50,
+  "currency": "USD",
+  "vendor": {
+    "name": "Stripe Inc.",
+    "taxId": "US-123456789"
+  },
+  "lineItems": [...]
+}`}
+              </pre>
             </motion.div>
 
             <motion.div
@@ -180,12 +184,14 @@ export default function TransformationAnimation() {
                   </div>
                 </div>
 
-                <h3 className="text-2xl font-bold text-white mb-2 flex items-center gap-2">
-                  Ready to Download{" "}
-                  <CheckCircle className="w-6 h-6 text-emerald-400" />
+                <h3 className="text-2xl font-bold text-white mb-2 flex flex-col items-center gap-2">
+                  <div className="flex items-center gap-2">
+                    Extraction Complete
+                    <CheckCircle className="w-6 h-6 text-emerald-400" />
+                  </div>
                 </h3>
-                <p className="text-slate-400 text-sm mb-8">
-                  Generated in 428ms
+                <p className="text-slate-400 text-sm mb-8 text-center px-4">
+                  14 line items verified in 428ms. Normalized rendering is ready.
                 </p>
 
                 <div className="flex gap-4 w-full">
@@ -194,14 +200,14 @@ export default function TransformationAnimation() {
                     whileTap={{ scale: 0.95 }}
                     className="flex-1 h-14 bg-white text-slate-950 rounded-2xl font-bold text-sm"
                   >
-                    Get PDF URL
+                    View Normalized Output
                   </motion.button>
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     className="h-14 w-14 glass rounded-2xl flex items-center justify-center text-white"
                   >
-                    <FileText className="w-5 h-5" />
+                    <CheckCircle className="w-5 h-5 text-emerald-400" />
                   </motion.button>
                 </div>
               </div>
@@ -243,3 +249,5 @@ export default function TransformationAnimation() {
     </div>
   );
 }
+
+

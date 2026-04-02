@@ -100,10 +100,13 @@ export default function RootLayout({
         className={`${inter.variable} antialiased overflow-x-hidden w-full`}
       >
         <PostHogProvider>
-          <Navbar />
-          <Providers>{children}</Providers>
-          <SpeedInsights />
-          <Analytics />
+          <Providers>
+            <Navbar />
+            {children}
+
+            <SpeedInsights />
+            <Analytics />
+          </Providers>
         </PostHogProvider>
       </body>
     </html>

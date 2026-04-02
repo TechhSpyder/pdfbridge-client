@@ -1,4 +1,4 @@
-import { useConversions } from "@/modules/hooks/queries";
+import { useActivity } from "@/modules/hooks/queries";
 import { cn } from "@/utils";
 import * as Dialog from "@radix-ui/react-dialog";
 import { AnimatePresence, motion } from "framer-motion";
@@ -16,12 +16,12 @@ import { Highlight, themes } from "prism-react-renderer";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-export function RecentConversionsList() {
+export function RecentActivityList() {
   const [pollInterval, setPollInterval] = useState<number | undefined>(30000);
-  const { data, isLoading, error } = useConversions(1, 5, pollInterval);
-  const conversions = data?.conversions || [];
+  const { data, isLoading, error } = useActivity(1, 5, pollInterval);
+  const activities = data?.executions || [];
 
-  const hasPending = conversions.some((c: any) => c.status === "PENDING");
+  const hasPending = activities.some((c: any) => c.status === "PENDING");
 
   useEffect(() => {
     if (hasPending) {
@@ -31,12 +31,12 @@ export function RecentConversionsList() {
     }
   }, [hasPending]);
 
-  const [selectedConversion, setSelectedConversion] = useState<any>(null);
+  const [selectedActivity, setSelectedActivity] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleViewAiData = (conv: any) => {
     if (!conv.aiMetadata) return;
-    setSelectedConversion(conv);
+    setSelectedActivity(conv);
     setIsModalOpen(true);
   };
 
@@ -65,18 +65,18 @@ export function RecentConversionsList() {
     );
   }
 
-  if (conversions.length === 0) {
+  if (activities.length === 0) {
     return (
       <div className="rounded-2xl border border-white/5 bg-slate-900/50 backdrop-blur-sm p-6 text-center min-h-[300px] flex flex-col items-center justify-center">
         <div className="h-16 w-16 bg-blue-500/10 rounded-full flex flex-col items-center justify-center mb-4 text-blue-500 shadow-inner border border-blue-500/20">
           <Activity className="h-8 w-8" />
         </div>
         <h3 className="text-lg font-bold text-white mb-2">
-          No conversions yet
+          No activity yet
         </h3>
         <p className="text-slate-400 text-sm max-w-[250px] mx-auto leading-relaxed mb-6">
           Your pipeline is completely set up. Send an API request or use the
-          Playground below to generate your first PDF.
+          Playground below to process your first invoice.
         </p>
         <button
           onClick={() => {
@@ -96,7 +96,7 @@ export function RecentConversionsList() {
       data-lenis-prevent
       className="space-y-3 max-h-72 overflow-y-auto scrollbar-hide"
     >
-      {conversions.map((conv: any) => (
+      {activities.map((conv: any) => (
         <div
           key={conv.id}
           onClick={() => handleViewAiData(conv)}
@@ -160,42 +160,50 @@ export function RecentConversionsList() {
             )}
 
             {conv.success && conv.status !== "EXPIRED" && (
-              <div className="flex items-center gap-1">
-                {conv.aiMetadata && (
+              <div className="flex items-center gap-2">
+                {/* One-Click Pay / Resolve Actions */}
+                {conv.status === "DETERMINISTIC" ? (
+                  <Link href={`/compiler?id=${conv.id}`}>
+                    <button className="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black text-[10px] font-black uppercase transition-all active:scale-95 shadow-lg shadow-emerald-500/20">
+                      Pay →
+                    </button>
+                  </Link>
+                ) : (conv.status === "INCOMPLETE" || conv.status === "ESCALATED") ? (
+                  <Link href={`/compiler?id=${conv.id}`}>
+                    <button className="px-3 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-black text-[10px] font-black uppercase transition-all active:scale-95 shadow-lg shadow-sky-500/20">
+                      Resolve
+                    </button>
+                  </Link>
+                ) : null}
+
+                <div className="flex items-center gap-1 border-l border-white/10 ml-1 pl-1">
+                  {conv.aiMetadata && (
+                    <button
+                      onClick={() => handleViewAiData(conv)}
+                      title="View Institutional Intelligence"
+                      className="p-1.5 hover:bg-blue-500/10 rounded-md transition text-blue-400 hover:text-blue-200 cursor-pointer"
+                    >
+                      <Activity className="h-3.5 w-3.5" />
+                    </button>
+                  )}
                   <button
-                    onClick={() => handleViewAiData(conv)}
-                    title="View AI Insights"
-                    className="p-1.5 hover:bg-blue-500/10 rounded-md transition text-blue-400 hover:text-blue-200 cursor-pointer"
+                    onClick={() => {
+                      navigator.clipboard.writeText(conv.url);
+                      toast.success("URL copied to clipboard");
+                    }}
+                    title="Copy Invoice URL"
+                    className="p-1.5 hover:bg-white/10 rounded-md transition text-slate-400 hover:text-white cursor-pointer"
                   >
-                    <Brain className="h-3.5 w-3.5" />
+                    <Copy className="h-3.5 w-3.5" />
                   </button>
-                )}
-                <Link
-                  href={conv.url}
-                  target="_blank"
-                  download
-                  title="Download PDF"
-                  className="p-1.5 hover:bg-white/10 rounded-md transition text-slate-400 hover:text-white cursor-pointer"
-                >
-                  <Download className="h-3.5 w-3.5" />
-                </Link>
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(conv.url);
-                    toast.success("URL copied to clipboard");
-                  }}
-                  title="Copy URL"
-                  className="p-1.5 hover:bg-white/10 rounded-md transition text-slate-400 hover:text-white cursor-pointer"
-                >
-                  <Copy className="h-3.5 w-3.5" />
-                </button>
+                </div>
               </div>
             )}
           </div>
         </div>
       ))}
       <AnimatePresence>
-        {isModalOpen && selectedConversion && (
+        {isModalOpen && selectedActivity && (
           <Dialog.Root open={isModalOpen} onOpenChange={setIsModalOpen}>
             <Dialog.Portal forceMount>
               <Dialog.Overlay asChild>
@@ -206,7 +214,7 @@ export function RecentConversionsList() {
                   className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
                 />
               </Dialog.Overlay>
-              <Dialog.Content aria-describedby={"AI Metadata"} asChild>
+              <Dialog.Content aria-describedby={"Invoice Intelligence"} asChild>
                 <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-50">
                   <motion.div
                     initial={{ scale: 0.95, opacity: 0, y: 20 }}
@@ -218,14 +226,14 @@ export function RecentConversionsList() {
                       <Dialog.Title>
                         <div className="flex items-center gap-3">
                           <div className="h-8 w-8 bg-blue-500/10 rounded-lg flex items-center justify-center text-blue-400 border border-blue-500/20">
-                            <Brain className="h-4 w-4" />
+                            <Activity className="h-4 w-4" />
                           </div>
                           <div>
                             <h2 className="text-sm font-bold text-white uppercase tracking-wider">
-                              Intelligent PDF Analysis Insights
+                              Institutional Intelligence Synthesis
                             </h2>
                             <p className="text-[10px] text-slate-500">
-                              Extracted via Gemini 1.5 Flash (BETA)
+                              Infrastructure-Grade Semantic Decomposition
                             </p>
                           </div>
                         </div>
@@ -244,7 +252,7 @@ export function RecentConversionsList() {
                       <Highlight
                         theme={themes.vsDark}
                         code={JSON.stringify(
-                          selectedConversion.aiMetadata,
+                          selectedActivity.aiMetadata,
                           null,
                           2,
                         )}

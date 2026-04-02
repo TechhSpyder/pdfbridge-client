@@ -56,7 +56,7 @@ export function SocialProof() {
           }`}
         >
           <h2 className="text-3xl font-semibold tracking-tight">
-            Production-ready PDF rendering for modern web stacks.
+            Document processing for modern systems.
           </h2>
           <div className="mt-4 flex flex-wrap justify-center gap-2">
             {["React", "Next.js", "Vue", "Tailwind", "Node"].map((tech) => (
@@ -69,8 +69,7 @@ export function SocialProof() {
             ))}
           </div>
           <p className="mt-4 text-muted-foreground">
-            Designed to support high-volume, automated PDF generation across
-            modern workflows.
+            Designed for high-volume, automated document workflows.
           </p>
         </div>
 
@@ -110,8 +109,7 @@ export function SocialProof() {
           }`}
           style={{ transitionDelay: "400ms" }}
         >
-          Built for production-grade reliability, scalability, and consistent
-          HTML-to-PDF rendering.
+          Built for high-throughput, reliable document processing at scale.
         </p>
       </div>
     </section>

@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion, Variants } from "framer-motion";
-import { cn } from "@/utils";
+import { cn, formatAddress } from "@/utils";
 import { useEffect, useRef, useState } from "react";
 import { useSidebarStore } from "@/modules/stores";
 import { NAV_GROUPS } from "@/modules/constants";
@@ -14,7 +14,14 @@ import {
   UserAvatar,
 } from "@/modules/app";
 import { authClient } from "@/lib/auth-client";
-import { LogOut, MessageCircle, Check, ChevronDown, Zap } from "lucide-react";
+import {
+  LogOut,
+  MessageCircle,
+  Check,
+  ChevronDown,
+  Zap,
+  Copy,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
@@ -71,11 +78,13 @@ function SidebarContent({ isSmallScreen, setSidebarOpen }: any) {
     }));
   };
 
-  const userRole =
-    (user?.publicMetadata?.role as string) ||
-    (user?.publicMetadata?.userRole as string) ||
-    "";
-  const primaryEmail = user?.primaryEmailAddress?.emailAddress || "";
+  const userRole = (user as any)?.role || "";
+  const primaryEmail = user?.email || "";
+  const walletAddress = (user as any)?.walletAddress as string | undefined;
+
+  // Truncation helper for wallet-native UX using compact formatter
+  const compactDisplay = formatAddress(walletAddress);
+
   const allowedEmails = ["hello@techhspyder.com"];
   const isPlatformOwner =
     userRole === "platform-owner" ||
@@ -159,7 +168,7 @@ function SidebarContent({ isSmallScreen, setSidebarOpen }: any) {
                                 "flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-300 group select-none active:scale-[0.97] border",
                                 isActive
                                   ? "bg-blue-600/10 text-blue-400 border-blue-500/20 shadow-[0_0_20px_rgba(37,99,235,0.08)]"
-                                  : "text-slate-500 hover:text-slate-200 hover:bg-white/[0.03] border-transparent",
+                                  : "text-slate-500 hover:text-slate-200 hover:bg-white/3 border-transparent",
                               )}
                             >
                               <Icon
@@ -217,10 +226,11 @@ function SidebarContent({ isSmallScreen, setSidebarOpen }: any) {
                 <UserAvatar name={user.name} image={user.image} size="sm" />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-white truncate">
-                    {user.name || "Developer"}
+                    {user.name ||
+                      (walletAddress ? compactDisplay : "Developer")}
                   </p>
                   <p className="text-xs text-slate-500 truncate">
-                    {user.email}
+                    {walletAddress ? "Connected via Wallet" : user.email}
                   </p>
                 </div>
               </div>
@@ -252,7 +262,7 @@ function SidebarContent({ isSmallScreen, setSidebarOpen }: any) {
                       />
 
                       <p className="text-sm font-medium truncate">
-                        {user.name || "Developer"}
+                        {compactDisplay || user.name || "Developer"}
                       </p>
 
                       <ChevronDown
@@ -264,7 +274,7 @@ function SidebarContent({ isSmallScreen, setSidebarOpen }: any) {
                     </div>
                   </PopoverTrigger>
 
-                  <PopoverContent className="border-muted bg-popover w-[--radix-popover-trigger-width]!">
+                  <PopoverContent className="border-muted bg-popover w-[--radix-popover-trigger-width]! min-w-[200px]">
                     <div className="flex items-center gap-3 px-1 mb-4 border-b border-b-border pb-3">
                       <UserAvatar
                         name={user.name}
@@ -273,13 +283,46 @@ function SidebarContent({ isSmallScreen, setSidebarOpen }: any) {
                       />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-white truncate">
-                          {user.name || "Developer"}
+                          {user.name ||
+                            (walletAddress ? "Solana Wallet" : "Developer")}
                         </p>
                         <p className="text-xs text-slate-500 truncate">
-                          {user.email}
+                          {compactDisplay || user.email}
                         </p>
                       </div>
                     </div>
+
+                    {walletAddress && (
+                      <button
+                        onClick={() => copy(walletAddress)}
+                        className="flex items-center gap-3 px-3 py-2 text-slate-400 w-full hover:text-white hover:bg-white/5 border border-transparent rounded-lg text-sm font-medium transition-all duration-200 group mb-1"
+                      >
+                        <div className="relative flex items-center">
+                          <motion.div
+                            animate={{
+                              scale: copied ? 0 : 1,
+                              opacity: copied ? 0 : 1,
+                            }}
+                            className="absolute inset-0 flex items-center justify-center"
+                          >
+                            <Copy className="h-4 w-4 text-slate-500 group-hover:text-slate-300" />
+                            {/* <Image src="/svg/copy_icon.svg" alt="Copy" width={16} height={16} className="text-slate-500 group-hover:text-slate-300" /> */}
+                          </motion.div>
+                          <motion.div
+                            initial={{ scale: 0, opacity: 0 }}
+                            animate={{
+                              scale: copied ? 1 : 0,
+                              opacity: copied ? 1 : 0,
+                            }}
+                            className="flex items-center justify-center"
+                          >
+                            <Check className="h-4 w-4 text-green-500" />
+                          </motion.div>
+                          {/* Fallback space for the icons */}
+                        </div>
+                        Copy Wallet Address
+                      </button>
+                    )}
 
                     <SmartContactLink
                       email="hello@techhspyder.com"

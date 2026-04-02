@@ -26,14 +26,14 @@ export function UsageAlert({ usagePercentage }: { usagePercentage: number }) {
           />
         </div>
         <div className="space-y-1 text-center md:text-left">
-          <h4 className="text-lg font-bold text-white">
+          <h3 className="text-sm font-bold text-red-400">
             {isFull
-              ? "Conversion Limit Reached"
+              ? "Execution Quota Exhausted"
               : "Approaching API Usage Limit"}
-          </h4>
+          </h3>
           <p className="text-sm text-slate-400 max-w-lg">
             {isFull
-              ? "You have used 100% of your monthly conversion limit. API requests may fail until your next billing cycle."
+              ? "You have used 100% of your monthly execution quota. API requests may fail until your next billing cycle."
               : `You have consumed ${Math.round(usagePercentage)}% of your monthly API limits. Upgrade your plan to ensure uninterrupted service.`}
           </p>
         </div>

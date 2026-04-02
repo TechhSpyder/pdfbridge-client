@@ -10,62 +10,68 @@ import { useState } from "react";
 const tiers = [
   {
     id: "free",
-    title: "Free",
+    title: "Builder",
     price: "$0",
     sub: "Ideal for rapid testing",
     features: [
-      "50 Conversions / mo",
-      "5 AI Extractions / mo",
-      "1 Team Seat",
-      "Basic API Access",
+      "Includes 50 documents / mo",
+      "Built for testing and early integration",
+      "Includes 5 financial extractions",
       "10MB File Limit",
       "7 Days Retention",
     ],
   },
   {
     id: "developer",
-    title: "Developer",
+    title: "Startup",
     price: "$19",
-    sub: "For solo builders & startups",
+    sub: "For builders and early-stage products",
     features: [
-      "2,000 Conversions / mo",
-      "100 AI Extractions / mo",
-      "5 Team Seats",
-      "Native Tailwind Support",
-      "Custom Headers/Footers",
-      "25MB File Limit",
-      "30 Days Retention",
-      "Webhooks & ERP Ready",
+      "Includes 2,000 documents / mo",
+      "Includes 100 extractions / mo",
+      "Webhooks & ERP-ready",
+      "Financial data layer access",
+      "Tailwind normalization",
     ],
   },
   {
-    id: "automation",
-    title: "Automation",
+    id: "growth",
+    title: "Growth",
     price: "$99",
-    sub: "Built for Vertical SaaS",
+    sub: "For scaling financial workflows",
     features: [
-      "20,000 Conversions / mo",
-      "500 AI Extractions / mo",
-      "20 Team Seats",
+      "Includes 20,000 documents / mo",
+      "Includes 500 extractions / mo",
+      "Priority processing",
       "Ghost Mode (Private)",
-      "50MB File Limit",
-      "Unlimited Retention",
-      "Everything in Developer",
+      "Unlimited retention",
+      "Everything in Startup",
     ],
   },
   {
-    id: "resilience",
-    title: "Resilience",
+    id: "scale",
+    title: "Scale",
     price: "$499",
-    sub: "FinTech & Gov-Grade",
+    sub: "For high-volume financial automation",
     features: [
-      "100,000 Conversions / mo",
-      "Unlimited AI Extractions",
-      "Unlimited Team Seats",
-      "IP Whitelisting Support",
-      "100MB+ File Limit",
-      "Everything in Automation",
-      "Audit-Ready Infrastructure",
+      "Includes 100,000+ documents / mo",
+      "Unlimited extractions",
+      "Financial data layer access",
+      "Audit-ready infrastructure",
+      "Everything in Growth",
+    ],
+  },
+  {
+    id: "enterprise",
+    title: "Enterprise",
+    price: "Custom",
+    sub: "Handling millions of documents monthly? Talk to us.",
+    features: [
+      "Custom throughput",
+      "SLA-backed guarantees",
+      "Dedicated infrastructure",
+      "Custom pricing based on workload",
+      "Global compliance support",
     ],
   },
 ];
@@ -83,23 +89,20 @@ export function Pricing() {
     >
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         {/* Heading */}
-        <div
-          className={`mx-auto max-w-2xl text-center transition-all duration-700 ${
-            isVisible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
-          }`}
-        >
-          <h2 className="text-3xl font-semibold tracking-tight">
-            Pricing Tiers
+        <div className="mx-auto max-w-2xl px-4 text-center sm:px-6 lg:px-8">
+          <h2 className="text-4xl font-black tracking-tight text-white mb-4">
+            Predictable pricing. Built for financial workflows.
           </h2>
-          <p className="mt-4 text-muted-foreground">
-            Clear value-to-price ratio for teams of any size.
+          <p className="text-xl text-blue-400 font-bold uppercase tracking-widest mb-12">
+            All plans scale automatically — no hard limits, no dropped jobs.
           </p>
         </div>
 
         {/* Tier Cards */}
 
-        <div className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4! w-full">
-          {tiers.map((tier, index) => (
+        {/* Standard Tiers */}
+        <div className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 w-full">
+          {tiers.slice(0, 3).map((tier, index) => (
             <div
               key={tier.title}
               onClick={() => setActiveIndex(index)}
@@ -108,7 +111,7 @@ export function Pricing() {
               onKeyDown={(e) => e.key === "Enter" && setActiveIndex(index)}
               className={cn(
                 "transition-all duration-500 ease-out cursor-pointer",
-                index === activeIndex && "md:scale-110",
+                index === activeIndex && "md:scale-105",
               )}
               style={{
                 transform: isVisible ? "translateY(0)" : "translateY(8px)",
@@ -126,13 +129,14 @@ export function Pricing() {
                       <span className="text-4xl font-bold text-white">
                         {tier.price}
                       </span>
-                      <span className="text-muted-foreground text-sm">
-                        /month
-                      </span>
+                      {tier.price !== "Custom" && (
+                        <span className="text-muted-foreground text-sm">
+                          /month
+                        </span>
+                      )}
                     </div>
                     <ul className="mt-2 mb-4 space-y-3 text-sm text-muted-foreground">
                       {tier.features.map((f, i) => (
-                        // <li key={f}><Check className="w-4 h-4 text-blue-400 flex-shrink-0" /> {f}</li>
                         <li
                           key={`${tier.id}-${i}`}
                           className="flex items-center gap-3 text-sm"
@@ -166,6 +170,85 @@ export function Pricing() {
               />
             </div>
           ))}
+        </div>
+
+          <div className="mt-20">
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 max-w-4xl mx-auto">
+            {tiers.slice(3).map((tier, index) => {
+              const globalIndex = index + 3;
+              return (
+                <div
+                  key={tier.title}
+                  onClick={() => setActiveIndex(globalIndex)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) =>
+                    e.key === "Enter" && setActiveIndex(globalIndex)
+                  }
+                  className={cn(
+                    "transition-all duration-500 ease-out cursor-pointer",
+                    globalIndex === activeIndex && "md:scale-105",
+                  )}
+                  style={{
+                    transform: isVisible ? "translateY(0)" : "translateY(8px)",
+                    opacity: isVisible ? 1 : 0,
+                    transitionDelay: `${globalIndex * 120}ms`,
+                  }}
+                >
+                  <GlowCard
+                    title={tier.title}
+                    titleClass="text-3xl font-black text-blue-400"
+                    sub={tier.sub}
+                    className="border-blue-500/10"
+                    content={
+                      <div className="space-y-6">
+                        <div>
+                          <span className="text-4xl font-bold text-white">
+                            {tier.price}
+                          </span>
+                          {tier.price !== "Custom" && (
+                            <span className="text-muted-foreground text-sm">
+                              /month
+                            </span>
+                          )}
+                        </div>
+                        <ul className="mt-2 mb-4 space-y-4 text-sm text-muted-foreground">
+                          {tier.features.map((f, i) => (
+                            <li
+                              key={`${tier.id}-${i}`}
+                              className="flex items-center gap-3 text-sm"
+                            >
+                              <Check className="w-4 h-4 text-blue-500 shrink-0" />
+                              <span
+                                className={cn(
+                                  f.startsWith("Everything in") &&
+                                    "font-bold text-white text-base",
+                                )}
+                              >
+                                {f}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    }
+                    icon={null}
+                  ></GlowCard>
+
+                  {/* Active Card Border */}
+                  <div
+                    className={`absolute inset-0 h-full rounded-2xl pointer-events-none transition-all duration-500`}
+                    style={{
+                      border:
+                        globalIndex === activeIndex
+                          ? "2px solid rgba(96, 165, 250, 0.8)" // blue highlight
+                          : "1px solid rgba(255, 255, 255, 0.1)",
+                    }}
+                  />
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
     </section>

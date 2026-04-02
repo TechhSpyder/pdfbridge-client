@@ -54,11 +54,11 @@ export function ApiReferenceContent() {
 
       {/* Endpoints */}
       <div className="space-y-20">
-        {/* POST /convert */}
+        {/* POST /process */}
         <section id="ref-convert" className="scroll-mt-24 space-y-6">
           <div className="flex items-center gap-3">
             <span className="px-3 py-1 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-md font-bold text-xs">POST</span>
-            <h3 className="text-xl font-bold text-white">/convert</h3>
+            <h3 className="text-xl font-bold text-white">/process</h3>
           </div>
           <p className="text-slate-400">
             Create a PDF generation job from a URL or raw HTML.
@@ -95,6 +95,46 @@ export function ApiReferenceContent() {
           </div>
         </section>
 
+        {/* POST /normalize-invoice */}
+        <section id="ref-normalize" className="scroll-mt-24 space-y-6">
+          <div className="flex items-center gap-3">
+            <span className="px-3 py-1 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-md font-bold text-xs">POST</span>
+            <h3 className="text-xl font-bold text-white">/normalize-invoice</h3>
+          </div>
+          <p className="text-slate-400">
+            The "Closed-Loop" workflow. Convert messy invoice images or low-quality PDFs into structured data **and** a clean, branded PDF.
+          </p>
+          <div className="grid lg:grid-cols-2 gap-8 mt-6">
+            <div className="space-y-4">
+              <h4 className="text-sm font-bold text-slate-500 uppercase tracking-widest">Request Body</h4>
+              <ul className="space-y-4">
+                <ParamRow name="file" type="binary" desc="The input document (max 20MB). Required if 'url' not provided." />
+                <ParamRow name="url" type="string" desc="Public URL to the document." />
+                <ParamRow name="branding" type="object" desc="Branding options: { companyName, logoUrl, primaryColor }." />
+                <ParamRow name="isGhostMode" type="boolean" desc="Enable zero-retention privacy protocol." />
+              </ul>
+            </div>
+            <div className="bg-slate-900/50 rounded-2xl border border-white/5 p-6 h-fit">
+              <h4 className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-4">Example Response</h4>
+              <Highlight theme={themes.vsDark} code={`{
+  "jobId": "norm-8231-...",
+  "status": "pending",
+  "message": "Normalization job queued"
+}`} language="json">
+                {({ className, style, tokens, getLineProps, getTokenProps }) => (
+                  <pre className={`${className} p-0 bg-transparent text-xs`} style={style}>
+                    {tokens.map((line, i) => (
+                      <div key={i} {...getLineProps({ line })}>
+                        {line.map((token, key) => <span key={key} {...getTokenProps({ token })} />)}
+                      </div>
+                    ))}
+                  </pre>
+                )}
+              </Highlight>
+            </div>
+          </div>
+        </section>
+
         {/* POST /extract */}
         <section id="ref-extract" className="scroll-mt-24 space-y-6">
           <div className="flex items-center gap-3">
@@ -102,26 +142,106 @@ export function ApiReferenceContent() {
             <h3 className="text-xl font-bold text-white">/extract</h3>
           </div>
           <p className="text-slate-400">
-            Directly upload a PDF file for intelligent AI analysis. Optimized for Speed & Privacy.
+            Directly upload a PDF file for intelligent Engine analysis. Optimized for Speed & Privacy.
           </p>
           <div className="grid lg:grid-cols-2 gap-8 mt-6">
             <div className="space-y-4">
               <h4 className="text-sm font-bold text-slate-500 uppercase tracking-widest">Multipart Form Data</h4>
               <ul className="space-y-4">
-                <ParamRow name="file" type="binary" desc="The PDF file to analyze. Max 10MB." />
+                <ParamRow name="file" type="binary" desc="The PDF file to analyze. Max 20MB." />
+                <ParamRow name="isGhostMode" type="boolean" desc="Process without disk storage (Pro+)." />
               </ul>
-              <div className="p-4 rounded-xl bg-blue-500/5 border border-blue-500/10 mt-4 leading-relaxed">
-                <p className="text-xs text-blue-400">
-                  <span className="font-bold">Pro Tip:</span> Use this endpoint when you already have a PDF 
-                  (e.g., from an email or disk). It's 5x faster than rendering via <code className="text-blue-300">/convert</code>.
-                </p>
-              </div>
             </div>
             <div className="bg-slate-900/50 rounded-2xl border border-white/5 p-6 h-fit">
               <h4 className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-4">Example Response</h4>
               <Highlight theme={themes.vsDark} code={`{
   "jobId": "ee23-...",
   "status": "processing"
+}`} language="json">
+                {({ className, style, tokens, getLineProps, getTokenProps }) => (
+                  <pre className={`${className} p-0 bg-transparent text-xs`} style={style}>
+                    {tokens.map((line, i) => (
+                      <div key={i} {...getLineProps({ line })}>
+                        {line.map((token, key) => <span key={key} {...getTokenProps({ token })} />)}
+                      </div>
+                    ))}
+                  </pre>
+                )}
+              </Highlight>
+            </div>
+          </div>
+        </section>
+
+        {/* POST /process/bulk */}
+        <section id="ref-bulk" className="scroll-mt-24 space-y-6">
+          <div className="flex items-center gap-3">
+            <span className="px-3 py-1 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-md font-bold text-xs">POST</span>
+            <h3 className="text-xl font-bold text-white">/process/bulk</h3>
+          </div>
+          <p className="text-slate-400">
+            Process up to 1,000 PDF generation or extraction jobs in a single request. 
+            Ideal for monthly billing cycles and high-volume data processing.
+          </p>
+          <div className="grid lg:grid-cols-2 gap-8 mt-6">
+            <div className="space-y-4">
+              <h4 className="text-sm font-bold text-slate-500 uppercase tracking-widest">Request Body</h4>
+              <ul className="space-y-4">
+                <ParamRow name="jobs" type="array" desc="Array of job objects (same schema as /process)." />
+                <ParamRow name="extractMetadata" type="boolean" desc="Run Engine analysis on all generated documents." />
+                <ParamRow name="webhookUrl" type="string" desc="Global webhook for all job completions." />
+              </ul>
+            </div>
+            <div className="bg-slate-900/50 rounded-2xl border border-white/5 p-6 h-fit">
+              <h4 className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-4">Example Response</h4>
+              <Highlight theme={themes.vsDark} code={`{
+  "jobIds": ["job_1", "job_2", ...],
+  "status": "queued",
+  "count": 100
+}`} language="json">
+                {({ className, style, tokens, getLineProps, getTokenProps }) => (
+                  <pre className={`${className} p-0 bg-transparent text-xs`} style={style}>
+                    {tokens.map((line, i) => (
+                      <div key={i} {...getLineProps({ line })}>
+                        {line.map((token, key) => <span key={key} {...getTokenProps({ token })} />)}
+                      </div>
+                    ))}
+                  </pre>
+                )}
+              </Highlight>
+            </div>
+          </div>
+        </section>
+
+        {/* GET /ledger */}
+        <section id="ref-ledger" className="scroll-mt-24 space-y-6">
+          <div className="flex items-center gap-3">
+            <span className="px-3 py-1 bg-blue-500/10 text-blue-500 border border-blue-500/20 rounded-md font-bold text-xs">GET</span>
+            <h3 className="text-xl font-bold text-white">/ledger</h3>
+          </div>
+          <p className="text-slate-400">
+            Query the organization-wide Financial Ledger of all processed documents.
+          </p>
+          <div className="grid lg:grid-cols-2 gap-8 mt-6">
+            <div className="space-y-4">
+              <h4 className="text-sm font-bold text-slate-500 uppercase tracking-widest">Query Parameters</h4>
+              <ul className="space-y-4">
+                <ParamRow name="page" type="number" desc="Results page (default: 1)." />
+                <ParamRow name="limit" type="number" desc="Items per page (default: 20, max: 100)." />
+                <ParamRow name="currency" type="string" desc="Filter by ISO currency code." />
+              </ul>
+            </div>
+            <div className="bg-slate-900/50 rounded-2xl border border-white/5 p-6 h-fit">
+              <h4 className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-4">Success Response</h4>
+              <Highlight theme={themes.vsDark} code={`{
+  "documents": [
+    {
+      "id": "ledger_823",
+      "vendorName": "Acme Corp",
+      "totalAmount": 1250,
+      "date": "2024-03-18T10:00:00Z"
+    }
+  ],
+  "pagination": { "total": 45, "page": 1 }
 }`} language="json">
                 {({ className, style, tokens, getLineProps, getTokenProps }) => (
                   <pre className={`${className} p-0 bg-transparent text-xs`} style={style}>
@@ -159,6 +279,7 @@ export function ApiReferenceContent() {
   "status": "SUCCESS",
   "result": {
     "url": "https://storage.pdfbridge.xyz/...",
+    "normalizedUrl": "https://storage.pdfbridge.xyz/...",
     "aiMetadata": {
       "vendorName": "Acme Corp",
       "totalAmount": 1250,
@@ -197,3 +318,5 @@ function ParamRow({ name, type, desc }: { name: string; type: string; desc: stri
     </li>
   );
 }
+
+

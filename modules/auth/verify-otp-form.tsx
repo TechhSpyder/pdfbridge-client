@@ -22,7 +22,17 @@ export const VerifyOtpForm: React.FC<VerifyOtpFormProps> = ({ email, onSuccess }
   const [isRouting, setIsRouting] = useState(false);
   const router = useRouter();
 
+  const hasSentRef = React.useRef(false);
+
   useEffect(() => {
+    if (!hasSentRef.current) {
+      hasSentRef.current = true;
+      authClient.emailOtp.sendVerificationOtp({
+        email,
+        type: "email-verification",
+      }).catch(console.error);
+    }
+
     let timer: NodeJS.Timeout;
     if (countdown > 0) {
       timer = setInterval(() => {
@@ -32,7 +42,7 @@ export const VerifyOtpForm: React.FC<VerifyOtpFormProps> = ({ email, onSuccess }
       setCanResend(true);
     }
     return () => clearInterval(timer);
-  }, [countdown]);
+  }, [countdown, email]);
 
   const handleResend = async () => {
     if (!canResend) return;

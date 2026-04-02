@@ -1,15 +1,12 @@
 "use server";
 
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
+import { getServerSession } from "@/lib/auth";
 import { blogPrisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 
 async function verifyAdmin() {
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
+    const session = await getServerSession();
 
     if (!session) throw new Error("Unauthorized");
 

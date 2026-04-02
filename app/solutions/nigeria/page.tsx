@@ -65,7 +65,7 @@ export default function NigerianPricingPage() {
               <ShieldCheck className="text-green-500 w-8 h-8" />
             </div>
             <h3 className="text-xl font-bold mb-4">World-class Tech</h3>
-            <p className="text-slate-400 text-sm">You get exactly the same massive infrastructure: AI Extraction tools, Template engines, and React endpoints as global users.</p>
+            <p className="text-slate-400 text-sm">You get exactly the same massive infrastructure: Engine Extraction tools, Template engines, and React endpoints as global users.</p>
           </div>
         </div>
 
@@ -80,3 +80,5 @@ export default function NigerianPricingPage() {
     </div>
   );
 }
+
+

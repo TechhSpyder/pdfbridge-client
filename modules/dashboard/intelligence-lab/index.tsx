@@ -44,7 +44,7 @@ export function AiLabPage() {
     }
   }, [html, generateMutation.isPending]);
 
-  const [saveName, setSaveName] = useState("My AI Template");
+  const [saveName, setSaveName] = useState("My Engine Template");
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
 
   const handleSave = async () => {
@@ -75,7 +75,7 @@ export function AiLabPage() {
       return;
     }
 
-    const tId = toast.loading("AI is crafting your PDF layout...");
+    const tId = toast.loading("The Engine is processing your PDF layout...");
     try {
       const response: any = await generateMutation.mutateAsync({ prompt });
       if (response.success && response.data) {
@@ -112,6 +112,71 @@ export function AiLabPage() {
     if (iframeRef.current && html) {
       const doc = iframeRef.current.contentDocument;
       if (doc) {
+        // Simple client-side Handlebars mock renderer for preview
+        const mockData = {
+          items: [
+            { name: "Advanced Extraction", price: "$450.00", quantity: 2, total: "$900.00" },
+            { name: "API Usage Fee", price: "$50.00", quantity: 1, total: "$50.00" },
+            { name: "Dedicated Support", price: "$300.00", quantity: 1, total: "$300.00" }
+          ],
+          features: [
+            { icon: "⚡", title: "Global CDN", desc: "Edge delivery in 100+ cities." },
+            { icon: "🛡️", title: "DDoS Shield", desc: "Layer 7 protection included." },
+            { icon: "🤖", title: "Engine Insights", desc: "Automated document analysis." }
+          ],
+          property: {
+            title: "Modern Executive Suite",
+            price: "$4,500/mo",
+            location: "Silicon Valley, CA",
+            sqft: "1,200 sqft",
+            beds: 2,
+            baths: 2
+          },
+          company_name: "PDFBridge Global",
+          invoice_number: "INV-8829",
+          date: new Date().toLocaleDateString(),
+          due_date: new Date(Date.now() + 86400000 * 14).toLocaleDateString(),
+          total_amount: "$1,250.00",
+          user_name: userData?.user?.name || "Demo User",
+          user_email: userData?.user?.email || "user@example.com"
+        };
+
+        const renderPreview = (content: string) => {
+          let rendered = content;
+          
+          // 1. Handle #each blocks for items, features, etc.
+          const eachRegex = /\{\{#each\s+([^}]+)\}\}([\s\S]*?)\{\{\/each\}\}/g;
+          rendered = rendered.replace(eachRegex, (match, key, body) => {
+            const list = (mockData as any)[key.trim()] || [];
+            return list.map((item: any) => {
+              let itemBody = body;
+              // Replace {{this.prop}} or {{prop}}
+              Object.keys(item).forEach(prop => {
+                const propRegex = new RegExp(`\\{\\{(this\\.)?${prop}\\}\\}`, 'g');
+                itemBody = itemBody.replace(propRegex, item[prop]);
+              });
+              return itemBody;
+            }).join('');
+          });
+
+          // 2. Handle simple variables
+          Object.keys(mockData).forEach(key => {
+            if (typeof (mockData as any)[key] !== 'object') {
+              const varRegex = new RegExp(`\\{\\{${key}\\}\\}`, 'g');
+              rendered = rendered.replace(varRegex, (mockData as any)[key]);
+            } else if (key === 'property') {
+              Object.keys(mockData.property).forEach(prop => {
+                const varRegex = new RegExp(`\\{\\{property\\.${prop}\\}\\}`, 'g');
+                rendered = rendered.replace(varRegex, (mockData.property as any)[prop]);
+              });
+            }
+          });
+
+          return rendered;
+        };
+
+        const processedHtml = renderPreview(html);
+
         doc.open();
         doc.write(`
           <!DOCTYPE html>
@@ -124,25 +189,25 @@ export function AiLabPage() {
               </style>
             </head>
             <body>
-              ${html}
+              ${processedHtml}
             </body>
           </html>
         `);
         doc.close();
       }
     }
-  }, [html, css, view]);
+  }, [html, css, view, userData]);
 
-  const aiTemplateLimit = userData?.plan?.aiTemplateLimit || 0;
+  const aiTemplateLimit = userData?.plan?.intelligenceTemplateLimit || 0;
   const aiTemplateCount = userData?.usage?.aiTemplateCount || 0;
-  const remaining = Math.max(0, aiTemplateLimit - aiTemplateCount);
+  const remaining = userData ? Math.max(0, aiTemplateLimit - aiTemplateCount) : 1; // Default to 1 to prevent flicker
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <Title
-          title="AI Template Lab"
-          description="Design high-conversion PDF layouts using natural language."
+          title="Template Engine Studio"
+          description="Architect high-performance document assets with institutional precision."
           icon={<Sparkles className="h-8 w-8 text-indigo-500" />}
         />
 
@@ -213,12 +278,12 @@ export function AiLabPage() {
                 )}
                 {generateMutation.isPending
                   ? "Generating..."
-                  : "Generate Layout"}
+                  : "Architect Layout"}
               </Button>
 
-              {remaining === 0 && (
+              {userData && remaining === 0 && (
                 <p className="text-[10px] text-center text-orange-400 font-medium">
-                  You've reached your monthly AI Template limit. Upgrade to
+                  You've reached your monthly Engine Template limit. Upgrade to
                   generate more.
                 </p>
               )}
@@ -330,11 +395,11 @@ export function AiLabPage() {
                   <Sparkles className="h-10 w-10 text-indigo-500" />
                 </div>
                 <h3 className="text-lg font-bold text-white mb-2">
-                  Ready to Design?
+                  Ready to Architect?
                 </h3>
                 <p className="text-sm text-slate-500 max-w-sm">
-                  Enter a description on the left and our AI will build you a
-                  production-ready PDF template in seconds.
+                  Enter a description on the left and our Engine will engineer a
+                  production-ready PDF layout in seconds.
                 </p>
               </div>
             )}
@@ -343,7 +408,7 @@ export function AiLabPage() {
               <div className="absolute inset-0 z-10 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center gap-4">
                 <RotateCcw className="h-10 w-10 animate-spin text-indigo-500" />
                 <div className="text-sm font-bold text-white animate-pulse uppercase tracking-widest">
-                  AI is thinking...
+                  Engine is thinking...
                 </div>
               </div>
             )}
@@ -405,7 +470,7 @@ function SaveTemplateDialog({
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Content className="max-w-md">
         <Dialog.Header>
-          <Dialog.Title>Save AI Template</Dialog.Title>
+          <Dialog.Title>Save Engine Template</Dialog.Title>
         </Dialog.Header>
         <Dialog.Body className="items-start gap-4">
           <p className="text-sm text-slate-400">

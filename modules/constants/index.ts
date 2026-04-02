@@ -27,7 +27,7 @@ export const NAV_GROUPS = [
     label: "Engineering",
     links: [
       { href: "/dashboard/api-keys", label: "API Keys", icon: Key },
-      { href: "/dashboard/lab", label: "AI Template Lab", icon: Sparkles },
+      { href: "/dashboard/lab", label: "Engine Template Lab", icon: Sparkles },
       { href: "/dashboard/templates", label: "My Templates", icon: Library },
       { href: "/dashboard/blog", label: "Blog Journal", icon: PenTool },
     ],
@@ -53,59 +53,62 @@ export const NAV_LINKS = NAV_GROUPS.flatMap((g) => g.links);
 export const PLAN_METADATA: any = {
   "Test Mode": {
     features: [
-      "Unlimited Conversions",
+      "Unlimited Processed Invoices",
       "Mandatory Watermark",
       "Development Only",
       "24h Retention",
     ],
     color: "amber",
   },
-  Free: {
+  Builder: {
     features: [
-      "50 Conversions / month",
-      "1 AI Template / month",
-      "1 Team Seat",
+      "Includes 50 invoices / mo",
+      "Built for testing and early integration",
+      "Includes 5 financial extractions",
       "10MB File Limit",
       "7 Days Retention",
-      "No Webhooks",
     ],
     color: "slate",
   },
-  Developer: {
+  Startup: {
     features: [
-      "2,000 Conversions / month",
-      "100 AI Extractions / month",
-      "5 Team Seats",
-      "Native Tailwind Support",
-      "Custom Headers/Footers",
-      "25MB File Limit",
-      "30 Days Retention",
-      "Webhooks & ERP Ready",
+      "Includes 2,000 invoices / mo",
+      "Includes 100 extractions / mo",
+      "Webhooks & ERP-ready",
+      "Financial data layer access",
+      "Tailwind normalization",
     ],
     color: "blue",
   },
-  Automation: {
+  Growth: {
     features: [
-      "20,000 Conversions / month",
-      "500 AI Extractions / month",
-      "20 Team Seats",
+      "Includes 20,000 invoices / mo",
+      "Includes 500 extractions / mo",
+      "Priority processing",
       "Ghost Mode (Private)",
-      "50MB File Limit",
-      "Unlimited Retention",
-      "Everything in Developer",
+      "Unlimited retention",
+      "Everything in Startup",
     ],
     color: "emerald",
     recommended: true,
   },
-  Resilience: {
+  Scale: {
     features: [
-      "100,000 Conversions / month",
-      "Unlimited AI Extractions",
-      "Unlimited Team Seats",
-      "IP Whitelisting Support",
-      "100MB+ File Limit",
-      "Everything in Automation",
-      "Audit-Ready Infrastructure",
+      "Includes 100,000+ invoices / mo",
+      "Unlimited extractions",
+      "Financial data layer access",
+      "Audit-ready infrastructure",
+      "Everything in Growth",
+    ],
+    color: "blue",
+  },
+  Enterprise: {
+    features: [
+      "Custom throughput",
+      "SLA-backed guarantees",
+      "Dedicated infrastructure",
+      "Custom pricing based on workload",
+      "Handling millions of invoices monthly? Talk to us.",
     ],
     color: "blue",
   },

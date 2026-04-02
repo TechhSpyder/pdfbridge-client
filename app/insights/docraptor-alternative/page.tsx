@@ -116,7 +116,7 @@ export default function DocRaptorAlternativePage() {
                   <td className="p-4"><CheckCircle2 className="inline mr-2 text-emerald-500" size={16}/> Separate Sandbox API Keys</td>
                 </tr>
                 <tr>
-                  <td className="p-4 font-medium text-white">AI Data Extraction</td>
+                  <td className="p-4 font-medium text-white">Engine Data Extraction</td>
                   <td className="p-4"><XCircle className="inline mr-2 text-red-500" size={16}/> None</td>
                   <td className="p-4"><CheckCircle2 className="inline mr-2 text-emerald-500" size={16}/> Built-in LLM Processing</td>
                 </tr>
@@ -155,3 +155,5 @@ export default function DocRaptorAlternativePage() {
     </article>
   );
 }
+
+

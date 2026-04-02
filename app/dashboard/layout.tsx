@@ -1,6 +1,5 @@
 import { Breadcrumbs, MobileTopBar, Sidebar } from "@/modules/dashboard";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
+import { getServerSession } from "@/lib/auth";
 import { MailWarning } from "lucide-react";
 import { Button } from "@/modules/app/button";
 import { redirect } from "next/navigation";
@@ -13,14 +12,7 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  if (!auth || !auth.api) {
-    console.error("[DASHBOARD] Auth instance or API is undefined. Check Better-Auth configuration.");
-    return redirect("/sign-in");
-  }
-
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const session = await getServerSession();
 
   if (!session) {
     redirect("/sign-in");

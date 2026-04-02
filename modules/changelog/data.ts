@@ -19,7 +19,7 @@ export const CHANGELOG_DATA: ChangelogEntry[] = [
     changes: [
       {
         type: "feature",
-        text: "Intelligent Document Parsing: Native AI integration to instantly extract structured JSON metadata from generated PDFs.",
+        text: "Intelligent Document Parsing: Native Engine integration to instantly extract structured JSON metadata from generated PDFs.",
       },
       {
         type: "feature",
@@ -67,7 +67,7 @@ export const CHANGELOG_DATA: ChangelogEntry[] = [
   {
     version: "0.9.5",
     date: "February 20, 2026",
-    title: "Safety & AI Intelligence",
+    title: "Safety & Engine Intelligence",
     description:
       "Significant enhancements to security and data intelligence layers.",
     changes: [

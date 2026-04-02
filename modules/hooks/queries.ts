@@ -1,13 +1,14 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApiClient } from "@/app/api/api-client";
 import { usePDFBridge } from "./use-pdfbridge";
+export { usePDFBridge };
 import { toast } from "sonner";
 
 export const useMe = () => {
   const api = useApiClient();
   return useQuery({
     queryKey: ["me"],
-    queryFn: () => api.get("/api/v1/me"),
+    queryFn: () => api.get("/api/v1/user/me"),
   });
 };
 
@@ -50,15 +51,15 @@ export const useRevealKey = () => {
 };
 
 
-export const useConversions = (
+export const useActivity = (
   page = 1,
   limit = 10,
   refetchInterval?: number,
 ) => {
   const api = useApiClient();
   return useQuery({
-    queryKey: ["conversions", page, limit],
-    queryFn: () => api.get(`/api/v1/conversions?page=${page}&limit=${limit}`),
+    queryKey: ["executions", page, limit],
+    queryFn: () => api.get(`/api/v1/activity?page=${page}&limit=${limit}`),
     refetchInterval,
   });
 };
@@ -78,20 +79,20 @@ export const useJobStatus = (jobId: string, pollInterval?: number) => {
   });
 };
 
-export const useWebhookLogs = (conversionId: string) => {
+export const useWebhookLogs = (documentId: string) => {
   const api = useApiClient();
   return useQuery({
-    queryKey: ["webhook-logs", conversionId],
-    queryFn: () => api.get(`/api/v1/conversions/${conversionId}/webhooks`),
-    enabled: !!conversionId,
+    queryKey: ["webhook-logs", documentId],
+    queryFn: () => api.get(`/api/v1/jobs/${documentId}/webhooks`),
+    enabled: !!documentId,
   });
 };
 
-export const useConversionStats = (refetchInterval?: number) => {
+export const useProcessingStats = (refetchInterval?: number) => {
   const api = useApiClient();
   return useQuery({
-    queryKey: ["conversion-stats"],
-    queryFn: () => api.get("/api/v1/me/stats"),
+    queryKey: ["processing-stats"],
+    queryFn: () => api.get("/api/v1/processing/stats"),
     refetchInterval,
   });
 };
@@ -300,9 +301,9 @@ export const useLedgerDocument = (id: string) => {
   });
 };
 
-export const useNormalizeInvoice = () => {
-  const api = useApiClient();
+export const useIngestDocument = () => {
   const queryClient = useQueryClient();
+  const api = useApiClient();
   return useMutation({
     mutationFn: ({
       file,
@@ -314,18 +315,25 @@ export const useNormalizeInvoice = () => {
       const formData = new FormData();
       formData.append("file", file);
       if (testMode) formData.append("testMode", "true");
-      return api.post("/api/v1/normalize-invoice", formData);
+      return api.post("/api/v1/ingest", formData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["ledger"] });
-      toast.success("Normalization started", {
-        description: "The AI is extracting data. Check the ledger for updates.",
+      toast.success("Institutional Ingestion Initiated", {
+        description: "PDFBridge Engine synthesizing semantic components. Check the ledger for real-time reconciliation.",
       });
     },
     onError: (err: any) => {
-      toast.error("Failed to start normalization", {
+      toast.error("Ingestion failed", {
         description: err.response?.data?.message || err.message,
       });
     },
+  });
+};
+export const useDeactivateAccount = () => {
+  const api = useApiClient();
+  return useMutation({
+    mutationFn: (data: { password?: string; confirmation: string }) =>
+      api.delete("/api/v1/user/me", data),
   });
 };

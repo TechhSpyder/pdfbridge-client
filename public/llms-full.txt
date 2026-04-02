@@ -48,7 +48,7 @@ POST /api/v1/extract
 ```
 
 ### 3. AI Template Generation (AI Lab)
-In the PDFBridge dashboard, users can type "Generate a minimalist Stripe-style receipt for a SaaS product." The AI engine natively generates the underlying HTML/Tailwind styling, which can be saved to the database as a reusable generic template via `/api/v1/save-template`.
+In the PDFBridge dashboard, users can type "Generate a minimalist Stripe-style receipt for a SaaS product."  engine natively generates the underlying HTML/Tailwind styling, which can be saved to the database as a reusable generic template via `/api/v1/save-template`.
 
 ### 4. Enterprise Roles & Workspaces
 Organizations include distinct RBAC roles (Owner, Admin, Member), invite workflows via tokens (`/api/v1/invites`), and seat-based licensing.

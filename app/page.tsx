@@ -1,4 +1,4 @@
-import { Hero } from "@/modules/home/hero";
+import { Hero, VisualStrip } from "@/modules/home";
 import dynamic from "next/dynamic";
 import { Metadata } from "next";
 
@@ -28,11 +28,14 @@ const Problem = dynamic(() =>
 const PuppeteerVs = dynamic(() =>
   import("@/modules/home/puppeteer-vs").then((mod) => mod.PuppeteerVs),
 );
+const OperationalVisibility = dynamic(() =>
+  import("@/modules/home/visibility").then((mod) => mod.OperationalVisibility),
+);
 
 export const metadata: Metadata = {
-  title: "PDFBridge — HTML to PDF API | Tailwind, React & AI Extraction",
+  title: "PDFBridge — Financial Document Processing Infrastructure",
   description:
-    "Generate high-fidelity PDFs from HTML, URLs, and React components. 99.9% Uptime, lightning-fast rendering, and developer-first documentation.",
+    "Turn invoices, receipts, and financial documents into validated, structured data instantly. Built for fintechs and finance teams.",
 };
 
 import { PublicPlaygroundWrapper as PublicPlayground } from "@/modules/home/hero/PublicPlaygroundWrapper";
@@ -44,7 +47,7 @@ const softwareSchema = {
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Any",
   "description":
-    "Generate high-fidelity PDFs from HTML, URLs, and React components. Tailwind-Native & AI-Powered.",
+    "Financial document processing infrastructure. Extract, Validate, and Normalize financial documents into structured data instantly.",
   "offers": {
     "@type": "Offer",
     "price": "0",
@@ -81,6 +84,7 @@ export default function Home() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }}
       />
       <Hero />
+      <VisualStrip />
       <div id="playground" className="w-full py-10">
         <PublicPlayground />
       </div>
@@ -90,6 +94,7 @@ export default function Home() {
       <HowItWorks />
       <BuiltForDevelopers />
       <PuppeteerVs />
+      <OperationalVisibility />
       <Pricing />
       <FAQ />
       <CTA />
@@ -97,3 +102,5 @@ export default function Home() {
     </div>
   );
 }
+
+

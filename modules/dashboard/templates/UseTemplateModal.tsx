@@ -29,23 +29,23 @@ export function UseTemplateModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    const tId = toast.loading("Starting conversion...");
+    const tId = toast.loading("Initiating execution...");
 
     try {
-      const response = await api.post("/api/v1/convert", {
+      const response = await api.post("/api/v1/process", {
         templateId: template.id,
         variables,
         testMode: true, // Default to test mode for safety in development
       });
 
-      toast.success("Conversion job started!", { id: tId });
+      toast.success("Execution job started!", { id: tId });
       onClose();
       // Potentially redirect to the job status page
       if (response.jobId) {
-        toast.info("Check conversion status in the dashboard.");
+        toast.info("Monitor execution status in the dashboard.");
       }
     } catch (error: any) {
-      toast.error(error.message || "Failed to start conversion", { id: tId });
+      toast.error(error.message || "Failed to initiate execution", { id: tId });
     } finally {
       setIsSubmitting(false);
     }
@@ -71,7 +71,7 @@ export function UseTemplateModal({
         </Dialog.Header>
 
         <form onSubmit={handleSubmit}>
-          <Dialog.Body className="py-6 gap-6">
+          <Dialog.Body className="py-6 gap-6 max-h-[60vh] overflow-y-auto pr-2">
             <div className="w-full space-y-1">
               <h3 className="text-sm font-semibold text-slate-300">
                 {template.name}
@@ -128,7 +128,7 @@ export function UseTemplateModal({
               ) : (
                 <Send className="h-4 w-4" />
               )}
-              {isSubmitting ? "Processing..." : "Generate PDF"}
+              {isSubmitting ? "Processing..." : "Process PDF"}
             </Button>
           </Dialog.Footer>
         </form>

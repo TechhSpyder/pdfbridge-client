@@ -10,18 +10,23 @@ datasource db {
 model User {
   id                         String       @id @default(uuid())
   email                      String       @unique
+  emailVerified              Boolean      @default(false)
+  name                       String?
+  image                      String?
   isActive                   Boolean      @default(true)
+  password                   String?
   createdAt                  DateTime     @default(now())
+  updatedAt                  DateTime     @default(now()) @updatedAt
   clerkId                    String?      @unique
   welcomeEmailSent           Boolean      @default(false)
   notificationBillingUpdates Boolean      @default(true)
   notificationUsageAlerts    Boolean      @default(true)
   lastActiveAt               DateTime?
-  name                       String?
-  image                      String?
   conversions                Conversion[]
   memberships                Membership[]
   webhookLogs                WebhookLog[]
+  accounts                   Account[]
+  sessions                   Session[]
 }
 
 model Organization {
@@ -101,11 +106,11 @@ model Plan {
   priceUsdAnnual              Int            @default(0)
   rateLimitPerMin             Int            @default(10)
   retentionDays               Int            @default(7)
-  allowAi                     Boolean        @default(false)
+  allowIntelligence           Boolean        @default(false)
   allowTailwind               Boolean        @default(false)
   allowGhostMode              Boolean        @default(false)
-  aiLimit                     Int            @default(0)
-  aiTemplateLimit             Int            @default(0)
+  intelligenceLimit           Int            @default(0)
+  intelligenceTemplateLimit   Int            @default(0)
   maxSeats                    Int            @default(1)
   organizations               Organization[]
 }
@@ -116,8 +121,8 @@ model Usage {
   year            Int
   count           Int          @default(0)
   createdAt       DateTime     @default(now())
-  aiCount         Int          @default(0)
-  aiTemplateCount Int          @default(0)
+  intelligenceCount Int          @default(0)
+  intelligenceTemplateCount Int          @default(0)
   organizationId  String
   organization    Organization @relation(fields: [organizationId], references: [id])
 
@@ -258,17 +263,103 @@ model FinancialDocument {
   organizationId String
   status         String       @default("PENDING")
   vendorName     String?
+  vendorEmail    String?
+  invoiceNumber  String?
+  currency       String       @default("USD")
   totalAmount    Float        @default(0)
+  taxAmount      Float?
+  date           DateTime?
+  dueDate        DateTime?
   isTestMode     Boolean      @default(false)
+  s3Key          String?
+  externalId     String?
+  externalUrl    String?
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
+  metadata       Json?
   organization   Organization @relation(fields: [organizationId], references: [id])
+  lineItems      LineItem[]
+
+  @@index([organizationId, createdAt])
+}
+
+model LineItem {
+  id                  String            @id @default(uuid())
+  financialDocumentId String
+  description         String
+  quantity            Float             @default(1)
+  unitPrice           Float             @default(0)
+  totalPrice          Float             @default(0)
+  taxPercentage       Float             @default(0)
+  taxAmount           Float             @default(0)
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  metadata            Json?
+  financialDocument   FinancialDocument @relation(fields: [financialDocumentId], references: [id], onDelete: Cascade)
+
+  @@index([financialDocumentId])
 }
 
 model VendorIdentity {
-  id             String       @id @default(uuid())
-  organizationId String
-  name           String
-  website        String?
-  organization   Organization @relation(fields: [organizationId], references: [id])
+  id               String       @id @default(uuid())
+  organizationId   String
+  name             String
+  originalName     String?
+  normalizedName   String?
+  website          String?
+  confidence       Float        @default(0)
+  category         String?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  organization     Organization @relation(fields: [organizationId], references: [id])
+
+  @@unique([organizationId, normalizedName])
+  @@index([organizationId])
+}
+
+// Better-Auth Models
+model Account {
+  id                    String    @id @default(uuid())
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@unique([providerId, accountId])
+  @@index([userId])
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model Verification {
+  id         String    @id @default(uuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime? @default(now())
+  updatedAt  DateTime? @updatedAt
+
+  @@unique([identifier, value])
 }

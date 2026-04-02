@@ -5,17 +5,13 @@ import { Button } from "../app/button";
 import { GlowCard } from "../app/glow-card";
 
 import {
-  Loader2,
   AlertCircle,
   Zap,
   Key,
   Plus,
   Activity,
-  Copy,
   Check,
   Terminal,
-  ExternalLink,
-  Code2,
   BookOpen,
 } from "lucide-react";
 import Link from "next/link";
@@ -23,12 +19,11 @@ import { useMe, useApiKeys } from "../hooks/queries";
 import { toast } from "sonner";
 import dynamic from "next/dynamic";
 import { cn } from "@/utils";
-import { useState } from "react";
 
-const RecentConversionsList = dynamic(
+const RecentActivityList = dynamic(
   () =>
-    import("./index/recent-conversion").then(
-      (mod) => mod.RecentConversionsList,
+    import("./index/recent-activity").then(
+      (mod) => mod.RecentActivityList,
     ),
   { ssr: false },
 );
@@ -118,19 +113,19 @@ export function DashboardPage() {
     );
   }
 
-  const usageCount = userData?.usage?.count || 0;
+  const usageCount = userData?.usage?.executionCount || 0;
   const usageLimit = userData?.plan?.limit || 5;
   const usagePercentage = Math.min((usageCount / usageLimit) * 100, 100);
 
   const aiTemplateCount = userData?.usage?.aiTemplateCount || 0;
-  const aiTemplateLimit = userData?.plan?.aiTemplateLimit || 0;
+  const aiTemplateLimit = userData?.plan?.intelligenceTemplateLimit || 0;
   const aiTemplatePercentage =
     aiTemplateLimit > 0
       ? Math.min((aiTemplateCount / aiTemplateLimit) * 100, 100)
       : 0;
 
-  const aiExtractionCount = userData?.usage?.aiCount || 0;
-  const aiExtractionLimit = userData?.plan?.aiLimit || 0;
+  const aiExtractionCount = userData?.usage?.intelligenceCount || 0;
+  const aiExtractionLimit = userData?.plan?.intelligenceLimit || 0;
   const aiExtractionPercentage =
     aiExtractionLimit > 0
       ? Math.min((aiExtractionCount / aiExtractionLimit) * 100, 100)
@@ -159,9 +154,9 @@ export function DashboardPage() {
   const daysUntilReset = getDaysUntilReset();
 
   // Metadata from decoupled keys endpoint
-  const liveKeyData = apiKeysData?.find((k: any) => k.type === "live");
-  const testKeyData = apiKeysData?.find((k: any) => k.type === "test");
-  const hasKeys = apiKeysData && apiKeysData.length > 0;
+  const liveKeyData = apiKeysData?.keys?.find((k: any) => k.type === "live");
+  const testKeyData = apiKeysData?.keys?.find((k: any) => k.type === "test");
+  const hasKeys = apiKeysData?.keys && apiKeysData.keys.length > 0;
 
   const liveKeyHint = liveKeyData?.hint || "pk_live_••••••••";
   const testKeyHint = testKeyData?.hint || "pk_test_••••••••";
@@ -178,7 +173,7 @@ export function DashboardPage() {
               <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
                 {isNewUser ? "Welcome, " : "Welcome back, "}
                 <span className="text-blue-500">
-                  {session?.user?.name?.split(" ")[0] || "Developer"}
+                  {session?.user?.name?.split(" ")[0] || "Engineer"}
                 </span>
               </h1>
               {userData?.organizationName && (
@@ -195,8 +190,8 @@ export function DashboardPage() {
           )}
 
           <p className="mt-2 text-slate-400 max-w-2xl text-sm md:text-base">
-            Your document infrastructure is active. Monitor performance, manage
-            API keys, and track conversions in real-time.
+            Your invoice infrastructure is active. Monitor execution performance,
+            manage API keys, and track institutional activity in real-time.
           </p>
         </div>
         <div className="flex gap-3">
@@ -218,10 +213,10 @@ export function DashboardPage() {
           <div className="flex md:items-center justify-between mb-8 max-sm:flex-col gap-3">
             <div className="space-y-1">
               <h2 className="text-xl font-bold text-white">
-                Conversion Trends
+                Processing Trends
               </h2>
               <p className="text-sm text-slate-500">
-                Daily conversion volume for this billing cycle
+                Daily volume for this billing cycle
               </p>
             </div>
             <div className="flex bg-black/40 rounded-lg p-1 border border-white/5 justify-end">
@@ -251,7 +246,7 @@ export function DashboardPage() {
                   <Activity className="h-5 w-5 text-emerald-400" />
                 </div>
                 <h2 className="text-xl font-bold text-white">
-                  Recent Conversions
+                  Recent Activity
                 </h2>
               </div>
 
@@ -264,13 +259,13 @@ export function DashboardPage() {
                 href="/dashboard/usage"
                 className="text-xs font-semibold text-blue-400 hover:underline"
               >
-                View All
+                Full Ledger
               </Link>
             </div>
           </div>
 
           <div className="overflow-x-auto scrollbar-hide">
-            <RecentConversionsList />
+            <RecentActivityList />
           </div>
         </div>
       </div>
@@ -325,7 +320,7 @@ export function DashboardPage() {
               />
 
               <GlowCard
-                title="AI Templates"
+                title="Engine Templates"
                 sub={
                   aiTemplateLimit > 0
                     ? `${aiTemplateCount} / ${aiTemplateLimit}`
@@ -377,7 +372,7 @@ export function DashboardPage() {
                   <div className="mt-4 space-y-4">
                     <div className="flex items-center gap-2 text-xs text-slate-400">
                       <Check className="h-3.5 w-3.5 text-emerald-500" />
-                      {userData?.plan?.limit.toLocaleString()} conversions / mo
+                      {userData?.plan?.limit.toLocaleString()} processed invoices / mo
                     </div>
                     <Link href="/dashboard/billing" className="block">
                       <Button
@@ -464,7 +459,7 @@ export function DashboardPage() {
                 </div>
               </div>
               <GlowCard
-                title="AI Extracted Data"
+                title="Invoice Intelligence"
                 sub={
                   aiExtractionLimit > 0
                     ? `${aiExtractionCount} / ${aiExtractionLimit}`
@@ -483,7 +478,8 @@ export function DashboardPage() {
                         </div>
                         <div className="flex justify-between items-center text-xs">
                           <span className="text-slate-500 font-medium">
-                            Intelligent metadata extractions
+                          High-fidelity Engine extractions and institutional-grade invoice
+                          intelligence.
                           </span>
                           <span className="text-fuchsia-400 font-bold">
                             {Math.round(aiExtractionPercentage)}%
@@ -493,8 +489,8 @@ export function DashboardPage() {
                     ) : (
                       <div className="flex justify-between items-center text-xs bg-fuchsia-500/10 p-3 rounded-lg border border-fuchsia-500/20">
                         <span className="text-slate-400 font-medium">
-                          Automatically extract structured JSON data from your
-                          PDFs.
+                          Automatically ingest and extract structured JSON data
+                          from your documents.
                         </span>
                         <Link
                           href="/dashboard/billing"

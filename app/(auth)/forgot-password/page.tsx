@@ -22,12 +22,14 @@ export default function ForgotPasswordPage() {
     setError("");
 
     try {
-      const { error: resetError } = await authClient.forgetPassword({
+      // Better-Auth 1.5.x standard method for initiating reset
+      const { error: resetError } = await (authClient as any).forgetPassword({
         email,
         redirectTo: "/reset-password",
       });
 
       if (resetError) {
+        console.error("[AUTH] Reset error:", resetError);
         throw new Error(resetError.message || "Failed to send reset link");
       }
 

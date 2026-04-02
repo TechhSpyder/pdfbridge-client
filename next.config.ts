@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 import type { RuleSetRule } from "webpack";
 
 const nextConfig: NextConfig = {
+  serverExternalPackages: ["@prisma/client-app", "@prisma/client-blog"],
   /* config options here */
   async headers() {
     return [
@@ -42,7 +43,7 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://sandbox-cdn.paddle.com https://cdn.paddle.com https://*.hcaptcha.com https://hcaptcha.com",
               "img-src 'self' data: https://challenges.cloudflare.com https://*.paddle.com https://cdn.paddle.com https://images.unsplash.com https://avatars.githubusercontent.com https://res.cloudinary.com https://*.hcaptcha.com https://hcaptcha.com https://global.localizecdn.com https://upload.wikimedia.org https://developer.xero.com https://upload.wikimedia.org https://developer.xero.com",
               "font-src 'self' https://fonts.gstatic.com",
-              "connect-src 'self' http://localhost:3001 http://localhost:3003 https://challenges.cloudflare.com https://*.paddle.com https://api.paddle.com https://sandbox-checkout-service.paddle.com https://checkout-service.paddle.com https://*.pdfbridge.xyz https://pdfbridge-api-1.onrender.com https://vitals.vercel-insights.com https://*.hcaptcha.com https://hcaptcha.com https://*.profitwell.com https://paddlecfe.report-uri.com https://*.ingest.sentry.io https://global.localizecdn.com https://eu.i.posthog.com https://eu-assets.i.posthog.com",
+              "connect-src 'self' http://localhost:3001 http://localhost:3003 https://challenges.cloudflare.com https://*.paddle.com https://api.paddle.com https://sandbox-checkout-service.paddle.com https://checkout-service.paddle.com https://*.pdfbridge.xyz https://pdfbridge-api-1.onrender.com https://vitals.vercel-insights.com https://*.hcaptcha.com https://hcaptcha.com https://*.profitwell.com https://paddlecfe.report-uri.com https://*.ingest.sentry.io https://global.localizecdn.com https://eu.i.posthog.com https://eu-assets.i.posthog.com https://api.devnet.solana.com https://api.mainnet-beta.solana.com https://*.solana.com https://*.alchemy.com",
               "frame-src 'self' https://sandbox-buy.paddle.com https://buy.paddle.com https://checkout.paystack.com https://pdfbridge.lemonsqueezy.com https://challenges.cloudflare.com https://*.hcaptcha.com https://hcaptcha.com https://checkout.paddle.com https://*.paddle.com",
               "worker-src 'self' blob:",
               "base-uri 'self'",

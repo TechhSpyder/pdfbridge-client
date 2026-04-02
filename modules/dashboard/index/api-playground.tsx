@@ -3,12 +3,12 @@ import {
   useMe,
   useSaveTemplate,
   useJobStatus,
-  useNormalizeInvoice,
+  useIngestDocument,
 } from "@/modules/hooks/queries";
 import { cn } from "@/utils";
 import { useApiClient } from "@/utils/api-client";
 import { Loader2, Sparkles, Terminal, Upload } from "lucide-react";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Highlight, themes } from "prism-react-renderer";
 import { toast } from "sonner";
 import { Dialog } from "@/modules/app/dialog";
@@ -28,7 +28,7 @@ function generateSnippet(
   const apiKey = fallbackKey || "YOUR_API_KEY";
 
   if (activeTab === "file") {
-    const endpoint = "https://pdfbridge.xyz/api/v1/normalize-invoice";
+    const endpoint = "https://pdfbridge.xyz/api/v1/ingest";
     if (lang === "curl") {
       return `curl -X POST ${endpoint} \\
   -H "Authorization: Bearer ${apiKey}" \\
@@ -75,7 +75,7 @@ console.log(data);`;
   }
 
   const payloadStr = JSON.stringify(payload, null, 2);
-  const endpoint = "https://pdfbridge.xyz/api/v1/convert";
+  const endpoint = "https://pdfbridge.xyz/api/v1/process";
 
   if (lang === "curl") {
     return `curl -X POST ${endpoint} \\
@@ -130,8 +130,9 @@ export function ApiPlayground() {
   const api = useApiClient();
   const { data: me } = useMe();
   const saveMutation = useSaveTemplate();
-  const normalizeMutation = useNormalizeInvoice();
+  const ingestMutation = useIngestDocument();
   const { data: jobStatus } = useJobStatus(activeJobId || "");
+  const currentToastIdRef = useRef<string | number | null>(null);
 
   const userKeys = me?.apiKeys || [];
   const currentKeyHint = userKeys.find((k: any) => k.type === mode)?.hint;
@@ -139,13 +140,13 @@ export function ApiPlayground() {
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
       if (acceptedFiles.length > 0) {
-        normalizeMutation.mutate({
+        ingestMutation.mutate({
           file: acceptedFiles[0],
           testMode: mode === "test",
         });
       }
     },
-    [normalizeMutation, mode],
+    [ingestMutation, mode],
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -162,57 +163,75 @@ export function ApiPlayground() {
   const uniqueVariables = Array.from(new Set(detectedVariables));
 
   const { data: userData } = useMe();
-  const allowAi = userData?.plan?.allowAi;
+  const allowAi = userData?.plan?.allowIntelligence;
 
   useEffect(() => {
     if (!jobStatus || !activeJobId) return;
 
     if (jobStatus.status === "COMPLETED") {
-      toast.success("PDF Generated!", {
-        id: currentToastId || undefined,
+      toast.success("Document Processed!", {
+        id: currentToastIdRef.current || undefined,
         description: "Your document is ready for download.",
         action: {
           label: "Download",
           onClick: () => window.open(jobStatus?.result?.url, "_blank"),
         },
       });
+      currentToastIdRef.current = null;
       setActiveJobId(null);
     } else if (jobStatus.status === "FAILED") {
-      toast.error("Generation Failed", {
-        id: currentToastId || undefined,
+      toast.error("Execution Failed", {
+        id: currentToastIdRef.current || undefined,
         description:
           (jobStatus as any).result?.error || "An unknown error occurred.",
       });
+      currentToastIdRef.current = null;
       setActiveJobId(null);
-      setCurrentToastId(null);
-    } else if (status === "processing") {
-      toast.loading("Generating PDF...", {
-        id: currentToastId || undefined,
-        description: "PDFBridge Engine is crafting your document.",
+    } else if (jobStatus.status === "PROCESSING") {
+      toast.loading("Processing Document...", {
+        id: currentToastIdRef.current || undefined,
+        description: "PDFBridge Engine is processing your document.",
       });
-    } else if (status === "PENDING") {
+    } else if (jobStatus.status === "PENDING") {
       toast.loading("In Queue...", {
-        id: currentToastId || undefined,
+        id: currentToastIdRef.current || undefined,
         description: "Waiting for an available worker.",
       });
     }
-  }, [jobStatus, activeJobId, currentToastId]);
+  }, [jobStatus, activeJobId]);
 
   const handleTest = async () => {
     if (activeTab === "file") return;
 
+    // Live mode requires a live API key — test mode is open (rate-limited server-side)
+    if (mode === "live") {
+      const hasLiveKey = userKeys.some((k: any) => k.type === "live");
+      if (!hasLiveKey) {
+        toast.error("Live API Key Required", {
+          description:
+            "You need a live API key to process live documents. Provision one in the API Keys section.",
+          action: {
+            label: "Go to API Keys",
+            onClick: () =>
+              (window.location.href = "/dashboard/api-keys"),
+          },
+        });
+        return;
+      }
+    }
+
     if (extractMetadata && !allowAi && mode === "live") {
       toast.error("Intelligent PDF Analysis restricted", {
-        description: "Please upgrade your plan to use Gemini AI features.",
+        description: "Please upgrade your plan to use Gemini Engine features.",
       });
       return;
     }
     setLoading(true);
-    const tId = toast.loading(`Processing ${mode} conversion...`, {
-      description: "We are preparing your PDF...",
+    const tId = toast.loading(`Processing ${mode} request...`, {
+      description: "We are preparing your document...",
     });
     try {
-      const res = await api.post("/api/v1/convert", {
+      const res = await api.post("/api/v1/process", {
         ...(activeTab === "url" ? { url } : { html }),
         testMode: mode === "test",
         extractMetadata: mode === "live" && extractMetadata && allowAi,
@@ -221,14 +240,14 @@ export function ApiPlayground() {
 
       if (res.jobId) {
         setActiveJobId(res.jobId);
-        setCurrentToastId(tId);
+        currentToastIdRef.current = tId;
       } else {
-        toast.success("Conversion queued successfully!", {
+        toast.success("Processing job initiated!", {
           id: tId,
           description:
             mode === "test"
-              ? "Test PDF will appear in Recent Activity."
-              : "PDF will appear in Recent Activity momentarily.",
+              ? "Test document will appear in Recent Activity."
+              : "Document will appear in Recent Activity momentarily.",
         });
       }
     } catch (e: any) {
@@ -244,7 +263,7 @@ export function ApiPlayground() {
           ? "Slow down!"
           : isQuotaError
             ? "Monthly limit reached"
-            : "Failed to initiate conversion",
+            : "Failed to initiate processing",
         {
           id: tId,
           description: e.message || "Please check your network and try again.",
@@ -286,7 +305,7 @@ export function ApiPlayground() {
       <div className="p-6 space-y-5">
         <div className="flex items-center justify-between">
           <label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">
-            {activeTab === "file" ? "Invoice Normalization" : "Source Input"}
+            {activeTab === "file" ? "Document Ingestion" : "Source Input"}
           </label>
           <div className="flex bg-black/40 p-1 rounded-lg border border-white/5 gap-1">
             {(["test", "live"] as const).map((m) => (
@@ -369,15 +388,15 @@ export function ApiPlayground() {
               )}
             >
               <input {...getInputProps()} />
-              {normalizeMutation.isPending ? (
+              {ingestMutation.isPending ? (
                 <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
               ) : (
                 <Upload className="h-8 w-8 mb-2" />
               )}
               <p className="text-sm font-medium text-center">
-                {normalizeMutation.isPending
-                  ? "Normalizing via AI..."
-                  : "Drop invoice PDF here to test ERP sync"}
+                {ingestMutation.isPending
+                  ? "Ingesting via Document Intelligence..."
+                  : "Drop document here for high-fidelity ingestion"}
               </p>
               <p className="text-[10px] text-slate-600 mt-1">
                 Supports all global invoice formats
@@ -440,7 +459,7 @@ export function ApiPlayground() {
             <div className="flex items-center justify-between pt-2">
               <div className="flex flex-col gap-1">
                 <span className="text-[10px] font-bold text-slate-300 flex items-center gap-2">
-                  Intelligent PDF Analysis
+                  Document Intelligence
                   {!allowAi && (
                     <span className="bg-amber-500/10 text-amber-500 px-1.5 py-0.5 rounded text-[8px] border border-amber-500/20 uppercase">
                       Upgrade Required
@@ -454,8 +473,8 @@ export function ApiPlayground() {
                 </span>
                 <p className="text-[9px] text-slate-500">
                   {allowAi
-                    ? "Automatically extract structured JSON from the generated document."
-                    : "Intelligent PDF Analysis is available on Starter plans and above."}
+                    ? "Automatically extract structured JSON from the processed document."
+                    : "Document Intelligence is available on Starter plans and above."}
                 </p>
               </div>
               <button
@@ -486,7 +505,7 @@ export function ApiPlayground() {
 
         {mode === "test" && (
           <p className="text-[10px] text-orange-400 font-medium italic">
-            * Test mode adds a diagonal watermark to the generated PDF. AI
+            * Test mode adds a diagonal watermark to the processed document. AI
             extraction is disabled in Test mode.
           </p>
         )}
@@ -661,3 +680,5 @@ function SaveTemplateDialog({
     </Dialog.Root>
   );
 }
+
+

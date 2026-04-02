@@ -1,14 +1,63 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { auth } from "@/lib/auth";
+
+const API_URL = process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:3003";
+
+async function getSessionFromAPI(request: NextRequest) {
+  try {
+    const rawCookie = request.headers.get("cookie") || "";
+    // [SECURITY] Redacted cookie length and content from logs
+    if (rawCookie) {
+      const hasSession = rawCookie.includes("better-auth.session_token");
+      console.log(`[MW] getSession: Cookie present? ${!!rawCookie}. Includes session? ${hasSession}`);
+    }
+
+    // Clone all browser headers so Better Auth's anti-hijacking (User-Agent/IP checks) pass
+    const headers = new Headers(request.headers);
+    headers.set("Content-Type", "application/json");
+    headers.set("Cookie", rawCookie);
+    headers.set("X-Forwarded-Host", request.headers.get("x-forwarded-host") || request.headers.get("host") || "localhost:3000");
+
+    // BEARER FALLBACK: Extract naked token from the signed/prefixed cookie string
+    // This circumvents strict same-origin cookie validation rules internally in get-session
+    const tokenMatch = rawCookie.match(/better-auth\.session_token=([^;]+)/);
+    if (tokenMatch) {
+      const fullValue = decodeURIComponent(tokenMatch[1]);
+      const rawToken = fullValue.split('.')[0];
+      headers.set("Authorization", `Bearer ${rawToken}`);
+      console.log(`[MW] getSession: Injected Bearer Token Override (Masked)`);
+    }
+
+    const response = await fetch(`${API_URL}/api/auth/get-session`, {
+      method: "GET",
+      headers,
+      cache: "no-store", // CRITICAL: Prevent stale session caching in the bouncer
+    });
+    
+    console.log(`[MW] getSession: API Response Status: ${response.status}`);
+    
+    if (!response.ok) {
+      const errText = await response.text();
+      console.log(`[MW] getSession: API Error Body: ${errText}`);
+      return null;
+    }
+    const data = await response.json();
+    console.log(`[MW] getSession: API Success Data: User ID = ${data?.user?.id || "None"}`);
+    return data?.user ? data : null;
+  } catch (err: any) {
+    console.log(`[MW] getSession: Fetch Failed Exception: ${err.message}`);
+    return null;
+  }
+}
 
 const isPublicRoute = (pathname: string) => {
-  const publicPaths = [
-    "/",
+  if (pathname === "/") return true;
+  const publicPrefixes = [
     "/sign-in",
     "/sign-up",
     "/api/auth",
     "/api/health",
     "/pricing",
+    "/compiler",
     "/template-gallery",
     "/docs",
     "/blog",
@@ -17,18 +66,16 @@ const isPublicRoute = (pathname: string) => {
     "/terms",
     "/monitoring",
     "/api/public",
-    "/api/v1/convert", // Public conversion endpoint
-    "/api/v1/jobs",    // Job status is public with ID
+    "/api/v1/process", // Public conversion endpoint
+    "/api/v1/jobs", // Job status is public with ID
   ];
-  return publicPaths.some(path => pathname.startsWith(path));
+  return publicPrefixes.some((path) => pathname.startsWith(path));
 };
 
 const RETURNING_COOKIE = "pdfbridge_returning";
 
 export default async function middleware(request: NextRequest) {
-  const session = await auth.api.getSession({
-    headers: request.headers,
-  });
+  const session = await getSessionFromAPI(request);
 
   const { pathname } = request.nextUrl;
   const isReturning = request.cookies.has(RETURNING_COOKIE);

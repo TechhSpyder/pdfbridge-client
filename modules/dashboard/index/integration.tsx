@@ -17,7 +17,7 @@ export function IntegrationSnippets() {
   const copyKey = mode === "live" ? liveKeyFull : testKeyFull;
 
   const getSnippets = (k: string) => ({
-    javascript: `const res = await fetch("https://api.pdfbridge.xyz/api/v1/convert", {
+    javascript: `const res = await fetch("https://api.pdfbridge.xyz/api/v1/process", {
   method: "POST",
   headers: {
     "x-api-key": "${k}",
@@ -30,11 +30,11 @@ export function IntegrationSnippets() {
     python: `import requests
  
 res = requests.post(
-    "https://api.pdfbridge.xyz/api/v1/convert",
+    "https://api.pdfbridge.xyz/api/v1/process",
     headers={"x-api-key": "${k}"},
     json={"url": "https://google.com"}
 )`,
-    php: `$ch = curl_init("https://api.pdfbridge.xyz/api/v1/convert");
+    php: `$ch = curl_init("https://api.pdfbridge.xyz/api/v1/process");
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
     "x-api-key: ${k}",
     "Content-Type: application/json"
@@ -43,7 +43,7 @@ curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
     "url" => "https://google.com"
 ]));
 $res = curl_exec($ch);`,
-    curl: `curl -X POST https://api.pdfbridge.xyz/api/v1/convert \\
+    curl: `curl -X POST https://api.pdfbridge.xyz/api/v1/process \\
   -H "x-api-key: ${k}" \\
   -H "Content-Type: application/json" \\
   -d '{"url": "https://google.com"}'`,
@@ -105,3 +105,5 @@ $res = curl_exec($ch);`,
     </div>
   );
 }
+
+

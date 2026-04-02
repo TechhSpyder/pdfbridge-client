@@ -1,9 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useUser, UserProfile, useAuth } from "@clerk/nextjs";
 import { useMe } from "@/modules/hooks/queries";
-import { Button, GlowCard, SmartContactLink, UserAvatar } from "@/modules/app";
+import {
+  Button,
+  GlowCard,
+  SmartContactLink,
+  UserAvatar,
+  Dialog,
+} from "@/modules/app";
 import {
   Settings,
   CreditCard,
@@ -16,6 +20,7 @@ import {
   Network,
   Unplug,
   Loader2,
+  AlertTriangle,
 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -23,15 +28,19 @@ import {
   useUpdateSettings,
   useIntegrations,
   useDisconnectIntegration,
+  usePDFBridge,
+  useDeactivateAccount,
 } from "@/modules/hooks/queries";
 import { toast } from "sonner";
 import Title from "@/modules/app/title";
-import { usePDFBridge } from "@/modules/hooks/use-pdfbridge";
+import { authClient, useSession } from "@/lib/auth-client";
+import { useState, useEffect } from "react";
 
 export function SettingsPage() {
   const { data: userData, isLoading: userLoading } = useMe();
   const { data: session } = useSession();
   const updateSettingsMutation = useUpdateSettings();
+  const [isDeactivateDialogOpen, setIsDeactivateDialogOpen] = useState(false);
 
   const handleToggle = async (key: string, value: boolean) => {
     try {
@@ -128,8 +137,8 @@ export function SettingsPage() {
                               {userData?.plan?.name || "Standard Free"}
                             </h4>
                             <p className="text-xs text-slate-400">
-                              Up to {userData?.plan?.limit || 5} conversions /
-                              month
+                              Up to {userData?.plan?.limit || 5} processed
+                              documents / month
                             </p>
                           </div>
                         )}
@@ -207,19 +216,26 @@ export function SettingsPage() {
                     Danger Zone
                   </h4>
                   <p className="text-xs text-red-500/50 leading-relaxed">
-                    Deactivating your account will immediately stop all PDF
-                    conversions and delete all your API keys permanently.
+                    Deactivating your account will immediately stop all active
+                    document executions and delete all your API keys
+                    permanently.
                   </p>
-                  <SmartContactLink
-                    email="support@techhspyder.com"
-                    isButton
-                    className="w-full text-xs h-9 border-red-500/20 text-red-500 hover:bg-red-500/10 hover:border-red-500/40 transition-colors cursor-pointer border rounded-md flex items-center justify-center font-bold"
+                  <Button
+                    variant="destructive"
+                    onClick={() => setIsDeactivateDialogOpen(true)}
+                    className="w-full text-xs h-9 border-red-500/20 text-red-500 hover:bg-red-500/10 hover:border-red-500/40 transition-colors cursor-pointer border rounded-md flex items-center justify-center font-bold bg-transparent"
                   >
                     Deactivate Account
-                  </SmartContactLink>
+                  </Button>
                 </div>
               </div>
             </div>
+
+            <DeactivateAccountDialog
+              isOpen={isDeactivateDialogOpen}
+              onClose={() => setIsDeactivateDialogOpen(false)}
+              userEmail={userData?.email}
+            />
 
             {/* Communication Preferences */}
             <div className="space-y-6">
@@ -309,6 +325,13 @@ export function SettingsPage() {
                 icon={<UserIcon className="h-5 w-5 text-blue-400" />}
                 content={<ProfileForm />}
               />
+
+              <GlowCard
+                title="Workspace Settings"
+                sub="Customize your team environment."
+                icon={<Settings className="h-5 w-5 text-purple-400" />}
+                content={<WorkspaceForm />}
+              />
             </div>
           </div>
         </div>
@@ -341,7 +364,7 @@ function ProfileForm() {
     try {
       // Proactive: Use the direct profile update endpoint and refresh user data
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || ""}/api/v1/me/profile`,
+        `${process.env.NEXT_PUBLIC_API_URL || ""}/api/v1/user/me/profile`,
         {
           method: "PATCH",
           headers: {
@@ -407,6 +430,82 @@ function ProfileForm() {
           className="bg-blue-600 hover:bg-blue-500 text-white font-bold h-10 px-6 shadow-xl shadow-blue-500/10 transition-all disabled:opacity-50"
         >
           {isSaving ? "Saving..." : "Save Changes"}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function WorkspaceForm() {
+  const { data: userData, refetch } = useMe();
+  const [name, setName] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    if (userData?.organizationName) {
+      setName(userData.organizationName);
+    }
+  }, [userData]);
+
+  const handleSave = async () => {
+    if (!userData?.organizationId) return;
+    setIsSaving(true);
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || ""}/api/v1/organizations/${userData.organizationId}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({ name }),
+        },
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to update workspace");
+      }
+
+      await refetch();
+      toast.success("Workspace renamed successfully!");
+    } catch (e: any) {
+      toast.error("Failed to update workspace", {
+        description: e.message || "An unexpected error occurred.",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <div className="mt-6 space-y-6 pt-2 border-t border-white/5">
+      <div className="grid grid-cols-1 gap-4">
+        <div className="space-y-2">
+          <label className="text-[10px] font-bold text-slate-500 uppercase">
+            Workspace Name
+          </label>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="w-full bg-black/40 border border-white/5 text-slate-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500/50 transition-colors"
+            placeholder="My Workspace"
+          />
+          <p className="text-[10px] text-slate-500 italic">
+            This name will appear on all your processed invoices and reports.
+          </p>
+        </div>
+      </div>
+
+      <div className="pt-4 flex justify-end border-t border-white/5">
+        <Button
+          onClick={handleSave}
+          disabled={isSaving || name === userData?.organizationName}
+          className="bg-purple-600 hover:bg-purple-500 text-white font-bold h-10 px-6 shadow-xl shadow-purple-500/10 transition-all disabled:opacity-50"
+        >
+          {isSaving ? "Updating..." : "Save Workspace"}
         </Button>
       </div>
     </div>
@@ -612,5 +711,113 @@ function IntegrationsTab({ organizationId }: { organizationId?: string }) {
         </div>
       </div>
     </div>
+  );
+}
+
+function DeactivateAccountDialog({
+  isOpen,
+  onClose,
+  userEmail,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  userEmail: string;
+}) {
+  const [password, setPassword] = useState("");
+  const [confirmation, setConfirmation] = useState("");
+  const deactivateMutation = useDeactivateAccount();
+
+  const handleDeactivate = async () => {
+    try {
+      await deactivateMutation.mutateAsync({ password, confirmation });
+      toast.success("Account deactivated successfully");
+      await authClient.signOut();
+      window.location.href = "/";
+    } catch (e: any) {
+      toast.error("Deactivation failed", {
+        description:
+          e.response?.data?.error || e.message || "An error occurred",
+      });
+    }
+  };
+
+  const isInvalid =
+    confirmation !== userEmail || (password === "" && !!userEmail);
+
+  return (
+    <Dialog.Root open={isOpen} onOpenChange={onClose}>
+      <Dialog.Content className="max-w-md bg-slate-900 border-white/10">
+        <Dialog.Header className="border-white/5">
+          <div className="flex items-center gap-3 text-red-500">
+            <AlertTriangle className="h-5 w-5" />
+            <Dialog.Title className="text-red-500 font-bold">
+              Irreversible Account Deactivation
+            </Dialog.Title>
+          </div>
+        </Dialog.Header>
+        <Dialog.Body className="items-start gap-4">
+          <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 w-full text-left">
+            <p className="text-xs text-red-400 leading-relaxed font-medium">
+              This action is{" "}
+              <span className="underline uppercase font-bold">
+                irreversible
+              </span>
+              . Upon deactivation, your API keys will be permanently destroyed,
+              active processing jobs will be terminated, and your access to the
+              Intelligence Engine will be severed.
+            </p>
+          </div>
+
+          <div className="space-y-4 w-full">
+            <div className="space-y-2 text-left">
+              <label className="text-[10px] font-bold text-slate-500 uppercase">
+                Confirm your password
+              </label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="w-full bg-black/40 border border-white/5 text-slate-300 rounded-lg p-3 text-sm focus:outline-none focus:border-red-500/50 transition-colors"
+              />
+            </div>
+
+            <div className="space-y-2 text-left">
+              <label className="text-[10px] font-bold text-slate-500 uppercase">
+                Type <span className="text-white select-all">{userEmail}</span>{" "}
+                to confirm
+              </label>
+              <input
+                type="text"
+                value={confirmation}
+                onChange={(e) => setConfirmation(e.target.value)}
+                placeholder={userEmail}
+                className="w-full bg-black/40 border border-white/5 text-slate-300 rounded-lg p-3 text-sm focus:outline-none focus:border-red-500/50 transition-colors"
+              />
+            </div>
+          </div>
+        </Dialog.Body>
+        <Dialog.Footer className="border-t border-white/5 pt-4">
+          <div className="flex gap-3 w-full sm:justify-end">
+            <Button
+              variant="outline"
+              onClick={onClose}
+              className="flex-1 sm:flex-none border-white/10 text-slate-400 hover:text-white hover:bg-white/5 bg-transparent"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleDeactivate}
+              disabled={isInvalid || deactivateMutation.isPending}
+              className="flex-1 sm:flex-none bg-red-600 hover:bg-red-500 text-white font-bold shadow-xl shadow-red-500/20 transition-all disabled:opacity-50"
+            >
+              {deactivateMutation.isPending
+                ? "Deactivating..."
+                : "Deactivate Permanently"}
+            </Button>
+          </div>
+        </Dialog.Footer>
+      </Dialog.Content>
+    </Dialog.Root>
   );
 }

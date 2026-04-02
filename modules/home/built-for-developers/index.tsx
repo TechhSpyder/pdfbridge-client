@@ -65,7 +65,7 @@ func main() {
     "printBackground": true},
   }
   body, _ := json.Marshal(payload)
-  req, _ := http.NewRequest("POST", "https://api.pdfbridge.xyz/api/v1/convert", 
+  req, _ := http.NewRequest("POST", "https://api.pdfbridge.xyz/api/v1/process", 
   bytes.NewBuffer(body))
   req.Header.Set("x-api-key", "pk_live_your_key")
   req.Header.Set("Content-Type", "application/json")
@@ -80,7 +80,7 @@ func main() {
     label: "PHP",
     lang: "php",
     code: `<?php
-$ch = curl_init('https://api.pdfbridge.xyz/api/v1/convert');
+$ch = curl_init('https://api.pdfbridge.xyz/api/v1/process');
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
   'x-api-key: pk_live_your_key',
   'Content-Type: application/json'
@@ -114,11 +114,11 @@ export function BuiltForDevelopers() {
           }`}
         >
           <h2 className="text-3xl font-semibold tracking-tight">
-            Parse Your First Invoice in 30 Seconds
+            High-fidelity document output — without infrastructure overhead
           </h2>
           <p className="mt-4 text-muted-foreground">
-            No OCR setup. No schema wrangling. One request to extract structured
-            JSON from any invoice PDF.
+            Generate clean, consistent documents using modern HTML and CSS. If
+            it renders in the browser, it renders correctly here.
           </p>
         </div>
 
@@ -209,3 +209,5 @@ export function BuiltForDevelopers() {
     </section>
   );
 }
+
+

@@ -1,4 +1,5 @@
 export { Hero } from "./hero";
+export { VisualStrip } from "./hero/VisualStrip";
 export { SocialProof } from "./social-proof";
 export { WhyPdfBridge } from "./why-pdfbridge";
 export { HowItWorks } from "./how-it-works";

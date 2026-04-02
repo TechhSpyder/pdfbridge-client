@@ -130,7 +130,7 @@ export default function NextJsToPdfPage() {
 
 export async function POST(req) {
   // Option 1: URL to PDF (Great for static/public Next.js pages)
-  const response = await fetch("https://api.pdfbridge.xyz/api/v1/convert", {
+  const response = await fetch("https://api.pdfbridge.xyz/api/v1/process", {
     method: "POST",
     headers: {
       "x-api-key": \`\${process.env.PDFBRIDGE_API_KEY}\`,
@@ -178,3 +178,5 @@ export async function POST(req) {
     </div>
   );
 }
+
+

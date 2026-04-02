@@ -8,7 +8,7 @@ import { ChevronLeft } from "lucide-react";
 import { Calendar } from "lucide-react";
 import { Tag } from "lucide-react";
 import { Clock } from "lucide-react";
-import { Share2 } from "lucide-react";
+import { ShareButton } from "@/modules/app/share-button";
 import { ArrowRight } from "lucide-react";
 import { BookMarked } from "lucide-react";
 import sanitizeHtml from "sanitize-html";
@@ -130,9 +130,7 @@ export default async function InsightArticlePage({ params }: PostPageProps) {
             Back to Insights
           </Link>
           <div className="hidden md:flex items-center gap-4">
-            <button className="p-2.5 cursor-pointer rounded-xl bg-white/5 border border-white/10 text-slate-400 hover:text-white hover:bg-white/10 transition-all">
-              <Share2 size={18} />
-            </button>
+            <ShareButton title={post.title} url={`https://pdfbridge.xyz/insights/${post.slug}`} />
           </div>
         </div>
       </div>
