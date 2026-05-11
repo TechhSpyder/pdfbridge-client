@@ -23,7 +23,10 @@ async function handler(request: NextRequest) {
 
     // Explicitly forward logical origin to the API
     const headers = new Headers(request.headers);
-    headers.set("X-Forwarded-Host", request.headers.get("host") || "localhost:3000");
+    headers.set(
+      "X-Forwarded-Host",
+      request.headers.get("host") || "localhost:3000",
+    );
 
     const start = Date.now();
     const response = await fetch(apiUrl, {
@@ -38,19 +41,21 @@ async function handler(request: NextRequest) {
       headers: response.headers,
     });
 
+    res.headers.delete("Content-Encoding");
+
     /**
      * ULTRA-ROBUST MULTI-HEADER RELAY
-     * We attempt getSetCookie first, but if missing (Older Node/Next), we 
+     * We attempt getSetCookie first, but if missing (Older Node/Next), we
      * use a safe entry-iterator to find all set-cookie headers manually.
      */
     let setCookies: string[] = [];
-    if (typeof response.headers.getSetCookie === 'function') {
+    if (typeof response.headers.getSetCookie === "function") {
       setCookies = response.headers.getSetCookie();
     } else {
       // Fallback: Manually iterate entries to find multiple Set-Cookie headers
       for (const [key, value] of (response.headers as any).entries()) {
-        if (key.toLowerCase() === 'set-cookie') {
-          // In some runtimes, entries() might return merged cookies. 
+        if (key.toLowerCase() === "set-cookie") {
+          // In some runtimes, entries() might return merged cookies.
           // We break them safely by looking for common delimiters if they contain more than one.
           setCookies.push(value);
         }
@@ -69,12 +74,10 @@ async function handler(request: NextRequest) {
     console.error("[PROXY ERROR]", err);
     return NextResponse.json(
       { error: "Identity Gateway Timeout" },
-      { status: 504 }
+      { status: 504 },
     );
   }
 }
-
-
 
 export const GET = handler;
 export const POST = handler;
