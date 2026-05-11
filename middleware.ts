@@ -24,12 +24,15 @@ async function getSessionFromAPI(request: NextRequest) {
       // [SECURITY] Removed token override logging
     }
 
+    const hasCookie = rawCookie.includes("better-auth.session_token");
+    console.log(`[MW] rawCookie has session token: ${hasCookie}`);
+
     const response = await fetch(`${API_URL}/api/auth/get-session`, {
       method: "GET",
       headers,
-      cache: "no-store", // CRITICAL: Prevent stale session caching in the bouncer
+      cache: "no-store",
     });
-    
+
     const text = await response.text();
     console.log(`[MW] get-session status=${response.status} body=${text.slice(0, 300)}`);
     const data = text ? JSON.parse(text) : null;
