@@ -28,7 +28,7 @@ export function FAQ() {
     {
       question: "What happens if I hit my plan limit?",
       answer:
-        "Our infrastructure is designed to scale with your workload. We never drop jobs — you’ll simply be billed for additional volume at your plan&apos;s rate.",
+        "Our infrastructure is designed to scale with your workload. We never drop jobs, you’ll simply be billed for additional volume at your plan's rate.",
     },
     {
       question: "Can I control data residency?",

@@ -86,7 +86,7 @@ export function Hero() {
                 Ingest. Synthesize. Verify. Execute.
               </p>
               <p className="text-[10px] text-blue-400 font-black uppercase tracking-[0.2em] pt-2">
-                Protocol-Grade Financial Infrastructure (v5.Elite)
+                Protocol-Grade Financial Infrastructure
               </p>
             </div>
 

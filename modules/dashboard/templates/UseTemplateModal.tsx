@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { Dialog } from "@/modules/app/dialog";
@@ -32,7 +32,7 @@ export function UseTemplateModal({
     const tId = toast.loading("Initiating execution...");
 
     try {
-      const response = await api.post("/api/v1/process", {
+      const response = await api.post("/api/v1/utils/process", {
         templateId: template.id,
         variables,
         testMode: true, // Default to test mode for safety in development

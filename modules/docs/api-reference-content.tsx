@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Terminal, Key, Cpu, FileCode, Layout, Sparkles } from "lucide-react";
 import { Highlight, themes } from "prism-react-renderer";
@@ -67,7 +67,6 @@ export function ApiReferenceContent() {
             <div className="space-y-4">
               <h4 className="text-sm font-bold text-slate-500 uppercase tracking-widest">Request Body</h4>
               <ul className="space-y-4">
-                <ParamRow name="url" type="string" desc="The URL to convert to PDF. Required if 'html' is not provided." />
                 <ParamRow name="html" type="string" desc="Raw HTML content to convert. Required if 'url' is not provided." />
                 <ParamRow name="filename" type="string" desc="The destination filename (default: output.pdf)." />
                 <ParamRow name="extractMetadata" type="boolean" desc="Enable AI-powered metadata extraction." />
@@ -102,14 +101,13 @@ export function ApiReferenceContent() {
             <h3 className="text-xl font-bold text-white">/normalize-invoice</h3>
           </div>
           <p className="text-slate-400">
-            The "Closed-Loop" workflow. Convert messy invoice images or low-quality PDFs into structured data **and** a clean, branded PDF.
+            The "Closed-Loop" workflow. Normalize an invoice into structured data for downstream intent compilation and settlement.
           </p>
           <div className="grid lg:grid-cols-2 gap-8 mt-6">
             <div className="space-y-4">
               <h4 className="text-sm font-bold text-slate-500 uppercase tracking-widest">Request Body</h4>
               <ul className="space-y-4">
-                <ParamRow name="file" type="binary" desc="The input document (max 20MB). Required if 'url' not provided." />
-                <ParamRow name="url" type="string" desc="Public URL to the document." />
+                <ParamRow name="file" type="binary" desc="The input document (PDF/PNG/JPG). Max 5MB." />
                 <ParamRow name="branding" type="object" desc="Branding options: { companyName, logoUrl, primaryColor }." />
                 <ParamRow name="isGhostMode" type="boolean" desc="Enable zero-retention privacy protocol." />
               </ul>
@@ -318,5 +316,4 @@ function ParamRow({ name, type, desc }: { name: string; type: string; desc: stri
     </li>
   );
 }
-
 

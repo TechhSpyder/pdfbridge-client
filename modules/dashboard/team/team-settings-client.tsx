@@ -12,11 +12,141 @@ import {
   UserPlus,
   Clock,
   ShieldAlert,
+  ShieldCheck,
+  DollarSign,
 } from "lucide-react";
 
-import { useMe } from "@/modules/hooks/queries";
+import { useMe, useUpdateMemberSpendLimit } from "@/modules/hooks/queries";
 import { useApiClient } from "@/utils/api-client";
 import { IPWhitelistManager } from "./ip-whitelist-manager";
+
+// ─── Role Badge ────────────────────────────────────────────────────────────────
+function RoleBadge({ role }: { role: string }) {
+  const styles: Record<string, string> = {
+    OWNER: "bg-amber-500/10 border-amber-500/30 text-amber-500",
+    APPROVER: "bg-violet-500/10 border-violet-500/30 text-violet-400",
+    ADMIN: "bg-blue-500/10 border-blue-500/20 text-blue-400",
+    MEMBER: "bg-slate-800 border-slate-700 text-slate-400",
+  };
+  const labels: Record<string, string> = {
+    OWNER: "Owner",
+    APPROVER: "Approver · Auth-only",
+    ADMIN: "Admin",
+    MEMBER: "Member",
+  };
+  return (
+    <span
+      className={`px-2 py-1 rounded text-[10px] font-bold tracking-widest border uppercase ${styles[role] ?? styles.MEMBER}`}
+    >
+      {labels[role] ?? role}
+    </span>
+  );
+}
+
+// ─── Spend Limit Cell ──────────────────────────────────────────────────────────
+function SpendLimitCell({
+  member,
+  orgId,
+  isOwner,
+}: {
+  member: any;
+  orgId: string | undefined;
+  isOwner: boolean;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState<string>(
+    member.spendLimit !== null && member.spendLimit !== undefined
+      ? String(member.spendLimit)
+      : "",
+  );
+  const updateSpendLimit = useUpdateMemberSpendLimit(orgId);
+
+  if (!isOwner) {
+    // Non-OWNER: read-only
+    return (
+      <span className="text-slate-500 text-[11px] font-mono">
+        {member.spendLimit !== null && member.spendLimit !== undefined
+          ? `$${Number(member.spendLimit).toLocaleString()}`
+          : "Plan default"}
+      </span>
+    );
+  }
+
+  if (member.role === "OWNER") {
+    // OWNER always has unlimited — no spend gate
+    return (
+      <span className="text-slate-600 text-[11px] font-mono">Unlimited</span>
+    );
+  }
+
+  if (editing) {
+    return (
+      <div className="flex items-center gap-1.5">
+        <span className="text-slate-500 text-xs">$</span>
+        <input
+          type="number"
+          min="0"
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          className="w-24 bg-black/40 border border-violet-500/40 rounded-lg px-2 py-1 text-xs text-white font-mono outline-none focus:border-violet-500"
+          placeholder="e.g. 2000"
+          autoFocus
+          onKeyDown={(e) => {
+            if (e.key === "Escape") setEditing(false);
+            if (e.key === "Enter") {
+              const val = draft === "" ? null : Number(draft);
+              updateSpendLimit.mutate(
+                { userId: member.id, spendLimit: val },
+                { onSuccess: () => setEditing(false) },
+              );
+            }
+          }}
+        />
+        <button
+          onClick={() => {
+            const val = draft === "" ? null : Number(draft);
+            updateSpendLimit.mutate(
+              { userId: member.id, spendLimit: val },
+              { onSuccess: () => setEditing(false) },
+            );
+          }}
+          disabled={updateSpendLimit.isPending}
+          className="text-[10px] text-emerald-400 hover:text-emerald-300 font-bold uppercase disabled:opacity-50"
+        >
+          {updateSpendLimit.isPending ? "…" : "Save"}
+        </button>
+        <button
+          onClick={() => setEditing(false)}
+          className="text-[10px] text-slate-500 hover:text-slate-400"
+        >
+          Cancel
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <button
+      onClick={() => setEditing(true)}
+      className="group flex items-center gap-1.5 text-[11px] font-mono hover:text-violet-400 transition-colors"
+    >
+      <span
+        className={
+          member.spendLimit !== null && member.spendLimit !== undefined
+            ? "text-white"
+            : "text-slate-500"
+        }
+      >
+        {member.spendLimit !== null && member.spendLimit !== undefined
+          ? `$${Number(member.spendLimit).toLocaleString()}`
+          : "Plan default"}
+      </span>
+      <span className="text-slate-600 group-hover:text-violet-400 transition-colors text-[9px] uppercase font-bold">
+        Edit
+      </span>
+    </button>
+  );
+}
 
 export function TeamSettingsClient() {
   const { data: session } = useSession();
@@ -24,6 +154,9 @@ export function TeamSettingsClient() {
   const api = useApiClient();
   const queryClient = useQueryClient();
   const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteRole, setInviteRole] = useState<"ADMIN" | "MEMBER" | "APPROVER">(
+    "ADMIN",
+  );
   const [isInviting, setIsInviting] = useState(false);
 
   const orgId = me?.organizationId;
@@ -40,15 +173,17 @@ export function TeamSettingsClient() {
   });
 
   const inviteMutation = useMutation({
-    mutationFn: async (email: string) => {
+    mutationFn: async ({ email, role }: { email: string; role: string }) => {
       const res = await api.post(`/api/v1/organizations/${orgId}/invites`, {
         email,
+        role,
       });
       return res;
     },
     onSuccess: () => {
       toast.success("Invite sent successfully!");
       setInviteEmail("");
+      setInviteRole("ADMIN");
       setIsInviting(false);
       queryClient.invalidateQueries({ queryKey: ["team", orgId] });
     },
@@ -83,7 +218,7 @@ export function TeamSettingsClient() {
   const handleInvite = (e: React.FormEvent) => {
     e.preventDefault();
     if (!inviteEmail) return;
-    inviteMutation.mutate(inviteEmail);
+    inviteMutation.mutate({ email: inviteEmail, role: inviteRole });
   };
 
   const members = teamData?.data?.members || [];
@@ -147,7 +282,7 @@ export function TeamSettingsClient() {
                       <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 flex gap-3 text-amber-500 text-sm">
                         <ShieldAlert className="h-5 w-5 shrink-0" />
                         <p>
-                          You have reached your plan's maximum seat limit (
+                          You have reached your plan&apos;s maximum seat limit (
                           {seatLimit}
                           ). Upgrade your plan in billing to add more team
                           members.
@@ -171,6 +306,28 @@ export function TeamSettingsClient() {
                             required
                           />
                         </div>
+                        {/* Role selector */}
+                        <div className="space-y-2 min-w-[140px]">
+                          <label className="text-xs font-medium text-slate-400">
+                            Role
+                          </label>
+                          <select
+                            value={inviteRole}
+                            onChange={(e) =>
+                              setInviteRole(
+                                e.target.value as
+                                  | "ADMIN"
+                                  | "MEMBER"
+                                  | "APPROVER",
+                              )
+                            }
+                            className="w-full h-10 px-3 bg-black/40 border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-violet-500 transition-all"
+                          >
+                            <option value="ADMIN">Admin</option>
+                            <option value="MEMBER">Member</option>
+                            <option value="APPROVER">Approver</option>
+                          </select>
+                        </div>
                         <Button
                           type="submit"
                           disabled={inviteMutation.isPending || !inviteEmail}
@@ -181,6 +338,14 @@ export function TeamSettingsClient() {
                             : "Send Invite"}
                         </Button>
                       </form>
+                    )}
+                    {inviteRole === "APPROVER" && (
+                      <div className="w-full sm:w-auto mt-3">
+                        <p className="text-[10px] text-violet-400/80 font-mono flex items-center gap-1">
+                          <ShieldCheck className="h-3 w-3" />
+                          Can authorize payments · Cannot sign & settle
+                        </p>
+                      </div>
                     )}
                   </div>
                 }
@@ -215,9 +380,7 @@ export function TeamSettingsClient() {
                           {invite.email}
                         </td>
                         <td className="px-6 py-4 text-slate-300">
-                          <span className="px-2 py-1 rounded text-[10px] font-bold tracking-widest bg-slate-800 border border-slate-700 uppercase">
-                            {invite.role}
-                          </span>
+                          <RoleBadge role={invite.role ?? "MEMBER"} />
                         </td>
                         <td className="px-6 py-4 text-right">
                           {isOwner && (
@@ -240,16 +403,30 @@ export function TeamSettingsClient() {
             </div>
           )}
 
+          {/* ─── Active Members ─────────────────────────────────────────── */}
           <div className="space-y-4">
             <h3 className="text-lg font-bold text-white flex items-center gap-2">
               <Users className="h-5 w-5 text-emerald-500" /> Active Members
             </h3>
+            {isOwner && (
+              <p className="text-[10px] text-slate-600 font-mono flex items-center gap-1.5">
+                <DollarSign className="h-3 w-3" />
+                Spend limits control delegation thresholds per member. Click a
+                limit to edit.
+              </p>
+            )}
             <div className="rounded-xl border border-white/10 overflow-x-auto overflow-y-hidden bg-slate-900/50 backdrop-blur-sm scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
-              <table className="w-full text-left text-sm min-w-[600px]">
+              <table className="w-full text-left text-sm min-w-[720px]">
                 <thead className="bg-white/5 border-b border-white/10 text-xs uppercase text-slate-400">
                   <tr>
                     <th className="px-6 py-4 font-medium">User</th>
                     <th className="px-6 py-4 font-medium">Role</th>
+                    <th className="px-6 py-4 font-medium">
+                      <span className="flex items-center gap-1.5">
+                        <DollarSign className="h-3 w-3 text-violet-400" />
+                        Spend Limit
+                      </span>
+                    </th>
                     <th className="px-6 py-4 font-medium text-right">
                       Actions
                     </th>
@@ -263,27 +440,32 @@ export function TeamSettingsClient() {
                         key={member.id}
                         className="hover:bg-white/5 transition-colors"
                       >
-                        <td className="px-6 py-4 text-white font-medium flex items-center gap-3">
-                          <UserAvatar
-                            name={member.name}
-                            image={member.image}
-                            size="sm"
-                          />
-                          <div className="flex flex-col">
-                            <span>{member.email}</span>
-                            {isCurrentUser && (
-                              <span className="text-[10px] w-fit bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded uppercase tracking-wider font-bold">
-                                You
-                              </span>
-                            )}
+                        <td className="px-6 py-4 text-white font-medium">
+                          <div className="flex items-center gap-3">
+                            <UserAvatar
+                              name={member.name}
+                              image={member.image}
+                              size="sm"
+                            />
+                            <div className="flex flex-col">
+                              <span>{member.email}</span>
+                              {isCurrentUser && (
+                                <span className="text-[10px] w-fit bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded uppercase tracking-wider font-bold">
+                                  You
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <span
-                            className={`px-2 py-1 rounded text-[10px] font-bold tracking-widest border uppercase ${member.role === "OWNER" ? "bg-amber-500/10 border-amber-500/30 text-amber-500" : "bg-slate-800 border-slate-700 text-slate-300"}`}
-                          >
-                            {member.role}
-                          </span>
+                          <RoleBadge role={member.role} />
+                        </td>
+                        <td className="px-6 py-4">
+                          <SpendLimitCell
+                            member={member}
+                            orgId={orgId}
+                            isOwner={!!isOwner}
+                          />
                         </td>
                         <td className="px-6 py-4 text-right">
                           {isOwner &&

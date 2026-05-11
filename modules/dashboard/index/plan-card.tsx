@@ -7,7 +7,6 @@ import { Check, Loader2, Zap } from "lucide-react";
 export function PlanCard({
   plan,
   userData,
-  provider,
   onCheckout,
   isCheckoutPending,
   selectedPlanId,
@@ -21,10 +20,8 @@ export function PlanCard({
   const metadata = PLAN_METADATA[plan.name] || {};
 
   const isAnnual = interval === "year";
-  const baseMonthly =
-    provider === "paystack" ? plan.priceNgn || 0 : plan.priceUsd || 0;
-  const annualField =
-    provider === "paystack" ? plan.priceNgnAnnual : plan.priceUsdAnnual;
+  const baseMonthly = plan.priceUsd || 0;
+  const annualField = plan.priceUsdAnnual;
 
   // Fallback logic: If annual field is missing or 0, calculate 20% off 12 months
   let priceValue = isAnnual
@@ -33,12 +30,9 @@ export function PlanCard({
       : baseMonthly * 12 * 0.8
     : baseMonthly;
 
-  let price =
-    provider === "paystack"
-      ? `₦${(priceValue / 100).toLocaleString()}`
-      : `$${(priceValue / 100).toLocaleString()}`;
+  let price = `$${(priceValue / 100).toLocaleString()}`;
 
-  if (isFree) price = provider === "paystack" ? "₦0" : "$0";
+  if (isFree) price = "$0";
 
   const isEnterprise = plan.name === "Enterprise";
   if (isEnterprise) price = "Contact Sales";
@@ -97,9 +91,7 @@ export function PlanCard({
               {isAnnual && !isFree && (
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-slate-500 line-through">
-                    {provider === "paystack"
-                      ? `₦${((baseMonthly * 12) / 100).toLocaleString()}`
-                      : `$${((baseMonthly * 12) / 100).toLocaleString()}`}
+                    ${((baseMonthly * 12) / 100).toLocaleString()}
                   </span>
                   <span className="text-[10px] font-bold text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
                     SAVE 20%

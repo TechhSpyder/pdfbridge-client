@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const revalidate = 3600;
+export const dynamic = "force-dynamic";
 
 export default async function InsightsPage() {
   const dynamicPosts = await getPublishedPosts();
@@ -30,7 +30,7 @@ export default async function InsightsPage() {
       slug: "wkhtmltopdf-alternative",
       title: "wkhtmltopdf Alternative built for Modern Frontends.",
       description:
-        "wkhtmltopdf officially ceased maintenance in early 2023. It fails to render modern CSS grids, flexbox, and heavily relies on archaic float layouts. It’s time for a modern API alternative.",
+        "wkhtmltopdf officially ceased maintenance in early 2023. It fails to render modern CSS grids, flexbox, and heavily relies on archaic float layouts. It's time for a modern API alternative.",
       content: "wkhtmltopdf officially ceased maintenance in early 2023...", // For the excerpt
       createdAt: new Date("2026-03-02T10:00:00Z"),
       updatedAt: new Date("2026-03-02T10:00:00Z"),
@@ -84,7 +84,7 @@ export default async function InsightsPage() {
       description:
         "DocRaptor charges up to $15 per 1,000 PDFs generated. In 2026, paying enterprise premiums for a legacy PrinceXML rendering engine no longer makes structural or financial sense.",
       content:
-        "DocRaptor is built entirely around PrinceXML—a proprietary HTML-to-PDF tool originally built over a decade ago...",
+        "DocRaptor is built entirely around PrinceXMLâ€”a proprietary HTML-to-PDF tool originally built over a decade ago...",
       createdAt: new Date("2026-03-03T10:00:00Z"),
       updatedAt: new Date("2026-03-03T10:00:00Z"),
       published: true,

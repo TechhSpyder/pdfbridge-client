@@ -2,6 +2,7 @@ import { Button } from "@/modules/app/button";
 import { motion } from "framer-motion";
 import { AlertCircle } from "lucide-react";
 import Link from "next/link";
+
 export function UsageAlert({ usagePercentage }: { usagePercentage: number }) {
   if (usagePercentage < 80) return null;
 
@@ -28,27 +29,37 @@ export function UsageAlert({ usagePercentage }: { usagePercentage: number }) {
         <div className="space-y-1 text-center md:text-left">
           <h3 className="text-sm font-bold text-red-400">
             {isFull
-              ? "Execution Quota Exhausted"
-              : "Approaching API Usage Limit"}
+              ? "Workflow Limit Reached"
+              : "Approaching Monthly Workflow Limit"}
           </h3>
           <p className="text-sm text-slate-400 max-w-lg">
             {isFull
-              ? "You have used 100% of your monthly execution quota. API requests may fail until your next billing cycle."
-              : `You have consumed ${Math.round(usagePercentage)}% of your monthly API limits. Upgrade your plan to ensure uninterrupted service.`}
+              ? "You've used all your invoice workflows for this billing period. New settlement jobs will be blocked until you buy a top-up pack or upgrade your plan."
+              : `You've consumed ${Math.round(usagePercentage)}% of your monthly invoice workflows. Buy a top-up for $9 or upgrade to avoid disruption.`}
           </p>
         </div>
       </div>
-      <Link href="/dashboard/billing" className="w-full md:w-auto">
-        <Button
-          className={`w-full md:w-auto font-bold px-8 ${
-            isFull
-              ? "bg-red-600 hover:bg-blue-500 shadow-red-600/20"
-              : "bg-blue-600 hover:bg-blue-500 shadow-blue-600/20"
-          }`}
-        >
-          {isFull ? "Upgrade Now" : "Manage Subscription"}
-        </Button>
-      </Link>
+      <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+        <Link href="/dashboard/billing" className="w-full md:w-auto">
+          <Button
+            variant="outline"
+            className="w-full md:w-auto font-bold px-6 border-white/10 text-slate-300 hover:bg-white/5"
+          >
+            Buy Top-Up — $9
+          </Button>
+        </Link>
+        <Link href="/dashboard/billing" className="w-full md:w-auto">
+          <Button
+            className={`w-full md:w-auto font-bold px-8 ${
+              isFull
+                ? "bg-red-600 hover:bg-red-500 shadow-red-600/20"
+                : "bg-blue-600 hover:bg-blue-500 shadow-blue-600/20"
+            }`}
+          >
+            {isFull ? "Upgrade Plan" : "Manage Plan"}
+          </Button>
+        </Link>
+      </div>
     </motion.div>
   );
 }

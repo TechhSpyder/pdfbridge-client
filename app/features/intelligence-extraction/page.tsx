@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+﻿import { Metadata } from "next";
 import Link from "next/link";
 import { BrainCircuit, Code, Database, FileDigit, ArrowRight } from "lucide-react";
 
@@ -89,7 +89,7 @@ export default function AIPDFExtractionPage() {
             </div>
             <pre className="flex-1 text-sm font-mono text-slate-300 overflow-x-auto">
               <code>{`curl -X POST https://api.pdfbridge.xyz/v1/extract \\
-  -H "Authorization: Bearer pb_live_..." \\
+  -H "x-api-key: pk_live_..." \\
   -H "Content-Type: application/json" \\
   -d '{
     "file_url": "https://example.com/invoice-602.pdf",

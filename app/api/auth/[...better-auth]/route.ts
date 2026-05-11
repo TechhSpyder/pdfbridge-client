@@ -33,8 +33,6 @@ async function handler(request: NextRequest) {
       redirect: "manual",
     });
     const duration = Date.now() - start;
-    console.log(`[PROXY] API Fetch Finished: ${apiUrl} | Status: ${response.status} | Duration: ${duration}ms`);
-
     const res = new NextResponse(response.body, {
       status: response.status,
       headers: response.headers,
@@ -64,7 +62,6 @@ async function handler(request: NextRequest) {
       for (const cookie of setCookies) {
         res.headers.append("Set-Cookie", cookie);
       }
-      console.log(`[PROXY] Relayed ${setCookies.length} Set-Cookie headers.`);
     }
 
     return res;

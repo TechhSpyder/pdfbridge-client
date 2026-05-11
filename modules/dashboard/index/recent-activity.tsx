@@ -10,18 +10,20 @@ import {
   Loader2,
   X,
   AlertCircle,
+  ExternalLink,
 } from "lucide-react";
 import Link from "next/link";
 import { Highlight, themes } from "prism-react-renderer";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
+import type { FinancialDocument } from "@/modules/types";
 
 export function RecentActivityList() {
   const [pollInterval, setPollInterval] = useState<number | undefined>(30000);
   const { data, isLoading, error } = useActivity(1, 5, pollInterval);
-  const activities = data?.executions || [];
+  const activities = (data?.executions as any[]) || [];
 
-  const hasPending = activities.some((c: any) => c.status === "PENDING");
+  const hasPending = activities.some((c: any) => c.status === "PENDING" || c.status === "PROCESSING");
 
   useEffect(() => {
     if (hasPending) {
@@ -31,10 +33,10 @@ export function RecentActivityList() {
     }
   }, [hasPending]);
 
-  const [selectedActivity, setSelectedActivity] = useState<any>(null);
+  const [selectedActivity, setSelectedActivity] = useState<FinancialDocument | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleViewAiData = (conv: any) => {
+  const handleViewAiData = (conv: FinancialDocument) => {
     if (!conv.aiMetadata) return;
     setSelectedActivity(conv);
     setIsModalOpen(true);
@@ -96,79 +98,97 @@ export function RecentActivityList() {
       data-lenis-prevent
       className="space-y-3 max-h-72 overflow-y-auto scrollbar-hide"
     >
-      {activities.map((conv: any) => (
-        <div
-          key={conv.id}
-          onClick={() => handleViewAiData(conv)}
-          className={cn(
-            "p-4 rounded-xl bg-black/20 border border-white/5 flex items-center justify-between group transition-all duration-300 active:scale-[0.98] select-none",
-            conv.aiMetadata
-              ? "cursor-pointer hover:bg-white/5 hover:border-blue-500/30 hover:shadow-[0_8px_30px_rgba(0,0,0,0.3)]"
-              : "cursor-default",
-          )}
-        >
-          <div className="flex flex-col min-w-0 gap-0.5">
-            <span className="text-sm font-bold text-white truncate max-w-[150px] sm:max-w-xs">
-              {conv.isGhostMode
-                ? "Ghost Mode (Private)"
-                : conv.url && conv.url.startsWith("http")
-                  ? new URL(conv.url).hostname
-                  : "HTML Payload"}
-            </span>
-            <span className="text-[11px] font-medium text-slate-400">
-              {new Date(conv.createdAt).toLocaleString(undefined, {
-                month: "short",
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            {conv.status === "PENDING" ? (
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-yellow-500/10 text-yellow-500 border border-yellow-500/20">
-                Processing
-              </span>
-            ) : conv.status === "EXPIRED" ? (
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-orange-500/10 text-orange-500 border border-orange-500/20">
-                Expired
-              </span>
-            ) : conv.status === "FAILED" || !conv.success ? (
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-500/10 text-red-500 border border-red-500/20">
-                Failed
-              </span>
-            ) : (
-              <div className="flex items-center gap-2">
-                <span
-                  className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
-                    conv.isTestMode
-                      ? "bg-orange-500/10 text-orange-500 border-orange-500/20"
-                      : "bg-blue-500/10 text-blue-400 border-blue-500/20"
-                  }`}
-                >
-                  {conv.isTestMode ? "Test" : "Live"}
-                </span>
-                <span className="hidden sm:inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                  Ready
-                </span>
-                {conv.isGhostMode && (
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-fuchsia-500/10 text-fuchsia-400 border border-fuchsia-500/20">
-                    Ghost
-                  </span>
-                )}
-              </div>
+        {activities.map((conv: any) => {
+        const isCompiler = conv._activityType === "COMPILER";
+        return (
+          <div
+            key={conv.id}
+            onClick={() => handleViewAiData(conv)}
+            className={cn(
+              "p-4 rounded-xl bg-black/20 border border-white/5 flex items-center justify-between group transition-all duration-300 active:scale-[0.98] select-none",
+              conv.aiMetadata || isCompiler
+                ? "cursor-pointer hover:bg-white/5 hover:border-blue-500/30 hover:shadow-[0_8px_30px_rgba(0,0,0,0.3)]"
+                : "cursor-default",
             )}
+          >
+            <div className="flex flex-col min-w-0 gap-0.5">
+              <span className="text-sm font-bold text-white truncate max-w-[150px] sm:max-w-xs flex items-center gap-2">
+                {isCompiler && <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />}
+                {!isCompiler && <div className="h-2 w-2 rounded-full bg-blue-500" />}
+                {isCompiler
+                  ? (conv.vendorName || `Intent: ${conv.id.split('-')[0]}`)
+                  : conv.isGhostMode
+                    ? "Ghost Mode (Private)"
+                    : conv.url && conv.url.startsWith("http")
+                      ? new URL(conv.url).hostname
+                      : "HTML Payload"}
+              </span>
+              <span className="text-[11px] font-medium text-slate-400">
+                {new Date(conv.createdAt).toLocaleString(undefined, {
+                  month: "short",
+                  day: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              {conv.status === "PENDING" ? (
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-yellow-500/10 text-yellow-500 border border-yellow-500/20">
+                  Processing
+                </span>
+              ) : conv.status === "EXPIRED" ? (
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-orange-500/10 text-orange-500 border border-orange-500/20">
+                  Expired
+                </span>
+              ) : conv.status === "FAILED" || (!conv.success && !isCompiler) ? (
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-500/10 text-red-500 border border-red-500/20">
+                  Failed
+                </span>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                      conv.isTestMode
+                        ? "bg-orange-500/10 text-orange-500 border-orange-500/20"
+                        : "bg-blue-500/10 text-blue-400 border-blue-500/20"
+                    }`}
+                  >
+                    {conv.isTestMode ? "Test" : "Live"}
+                  </span>
+                  {isCompiler && conv.status === "CAPTURED" && (
+                    <span className="hidden sm:inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                      Unsettled
+                    </span>
+                  )}
+                  {isCompiler && (conv.status === "DETERMINISTIC" || conv.settlementStatus === "SETTLED") && (
+                    <span className="hidden sm:inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                      Settled
+                    </span>
+                  )}
+                  {(!isCompiler && conv.success) && (
+                     <span className="hidden sm:inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                       Ready
+                     </span>
+                  )}
+                  {conv.isGhostMode && (
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-fuchsia-500/10 text-fuchsia-400 border border-fuchsia-500/20">
+                      Ghost
+                    </span>
+                  )}
+                </div>
+              )}
 
-            {conv.success && conv.status !== "EXPIRED" && (
+            {((!isCompiler && conv.success) || isCompiler) && conv.status !== "EXPIRED" && (
               <div className="flex items-center gap-2">
                 {/* One-Click Pay / Resolve Actions */}
-                {conv.status === "DETERMINISTIC" ? (
+                {isCompiler && conv.status === "CAPTURED" ? (
                   <Link href={`/compiler?id=${conv.id}`}>
                     <button className="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black text-[10px] font-black uppercase transition-all active:scale-95 shadow-lg shadow-emerald-500/20">
                       Pay →
                     </button>
                   </Link>
-                ) : (conv.status === "INCOMPLETE" || conv.status === "ESCALATED") ? (
+                ) : isCompiler && (conv.status === "INCOMPLETE" || conv.status === "ESCALATED") ? (
                   <Link href={`/compiler?id=${conv.id}`}>
                     <button className="px-3 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-black text-[10px] font-black uppercase transition-all active:scale-95 shadow-lg shadow-sky-500/20">
                       Resolve
@@ -186,22 +206,53 @@ export function RecentActivityList() {
                       <Activity className="h-3.5 w-3.5" />
                     </button>
                   )}
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(conv.url);
-                      toast.success("URL copied to clipboard");
-                    }}
-                    title="Copy Invoice URL"
-                    className="p-1.5 hover:bg-white/10 rounded-md transition text-slate-400 hover:text-white cursor-pointer"
-                  >
-                    <Copy className="h-3.5 w-3.5" />
-                  </button>
+                  {isCompiler && (conv.settlementTxHash || (conv.metadata as any)?.settlementTxHash) ? (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const sig = conv.settlementTxHash || (conv.metadata as any)?.settlementTxHash;
+                        window.open(`https://solscan.io/tx/${sig}?cluster=devnet`, "_blank");
+                      }}
+                      title="View on Solscan"
+                      className="p-1.5 hover:bg-emerald-500/10 rounded-md transition text-emerald-400 hover:text-emerald-200 cursor-pointer"
+                    >
+                      <ExternalLink className="h-3.5 w-3.5" />
+                    </button>
+                  ) : isCompiler ? (
+                    // Settled compiler job but no txHash yet — show link to compiler
+                    <Link href={`/compiler?id=${conv.id}`}>
+                      <button
+                        onClick={(e) => e.stopPropagation()}
+                        title="View in Compiler"
+                        className="p-1.5 hover:bg-indigo-500/10 rounded-md transition text-indigo-400 hover:text-indigo-200 cursor-pointer"
+                      >
+                        <ExternalLink className="h-3.5 w-3.5" />
+                      </button>
+                    </Link>
+                  ) : (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (conv.url) {
+                          navigator.clipboard.writeText(conv.url);
+                          toast.success("URL copied to clipboard");
+                        } else {
+                          toast.error("No URL available");
+                        }
+                      }}
+                      title="Copy Target URL / ID"
+                      className="p-1.5 hover:bg-white/10 rounded-md transition text-slate-400 hover:text-white cursor-pointer"
+                    >
+                      <Copy className="h-3.5 w-3.5" />
+                    </button>
+                  )}
                 </div>
               </div>
             )}
           </div>
         </div>
-      ))}
+        );
+      })}
       <AnimatePresence>
         {isModalOpen && selectedActivity && (
           <Dialog.Root open={isModalOpen} onOpenChange={setIsModalOpen}>
@@ -279,7 +330,7 @@ export function RecentActivityList() {
                                 key: i,
                               });
                               return (
-                                <div key={key as any} {...lineProps}>
+                                <div key={i} {...lineProps}>
                                   <span className="inline-block w-8 text-slate-600 select-none text-[10px]">
                                     {i + 1}
                                   </span>

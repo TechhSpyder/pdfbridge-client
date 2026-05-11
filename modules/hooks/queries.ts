@@ -3,6 +3,7 @@ import { useApiClient } from "@/app/api/api-client";
 import { usePDFBridge } from "./use-pdfbridge";
 export { usePDFBridge };
 import { toast } from "sonner";
+import type { ApiError, JobStatus } from "../types";
 
 export const useMe = () => {
   const api = useApiClient();
@@ -71,7 +72,7 @@ export const useJobStatus = (jobId: string, pollInterval?: number) => {
     queryFn: () => sdk.getJob(jobId),
     enabled: !!jobId,
     refetchInterval: (query) => {
-      const data: any = query.state.data;
+      const data = query.state.data as JobStatus | undefined;
       if (data?.status === "COMPLETED" || data?.status === "FAILED")
         return false;
       return pollInterval || 2000;
@@ -83,8 +84,51 @@ export const useWebhookLogs = (documentId: string) => {
   const api = useApiClient();
   return useQuery({
     queryKey: ["webhook-logs", documentId],
-    queryFn: () => api.get(`/api/v1/jobs/${documentId}/webhooks`),
+    queryFn: () => api.get(`/api/v1/webhook-logs?executionId=${documentId}`),
     enabled: !!documentId,
+  });
+};
+
+export const useWebhookEndpoints = () => {
+  const api = useApiClient();
+  return useQuery({
+    queryKey: ["webhook-endpoints"],
+    queryFn: () => api.get("/api/v1/webhook-endpoints"),
+  });
+};
+
+export const useCreateWebhookEndpoint = () => {
+  const api = useApiClient();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { url: string; events: string[] }) =>
+      api.post("/api/v1/webhook-endpoints", data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["webhook-endpoints"] });
+      toast.success("Webhook endpoint created");
+    },
+    onError: (err: ApiError) => {
+      toast.error("Failed to create webhook", {
+        description: err.response?.data?.error || err.message,
+      });
+    },
+  });
+};
+
+export const useDeleteWebhookEndpoint = () => {
+  const api = useApiClient();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.delete(`/api/v1/webhook-endpoints/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["webhook-endpoints"] });
+      toast.success("Webhook endpoint deleted");
+    },
+    onError: (err: ApiError) => {
+      toast.error("Failed to delete webhook", {
+        description: err.response?.data?.error || err.message,
+      });
+    },
   });
 };
 
@@ -150,6 +194,27 @@ export const usePlans = () => {
   return useQuery({
     queryKey: ["plans"],
     queryFn: () => api.get("/api/v1/billing/plans"),
+  });
+};
+
+export const useTopupCheckout = () => {
+  const api = useApiClient();
+  return useMutation({
+    mutationFn: (quantity: number = 1) =>
+      api.post("/api/v1/billing/topup", { quantity }),
+  });
+};
+
+export const useVerifyTopup = () => {
+  const api = useApiClient();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (transactionId: string) =>
+      api.get(`/api/v1/billing/topup/verify/${transactionId}`),
+    onSuccess: () => {
+      // Immediately refetch usage so progress bar reflects new capacity
+      queryClient.invalidateQueries({ queryKey: ["me"] });
+    },
   });
 };
 
@@ -251,7 +316,7 @@ export const useUpdateIpWhitelist = () => {
       queryClient.invalidateQueries({ queryKey: ["me"] });
       toast.success("IP Whitelist updated");
     },
-    onError: (err: any) => {
+    onError: (err: ApiError) => {
       toast.error("Failed to update IP Whitelist", {
         description: err.response?.data?.error || err.message,
       });
@@ -276,7 +341,7 @@ export const useDisconnectIntegration = (organizationId?: string) => {
       queryClient.invalidateQueries({ queryKey: ["integrations"] });
       toast.success("Integration disconnected successfully");
     },
-    onError: (err: any) => {
+    onError: (err: ApiError) => {
       toast.error("Failed to disconnect integration", {
         description: err.message || "Please check your network and try again.",
       });
@@ -289,6 +354,7 @@ export const useLedger = (page = 1, limit = 10, refetchInterval?: number) => {
     queryKey: ["ledger", page, limit],
     queryFn: () => api.get(`/api/v1/ledger?page=${page}&limit=${limit}`),
     refetchInterval,
+    refetchIntervalInBackground: true,
   });
 };
 
@@ -315,7 +381,11 @@ export const useIngestDocument = () => {
       const formData = new FormData();
       formData.append("file", file);
       if (testMode) formData.append("testMode", "true");
-      return api.post("/api/v1/ingest", formData);
+      return api.post("/api/v1/ingest", formData, {
+        headers: {
+          "x-execution-mode": testMode ? "test" : "live",
+        },
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["ledger"] });
@@ -323,13 +393,42 @@ export const useIngestDocument = () => {
         description: "PDFBridge Engine synthesizing semantic components. Check the ledger for real-time reconciliation.",
       });
     },
-    onError: (err: any) => {
+    onError: (err: ApiError) => {
       toast.error("Ingestion failed", {
         description: err.response?.data?.message || err.message,
       });
     },
   });
 };
+
+export const useSettlements = (page = 1, limit = 10, refetchInterval?: number) => {
+  const api = useApiClient();
+  return useQuery({
+    queryKey: ["settlements", page, limit],
+    queryFn: () => api.get(`/api/v1/ledger?page=${page}&limit=${limit}&reconciledOnly=true`),
+    refetchInterval,
+    refetchIntervalInBackground: true,
+  });
+};
+
+export const useOverrideReconciliation = () => {
+  const api = useApiClient();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.post(`/api/v1/ledger/${id}/reconcile/override`, {}),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["ledger"] });
+      queryClient.invalidateQueries({ queryKey: ["settlements"] });
+      toast.success("Manual Reconciliation Override Successful");
+    },
+    onError: (err: ApiError) => {
+      toast.error("Override failed", {
+        description: err.response?.data?.error || err.message,
+      });
+    },
+  });
+};
+
 export const useDeactivateAccount = () => {
   const api = useApiClient();
   return useMutation({
@@ -337,3 +436,138 @@ export const useDeactivateAccount = () => {
       api.delete("/api/v1/user/me", data),
   });
 };
+
+// ─── CFO Layer 2: Approval Governance Hooks ────────────────────────────────
+
+/** Fetch all pending approvals for this org (role-scoped by backend). */
+export const useApprovals = () => {
+  const api = useApiClient();
+  return useQuery({
+    queryKey: ["approvals"],
+    queryFn: () => api.get("/api/v1/approvals"),
+  });
+};
+
+/** Poll approval status for a specific intent. Used by CompilerStage. */
+export const useApprovalStatus = (approvalId: string | null, enabled = false) => {
+  const api = useApiClient();
+  return useQuery({
+    queryKey: ["approval-status", approvalId],
+    queryFn: () => api.get(`/api/v1/approvals/${approvalId}/status`),
+    enabled: !!approvalId && enabled,
+    refetchInterval: (query) => {
+      const data = query.state.data as any;
+      const status = data?.data?.governanceStatus;
+      if (status === "EXECUTION_READY" || status === "EXECUTION_REJECTED") return false;
+      return 8000; // poll every 8s while EXECUTION_LOCKED
+    },
+  });
+};
+
+/** Request OWNER/APPROVER authorization for a locked intent. */
+export const useRequestApproval = () => {
+  const api = useApiClient();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (intentId: string) =>
+      api.post(`/api/v1/compiler/intent/${intentId}/request-approval`, {}),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["approvals"] });
+      toast.success("Authorization request sent to your organization's OWNER.");
+    },
+    onError: (err: ApiError) => {
+      toast.error("Failed to request authorization", {
+        description: err.response?.data?.message || err.message,
+      });
+    },
+  });
+};
+
+/** OWNER/APPROVER: authorize a pending payment. */
+export const useAuthorizeApproval = () => {
+  const api = useApiClient();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ workflowId, memo }: { workflowId: string; memo?: string }) =>
+      api.post(`/api/v1/approvals/${workflowId}/authorize`, { memo }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["approvals"] });
+      queryClient.invalidateQueries({ queryKey: ["approval-status"] });
+      toast.success("Payment authorized. The requesting ADMIN can now settle.");
+    },
+    onError: (err: ApiError) => {
+      toast.error("Authorization failed", {
+        description: err.response?.data?.message || err.message,
+      });
+    },
+  });
+};
+
+/** OWNER/APPROVER: reject a pending payment. */
+export const useRejectApproval = () => {
+  const api = useApiClient();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ workflowId, reason }: { workflowId: string; reason: string }) =>
+      api.post(`/api/v1/approvals/${workflowId}/reject`, { reason }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["approvals"] });
+      queryClient.invalidateQueries({ queryKey: ["approval-status"] });
+      toast.success("Payment request rejected. Admin has been notified.");
+    },
+    onError: (err: ApiError) => {
+      toast.error("Rejection failed", {
+        description: err.response?.data?.message || err.message,
+      });
+    },
+  });
+};
+
+/** Read org-level approval policy (role-scoped). */
+export const useApprovalPolicy = (orgId: string | undefined) => {
+  const api = useApiClient();
+  return useQuery({
+    queryKey: ["approval-policy", orgId],
+    queryFn: () => api.get(`/api/v1/organizations/${orgId}/approval-policy`),
+    enabled: !!orgId,
+  });
+};
+
+/** OWNER: update org-level approval thresholds. */
+export const useUpdateApprovalPolicy = (orgId: string | undefined) => {
+  const api = useApiClient();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { significant: number; material: number }) =>
+      api.patch(`/api/v1/organizations/${orgId}/approval-policy`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["approval-policy", orgId] });
+      toast.success("Governance policy updated.");
+    },
+    onError: (err: ApiError) => {
+      toast.error("Policy update failed", {
+        description: err.response?.data?.message || err.message,
+      });
+    },
+  });
+};
+
+/** OWNER: update a specific member's spend delegation limit. */
+export const useUpdateMemberSpendLimit = (orgId: string | undefined) => {
+  const api = useApiClient();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ userId, spendLimit }: { userId: string; spendLimit: number | null }) =>
+      api.patch(`/api/v1/organizations/${orgId}/members/${userId}/spend-limit`, { spendLimit }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["org-members", orgId] });
+      toast.success("Spend limit updated.");
+    },
+    onError: (err: ApiError) => {
+      toast.error("Spend limit update failed", {
+        description: err.response?.data?.message || err.message,
+      });
+    },
+  });
+};
+

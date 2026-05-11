@@ -1,4 +1,4 @@
-import { NextResponse, type NextRequest } from "next/server";
+﻿import { NextResponse, type NextRequest } from "next/server";
 
 const API_URL = process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:3003";
 
@@ -6,10 +6,7 @@ async function getSessionFromAPI(request: NextRequest) {
   try {
     const rawCookie = request.headers.get("cookie") || "";
     // [SECURITY] Redacted cookie length and content from logs
-    if (rawCookie) {
-      const hasSession = rawCookie.includes("better-auth.session_token");
-      console.log(`[MW] getSession: Cookie present? ${!!rawCookie}. Includes session? ${hasSession}`);
-    }
+    // [SECURITY] Removed session presence logging
 
     // Clone all browser headers so Better Auth's anti-hijacking (User-Agent/IP checks) pass
     const headers = new Headers(request.headers);
@@ -24,7 +21,7 @@ async function getSessionFromAPI(request: NextRequest) {
       const fullValue = decodeURIComponent(tokenMatch[1]);
       const rawToken = fullValue.split('.')[0];
       headers.set("Authorization", `Bearer ${rawToken}`);
-      console.log(`[MW] getSession: Injected Bearer Token Override (Masked)`);
+      // [SECURITY] Removed token override logging
     }
 
     const response = await fetch(`${API_URL}/api/auth/get-session`, {
@@ -33,15 +30,7 @@ async function getSessionFromAPI(request: NextRequest) {
       cache: "no-store", // CRITICAL: Prevent stale session caching in the bouncer
     });
     
-    console.log(`[MW] getSession: API Response Status: ${response.status}`);
-    
-    if (!response.ok) {
-      const errText = await response.text();
-      console.log(`[MW] getSession: API Error Body: ${errText}`);
-      return null;
-    }
     const data = await response.json();
-    console.log(`[MW] getSession: API Success Data: User ID = ${data?.user?.id || "None"}`);
     return data?.user ? data : null;
   } catch (err: any) {
     console.log(`[MW] getSession: Fetch Failed Exception: ${err.message}`);
@@ -66,8 +55,6 @@ const isPublicRoute = (pathname: string) => {
     "/terms",
     "/monitoring",
     "/api/public",
-    "/api/v1/process", // Public conversion endpoint
-    "/api/v1/jobs", // Job status is public with ID
   ];
   return publicPrefixes.some((path) => pathname.startsWith(path));
 };
@@ -84,7 +71,8 @@ export default async function middleware(request: NextRequest) {
 
   // 1. If user is logged in and trying to access root or auth, go to dashboard
   if (session && (isHome || isAuthPage)) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    const returnTo = request.nextUrl.searchParams.get("returnTo");
+    return NextResponse.redirect(new URL(returnTo || "/dashboard", request.url));
   }
 
   // 2. Returning User Logic

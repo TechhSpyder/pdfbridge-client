@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -52,6 +52,11 @@ const DOCUMENTATION_GROUPS = [
         icon: <FileCode className="h-4 w-4" />,
       },
       {
+        id: "bulk",
+        title: "Bulk Conversion",
+        icon: <Cpu className="h-4 w-4" />,
+      },
+      {
         id: "templates",
         title: "Dynamic Templates",
         icon: <Sparkles className="h-4 w-4 text-indigo-400" />,
@@ -64,37 +69,17 @@ const DOCUMENTATION_GROUPS = [
     ],
   },
   {
-    title: "Financial Automation",
-    items: [
-      {
-        id: "normalize",
-        title: "Intelligent Normalization",
-        icon: <Sparkles className="h-4 w-4 text-emerald-400" />,
-      },
-      {
-        id: "ai",
-        title: "Smart Extraction",
-        icon: <Cpu className="h-4 w-4" />,
-      },
-      {
-        id: "ledger",
-        title: "Organization Ledger",
-        icon: <Layout className="h-4 w-4" />,
-      },
-      {
-        id: "bulk",
-        title: "Bulk Processing",
-        icon: <Cpu className="h-4 w-4" />,
-      },
-    ],
-  },
-  {
     title: "Advanced Features",
     items: [
       {
         id: "tailwind",
         title: "Tailwind-Native",
         icon: <Code2 className="h-4 w-4" />,
+      },
+      {
+        id: "ai",
+        title: "Intelligent Extraction",
+        icon: <Cpu className="h-4 w-4" />,
       },
       {
         id: "jobs",
@@ -303,67 +288,47 @@ export function Documentation({
             <Book className="h-3 w-3" /> Get Started
           </div>
           <h1 className="text-4xl font-extrabold text-white tracking-tight">
-            The Infrastructure for <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">Financial Documents</span>
+            Introduction
           </h1>
-          <p className="text-lg">
-            PDFBridge is the high-performance engine for developers building the next generation of 
-            Fintech and AP Automation tools. We combine pixel-perfect generation with 
-            intelligent Engine extraction on a unified financial data pipeline.
+          <p>
+            PDFBridge is a powerful API for developers who need scale, security,
+            and precision. All generated PDFs are stored according to your{" "}
+            <Link
+              href="/dashboard/billing"
+              className="text-blue-400 hover:underline"
+            >
+              plan&apos;s retention policy
+            </Link>{" "}
+            (ranging from 7 to 30+ days) before being automatically purged,
+            unless <span className="font-bold text-white">Ghost Mode</span> is
+            used.
           </p>
-
-          <div className="grid md:grid-cols-3 gap-6 py-8">
-            <div className="space-y-3">
-              <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
-                <Sparkles className="h-6 w-6" />
+          <GlowCard
+            title="Base URL / API Versioning"
+            sub="Production: v1 (Latest)"
+            icon={<Info className="h-5 w-5 text-blue-400" />}
+            content={
+              <div className="space-y-4 mt-4">
+                <div className="relative group">
+                  <div className="p-4 rounded-xl bg-black/40 border border-white/5 font-mono text-sm text-blue-400 pr-12 break-all">
+                    https://api.pdfbridge.xyz/api/v1
+                  </div>
+                  <button
+                    onClick={copyBaseUrl}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-lg bg-white/5 border border-white/10 opacity-0 group-hover:opacity-100 transition-all text-slate-400 hover:text-white hover:bg-white/10 cursor-pointer"
+                    title="Copy to clipboard"
+                  >
+                    {copiedBaseUrl ? (
+                      <span className="text-[10px] font-bold text-emerald-400 px-1">
+                        Copied!
+                      </span>
+                    ) : (
+                      <Terminal className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
               </div>
-              <h4 className="font-bold text-white">Extraction</h4>
-              <p className="text-xs text-slate-500 leading-relaxed">
-                Turn messy invoices into strict, typed JSON in seconds.
-              </p>
-            </div>
-            <div className="space-y-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
-                <FileCode className="h-6 w-6" />
-              </div>
-              <h4 className="font-bold text-white">Normalization</h4>
-              <p className="text-xs text-slate-500 leading-relaxed">
-                Clean up incoming document chaos into branded, compliant PDFs.
-              </p>
-            </div>
-            <div className="space-y-3">
-              <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
-                <Layout className="h-6 w-6" />
-              </div>
-              <h4 className="font-bold text-white">Ledgering</h4>
-              <p className="text-xs text-slate-500 leading-relaxed">
-                Immutable financial indexing for every processed document.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* Quickstart */}
-        <section id="quickstart" className="scroll-mt-24 space-y-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold uppercase tracking-widest mb-2">
-            <Terminal className="h-3 w-3" /> 3-Minute Quickstart
-          </div>
-          <h2 className="text-3xl font-bold text-white">Normalization API</h2>
-          <p className="text-slate-400">
-            Submit a messy invoice image and receive a clean, structured JSON payload 
-            and a professional PDF in one request.
-          </p>
-          <CodeBlock 
-            code={`curl -X POST https://api.pdfbridge.xyz/api/v1/normalize-invoice \\
-  -H "x-api-key: pk_test_your_key_here" \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "url": "https://example.com/messy-invoice.png",
-    "branding": {
-      "companyName": "My Fintech App",
-      "primaryColor": "#2563eb"
-    }
-  }'`}
-            language="bash"
+            }
           />
         </section>
 
@@ -392,7 +357,7 @@ export function Documentation({
               </h4>
               <p className="text-xs text-slate-400 mt-1">
                 Production usage. Clean PDFs. Usage counts against your plan's
-                monthly ingestion quota.
+                monthly conversion quota.
               </p>
             </div>
           </div>
@@ -404,10 +369,9 @@ export function Documentation({
             header for all requests.
           </p>
           <CodeBlock
-            code={`curl -X POST https://api.pdfbridge.xyz/api/v1/process \\
+            code={`curl -X POST https://api.pdfbridge.xyz/api/v1/compiler/compile-intent \\
   -H "x-api-key: pk_live_your_key_here" \\
-  -H "Content-Type: application/json" \\
-  -d '{"url": "https://example.com"}'`}
+  -F "file=@invoice.pdf"`}
             language="bash"
           />
         </section>
@@ -418,7 +382,7 @@ export function Documentation({
             <Info className="text-blue-500" /> Usage & Credits
           </h2>
           <p className="text-slate-400 leading-relaxed">
-            Each ingestion job counts towards your plan's monthly credit limit.
+            Each conversion job counts towards your plan's monthly credit limit.
             To ensure fair infrastructure usage, credits are calculated based on
             the final PDF file size.
           </p>
@@ -477,55 +441,6 @@ export function Documentation({
           </div>
         </section>
 
-        {/* Normalization */}
-        <section id="normalize" className="scroll-mt-24 space-y-6">
-          <h2 className="text-3xl font-bold text-white flex items-center gap-4">
-            <Sparkles className="text-emerald-500" /> Intelligent Normalization
-          </h2>
-          <p className="text-slate-400">
-            The "Closed-Loop" financial workflow. Convert messy, low-quality invoice 
-            images or PDFs into structured data **and** a clean, branded PDF.
-          </p>
-
-          <div className="grid md:grid-cols-2 gap-4">
-            <GlowCard
-              title="Input: Document Chaos"
-              sub="Images, Scans, Messy PDFs"
-              content={
-                <p className="text-xs text-slate-500 leading-relaxed mt-2">
-                  Our vision engine handles rotation, perspective correction, 
-                  and low-light noise to ensure 99.9% extraction accuracy.
-                </p>
-              }
-            />
-            <GlowCard
-              title="Output: Branded Precision"
-              sub="Tailwind-Native Clean PDF"
-              content={
-                <p className="text-xs text-slate-500 leading-relaxed mt-2">
-                  Receive a pixel-perfect, accessible PDF that matches your 
-                  company's branding and is ready for customer delivery.
-                </p>
-              }
-            />
-          </div>
-
-          <div className="space-y-4">
-            <h4 className="font-bold text-white text-sm">Example Workflow</h4>
-            <CodeBlock 
-              code={`{
-  "file": "invoice_photo.jpg",
-  "branding": {
-    "companyName": "Acme Corp",
-    "logoUrl": "https://acme.com/logo.png"
-  },
-  "extractMetadata": true
-}`}
-              language="json"
-            />
-          </div>
-        </section>
-
         {/* Convert PDF */}
         <section id="convert" className="scroll-mt-24 space-y-6">
           <h2 className="text-3xl font-bold text-white flex items-center gap-4">
@@ -542,7 +457,7 @@ export function Documentation({
               <span className="px-2 py-1 bg-emerald-500/10 text-emerald-500 rounded border border-emerald-500/20 font-bold">
                 POST
               </span>
-              <span className="text-slate-200">/process</span>
+              <span className="text-slate-200">/convert</span>
             </div>
             <CodeBlock
               code={`{
@@ -563,16 +478,16 @@ export function Documentation({
         {/* Bulk Conversion */}
         <section id="bulk" className="scroll-mt-24 space-y-6">
           <h2 className="text-3xl font-bold text-white flex items-center gap-4">
-            <Cpu className="text-amber-500" /> Bulk Ingestion
+            <Cpu className="text-amber-500" /> Bulk Conversion
           </h2>
-          Process up to 1,000 ingestions in a single request. Highly efficient
+          Process up to 1,000 conversions in a single request. Highly efficient
           for generating large sets of documents like monthly invoices.
           <div className="space-y-4">
             <div className="flex items-center gap-2 font-mono text-sm">
               <span className="px-2 py-1 bg-emerald-500/10 text-emerald-500 rounded border border-emerald-500/20 font-bold">
                 POST
               </span>
-              <span className="text-slate-200">/process/bulk</span>
+              <span className="text-slate-200">/convert/bulk</span>
             </div>
             <CodeBlock
               code={`{
@@ -596,7 +511,7 @@ export function Documentation({
             <strong className="text-white">Handlebars-style</strong> variables.
             You can define placeholders like{" "}
             <code className="text-indigo-400 font-mono">{"{{name}}"}</code> in
-            your HTML and provide values at orchestration time.
+            your HTML and provide values at conversion time.
           </p>
           <div className="grid md:grid-cols-2 gap-4">
             <GlowCard
@@ -887,50 +802,13 @@ export function Documentation({
           </div>
         </section>
 
-        {/* Ledger API */}
-        <section id="ledger" className="scroll-mt-24 space-y-6">
-          <h2 className="text-3xl font-bold text-white flex items-center gap-4">
-            <Layout className="text-emerald-500" /> Financial Ledger API
-          </h2>
-          <p className="text-slate-400 leading-relaxed">
-            Every document processed by PDFBridge is automatically indexed in your 
-            <strong> Ledger</strong>. This allows you to reconcile payments, 
-            track expenses, and audit financial data without building a custom database.
-          </p>
-          
-          <div className="space-y-4">
-            <h4 className="font-bold text-white text-sm">Querying the Ledger</h4>
-            <CodeBlock 
-                code={`// List all invoices from the last 30 days
-const response = await fetch("https://api.pdfbridge.xyz/api/v1/ledger?limit=10", {
-  headers: { "x-api-key": "..." }
-});
-const { documents } = await response.json();
-
-console.log("Found:", documents[0].vendorName, documents[0].totalAmount);`}
-                language="javascript"
-            />
-          </div>
-
-          <div className="rounded-xl border border-emerald-500/10 bg-emerald-500/5 p-6 space-y-3">
-            <h4 className="font-bold text-emerald-400 text-sm flex items-center gap-2">
-              <Sparkles className="h-4 w-4" /> Pro Tip: Accounting Sync
-            </h4>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Use the Ledger endpoints to build direct syncs with <strong>Xero</strong>, 
-              <strong>QuickBooks</strong>, or <strong>Oracle NetSuite</strong>. 
-              The AI-extracted metadata is structured to match standard financial schemas.
-            </p>
-          </div>
-        </section>
-
         {/* Job Polling Flow */}
         <section id="jobs" className="scroll-mt-24 space-y-6">
           <h2 className="text-3xl font-bold text-white flex items-center gap-4">
             <Info className="text-blue-500" /> Job Polling Flow
           </h2>
           <p className="text-slate-400 leading-relaxed">
-            Since PDF generation and Engine extraction are complex asynchronous tasks, the API 
+            Since PDF generation and AI extraction are complex asynchronous tasks, the API 
             immediately returns a <code className="text-blue-400">jobId</code>. You should 
             poll for the final result or rely on <Link href="#webhooks" className="text-blue-400 hover:underline">Webhooks</Link>.
           </p>
@@ -1268,5 +1146,3 @@ function CodeBlock({ code, language }: { code: string; language: string }) {
     </div>
   );
 }
-
-

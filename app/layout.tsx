@@ -18,27 +18,22 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL("https://pdfbridge.xyz"),
   title: {
-    default: "PDFBridge | Modern API for PDF Generation",
+    default: "PDFBridge | Institutional Invoice Infrastructure",
     template: "%s | PDFBridge",
   },
   description:
-    "Generate high-quality PDFs from URLs and HTML with a single API call. Scale your document infrastructure with ease.",
+    "High-fidelity invoice ingestion and reconciliation engine. Deterministic math audit and settlement orchestration for industrial document workflows.",
   keywords: [
-    "pdf generation",
-    "html to pdf",
-    "url to pdf",
-    "api",
-    "gotenberg",
-    "developer tools",
-    "automated document generation",
-    "html to pdf api",
-    "automated pdf generation",
-    "react pdf export",
-    "pdf rendering issues",
-    "secure document conversion",
-    "bulk pdf creation",
-    "javascript pdf output",
-    "invoice pdf automation",
+    "invoice ingestion",
+    "math audit",
+    "settlement hub",
+    "deterministic reconciliation",
+    "ERP automation",
+    "industrial document workflows",
+    "financial data extraction",
+    "compliance audit trail",
+    "automated settlement",
+    "ledger infrastructure",
   ],
   authors: [{ name: "PDFBridge Team" }],
   creator: "PDFBridge",
@@ -52,9 +47,9 @@ export const metadata: Metadata = {
     canonical: "/",
   },
   openGraph: {
-    title: "PDFBridge | Modern API for PDF Generation",
+    title: "PDFBridge | Institutional Invoice Infrastructure",
     description:
-      "The high-performance bridge between your code and perfect documents. Support for Tailwind, Intelligent PDF Analysis, and Zero-Storage privacy.",
+      "Deterministic invoice reconciliation and settlement orchestration. High-fidelity ingestion with automated math audit for industrial financial workflows.",
     url: "https://pdfbridge.xyz",
     siteName: "PDFBridge",
     images: [
@@ -62,7 +57,7 @@ export const metadata: Metadata = {
         url: "https://res.cloudinary.com/duv0exsir/image/upload/v1769535362/branded_og_image_pdfbridge_1769534994459_qn8iyg.jpg",
         width: 1200,
         height: 630,
-        alt: "PDFBridge - Modern PDF Generation API",
+        alt: "PDFBridge - Institutional Invoice Infrastructure",
       },
     ],
     locale: "en_US",
@@ -70,9 +65,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "PDFBridge | Modern API for PDF Generation",
+    title: "PDFBridge | Institutional Invoice Infrastructure",
     description:
-      "Generate high-quality PDFs from URLs and HTML with a single API call. Tailwind-Native & AI-Powered.",
+      "High-fidelity invoice ingestion and deterministic reconciliation engine for enterprise document workflows.",
     images: [
       "https://res.cloudinary.com/duv0exsir/image/upload/v1769535362/branded_og_image_pdfbridge_1769534994459_qn8iyg.jpg",
     ],

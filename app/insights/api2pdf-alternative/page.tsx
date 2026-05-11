@@ -1,11 +1,11 @@
-import { Metadata } from "next";
+﻿import { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { ChevronLeft, Share2, CheckCircle2, XCircle, ArrowRight, Activity, Terminal, ExternalLink } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Api2PDF Alternative | PDFBridge (2026 Comparison)",
-  description: "Api2PDF served its purpose, but modern infrastructure demands more than basic HTML to PDF capabilities. Compare Api2PDF vs PDFBridge's advanced rendering and Engine features.",
+  description: "Api2PDF served its purpose, but modern infrastructure demands more than basic HTML to PDF capabilities. Compare Api2PDF vs PDFBridge's advanced rendering and AI features.",
   keywords: ["api2pdf alternative", "api2pdf replacement", "html to pdf api2pdf", "pdf generation api", "gotenberg api"],
   alternates: {
     canonical: "https://pdfbridge.xyz/insights/api2pdf-alternative",
@@ -16,7 +16,7 @@ const articleSchema = {
   "@context": "https://schema.org",
   "@type": "Article",
   "headline": "Api2PDF Alternative: Elevating your PDF Generation Infrastructure.",
-  "description": "While Api2PDF provides a functional baseline for PDF generation, modern SaaS applications require advanced Tailwind JIT rendering, Engine payload extraction, and stricter data-retention controls.",
+  "description": "While Api2PDF provides a functional baseline for PDF generation, modern SaaS applications require advanced Tailwind JIT rendering, AI payload extraction, and stricter data-retention controls.",
   "author": {
     "@type": "Person",
     "name": "Francis Bello",
@@ -83,7 +83,7 @@ export default function Api2PdfAlternativePage() {
           <p>Developers who migrate from Api2PDF to <strong>PDFBridge</strong> usually do so for three reasons:</p>
           <ul>
             <li><strong>The "Tailwind" Wall:</strong> Attempting to generate reports from deeply nested Next.js or React components heavily styled with utility CSS often results in unstyled, broken PDFs. PDFBridge employs intelligent network-idle checks to ensure hydration completes before the Chromium snapshot fires.</li>
-            <li><strong>Engine PDF Parsing:</strong> Document APIs are no longer just one-way streets (HTML to PDF). PDFBridge provides a bi-directional engine, allowing you to feed existing PDFs back into the API for intelligent JSON metadata extraction. </li>
+            <li><strong>AI PDF Parsing:</strong> Document APIs are no longer just one-way streets (HTML to PDF). PDFBridge provides a bi-directional engine, allowing you to feed existing PDFs back into the API for intelligent JSON metadata extraction. </li>
             <li><strong>Premium Developer Experience:</strong> Real-time Dashboard logs, highly reliable webhook architectures for bulk jobs, and transparent sandbox testing limits.</li>
           </ul>
         </section>
@@ -132,20 +132,16 @@ export default function Api2PdfAlternativePage() {
            <p className="text-sm text-slate-400 mb-6">Switching the API endpoint takes under 60 seconds.</p>
            <pre className="p-4 bg-slate-950 rounded-xl overflow-x-auto text-sm text-blue-200 border border-white/5">
              <code>{`// 1. Swap your API keys and endpoint URI
-const response = await fetch("https://api.pdfbridge.xyz/api/v1/process", {
+const response = await fetch("https://api.pdfbridge.xyz/api/v1/compiler/compile-intent", {
   method: "POST",
   headers: {
-    "x-api-key": "pk_live_...",
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({
-    url: "https://your-invoice-app.com/view/992",
-    options: {
-      format: "A4",
-      scale: 0.95,
-      printBackground: true
-    }
-  })
+  "x-api-key": "YOUR_API_KEY",
+},
+body: (() => {
+  const form = new FormData();
+  form.append("file", invoiceFile); // PDF/PNG/JPG
+  return form;
+})(),
 });
 
 // 2. Beautiful PDFs instantly returned.`}</code>
@@ -175,5 +171,3 @@ const response = await fetch("https://api.pdfbridge.xyz/api/v1/process", {
     </article>
   );
 }
-
-

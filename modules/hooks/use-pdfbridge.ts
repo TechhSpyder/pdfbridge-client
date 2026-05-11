@@ -16,9 +16,11 @@ export const usePDFBridge = (organizationId?: string) => {
     // in its internal fetch requests. If the SDK is techhspyder/pdfbridge-node,
     // it typically allows passing a custom fetch or configuration.
 
-    const client = new Proxy({} as any, {
+    const client = new Proxy({} as unknown as PDFBridge, {
       get: (target, prop) => {
-        return async (...args: any[]) => {
+        if (typeof prop !== "string") return undefined;
+        
+        return async (...args: unknown[]) => {
           const sdk = new PDFBridge({
             // No Bearer token needed as we rely on session cookies
             organizationId,
@@ -34,7 +36,7 @@ export const usePDFBridge = (organizationId?: string) => {
             }
           }
 
-          return (sdk as any)[prop](...args);
+          return (sdk as unknown as Record<string, Function>)[prop](...args);
         };
       },
     });

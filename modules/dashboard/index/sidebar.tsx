@@ -56,7 +56,7 @@ const footerVariants: Variants = {
   visible: { y: 0, opacity: 1 },
 };
 
-function SidebarContent({ isSmallScreen, setSidebarOpen }: any) {
+function SidebarContent({ isSmallScreen, setSidebarOpen }: { isSmallScreen: boolean; setSidebarOpen: (open: boolean) => void }) {
   const pathname = usePathname();
   const session = authClient.useSession();
   const user = session.data?.user;
@@ -64,10 +64,10 @@ function SidebarContent({ isSmallScreen, setSidebarOpen }: any) {
   const { copied, copy } = useClipboard();
   const [open, setOpen] = useState(false);
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
-    General: true,
-    Engineering: true,
-    Resources: true,
-    Account: true,
+    "Institutional Core": true,
+    "Infrastructure": true,
+    "Audit & Compliance": true,
+    "Internal Utils": false,
   });
   const router = useRouter();
 
@@ -78,9 +78,9 @@ function SidebarContent({ isSmallScreen, setSidebarOpen }: any) {
     }));
   };
 
-  const userRole = (user as any)?.role || "";
+  const userRole = (user as { role?: string })?.role || "";
   const primaryEmail = user?.email || "";
-  const walletAddress = (user as any)?.walletAddress as string | undefined;
+  const walletAddress = (user as { walletAddress?: string })?.walletAddress;
 
   // Truncation helper for wallet-native UX using compact formatter
   const compactDisplay = formatAddress(walletAddress);
@@ -122,7 +122,23 @@ function SidebarContent({ isSmallScreen, setSidebarOpen }: any) {
         className="flex-1 px-4 py-8 space-y-6 overflow-y-auto scrollbar-hide"
         data-lenis-prevent
       >
-        {NAV_GROUPS.map((group) => {
+        {/* Stripe-style Primary CTA for Manual Flow */}
+        <div className="mb-2">
+          <Link href="/compiler" onClick={() => isSmallScreen && setSidebarOpen(false)}>
+            <Button
+              className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold py-5 rounded-xl shadow-[0_0_20px_rgba(37,99,235,0.2)] transition-all overflow-hidden relative group border border-blue-500/50"
+            >
+              <Zap className="h-5 w-5 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-300" />
+              <span className="tracking-wide">Launch Compiler</span>
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
+            </Button>
+          </Link>
+        </div>
+
+        {NAV_GROUPS.filter((group) => {
+          if (group.label === "Internal Utils") return isPlatformOwner;
+          return true;
+        }).map((group) => {
           const isOpen = openGroups[group.label];
           return (
             <div key={group.label} className="space-y-1">
@@ -147,13 +163,7 @@ function SidebarContent({ isSmallScreen, setSidebarOpen }: any) {
                     transition={{ duration: 0.3, ease: "easeInOut" }}
                     className="overflow-hidden space-y-1"
                   >
-                    {group.links
-                      .filter((link) => {
-                        if (link.label === "Blog Journal")
-                          return isPlatformOwner;
-                        return true;
-                      })
-                      .map((link) => {
+                    {group.links.map((link) => {
                         const Icon = link.icon;
                         const isActive = pathname === link.href;
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useSession } from "@/lib/auth-client";
 import { Button } from "../app/button";
 import { GlowCard } from "../app/glow-card";
@@ -9,16 +10,18 @@ import {
   Zap,
   Key,
   Plus,
-  Activity,
   Check,
   Terminal,
   BookOpen,
+  ShieldCheck,
+  Activity,
 } from "lucide-react";
 import Link from "next/link";
-import { useMe, useApiKeys } from "../hooks/queries";
+import { useMe, useApiKeys, useTopupCheckout, useVerifyTopup } from "../hooks/queries";
 import { toast } from "sonner";
 import dynamic from "next/dynamic";
 import { cn } from "@/utils";
+import type { ApiKey } from "../types";
 
 const RecentActivityList = dynamic(
   () =>
@@ -54,12 +57,81 @@ export function DashboardPage() {
   const { data: userData, isLoading: beLoading, error } = useMe();
   const { data: apiKeysData, isLoading: keysLoading } = useApiKeys();
 
-  // Check if new user (created within last minute)
   const isNewUser = session?.user?.createdAt
     ? Math.abs(
         new Date(session.user.createdAt).getTime() - new Date().getTime(),
       ) < 60000
     : false;
+
+  const topupCheckout = useTopupCheckout();
+  const verifyTopup = useVerifyTopup();
+
+  useEffect(() => {
+    const initPaddle = () => {
+      if (window.Paddle) {
+        const env =
+          process.env.NEXT_PUBLIC_PADDLE_ENVIRONMENT === "production"
+            ? "production"
+            : "sandbox";
+        window.Paddle.Environment.set(env);
+        window.Paddle.Initialize({
+          token: process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN || "",
+        });
+        return true;
+      }
+      return false;
+    };
+
+    if (!initPaddle()) {
+      const poll = window.setInterval(() => {
+        if (initPaddle()) window.clearInterval(poll);
+      }, 500);
+      return () => window.clearInterval(poll);
+    }
+  }, []);
+
+  const handleTopup = async () => {
+    const tId = toast.loading("Preparing capacity purchase...");
+    try {
+      const response: any = await topupCheckout.mutateAsync(1);
+      if (!window.Paddle) throw new Error("Paddle.js not loaded. Refresh and try again.");
+      toast.dismiss(tId);
+      
+      const isDummyEmail = response.email?.endsWith("@solana.pdfbridge.xyz");
+
+      window.Paddle.Checkout.open({
+        settings: { displayMode: "overlay", theme: "dark", locale: "en" },
+        items: [{ priceId: response.priceId, quantity: 1 }],
+        customer: isDummyEmail ? undefined : { email: response.email },
+        customData: {
+          type: "topup",
+          userId: response.userId,
+          organizationId: response.organizationId,
+          quantity: 1,
+        },
+        eventCallback: async (data: any) => {
+          if (data.name === "checkout.completed") {
+            const tid = data.data.transaction_id;
+            const t2 = toast.loading("Adding workflows to your account...");
+            try {
+              await verifyTopup.mutateAsync(tid);
+              toast.success("50 workflows added!", {
+                id: t2,
+                description: "Your capacity has been updated. Happy invoicing.",
+              });
+            } catch {
+              toast.error("Verification failed", {
+                id: t2,
+                description: "Webhook will retry. Contact support.",
+              });
+            }
+          }
+        },
+      });
+    } catch (err: any) {
+      toast.error(err.message || "Failed to open checkout", { id: tId });
+    }
+  };
 
   const isLoading = sessionLoading || beLoading;
 
@@ -113,23 +185,16 @@ export function DashboardPage() {
     );
   }
 
-  const usageCount = userData?.usage?.executionCount || 0;
-  const usageLimit = userData?.plan?.limit || 5;
-  const usagePercentage = Math.min((usageCount / usageLimit) * 100, 100);
-
-  const aiTemplateCount = userData?.usage?.aiTemplateCount || 0;
-  const aiTemplateLimit = userData?.plan?.intelligenceTemplateLimit || 0;
-  const aiTemplatePercentage =
-    aiTemplateLimit > 0
-      ? Math.min((aiTemplateCount / aiTemplateLimit) * 100, 100)
-      : 0;
-
-  const aiExtractionCount = userData?.usage?.intelligenceCount || 0;
-  const aiExtractionLimit = userData?.plan?.intelligenceLimit || 0;
-  const aiExtractionPercentage =
-    aiExtractionLimit > 0
-      ? Math.min((aiExtractionCount / aiExtractionLimit) * 100, 100)
-      : 0;
+  // Unified invoice workflow metric.
+  // intelligenceCount tracks the settlement/compiler flow — the primary product.
+  // Both intelligenceLimit and plan.limit are now equal (set by update-plan-limits.sql).
+  const workflowsUsed = userData?.usage?.intelligenceCount || 0;
+  const workflowsBonus = userData?.usage?.bonusWorkflows || 0;
+  const workflowsBaseLimit = userData?.plan?.intelligenceLimit || userData?.plan?.limit || 5;
+  const workflowsEffectiveLimit = workflowsBaseLimit + workflowsBonus;
+  const usagePercentage = workflowsEffectiveLimit > 0
+    ? Math.min((workflowsUsed / workflowsEffectiveLimit) * 100, 100)
+    : 0;
 
   const getDaysUntilReset = () => {
     const anchorDate = userData?.planStartedAt || userData?.createdAt;
@@ -154,8 +219,8 @@ export function DashboardPage() {
   const daysUntilReset = getDaysUntilReset();
 
   // Metadata from decoupled keys endpoint
-  const liveKeyData = apiKeysData?.keys?.find((k: any) => k.type === "live");
-  const testKeyData = apiKeysData?.keys?.find((k: any) => k.type === "test");
+  const liveKeyData = apiKeysData?.keys?.find((k: ApiKey) => k.type === "live");
+  const testKeyData = apiKeysData?.keys?.find((k: ApiKey) => k.type === "test");
   const hasKeys = apiKeysData?.keys && apiKeysData.keys.length > 0;
 
   const liveKeyHint = liveKeyData?.hint || "pk_live_••••••••";
@@ -190,8 +255,8 @@ export function DashboardPage() {
           )}
 
           <p className="mt-2 text-slate-400 max-w-2xl text-sm md:text-base">
-            Your invoice infrastructure is active. Monitor execution performance,
-            manage API keys, and track institutional activity in real-time.
+            Institutional Invoice Infrastructure active. Monitor deterministic
+            execution performance, manage settlement keys, and track high-fidelity activity.
           </p>
         </div>
         <div className="flex gap-3">
@@ -216,7 +281,7 @@ export function DashboardPage() {
                 Processing Trends
               </h2>
               <p className="text-sm text-slate-500">
-                Daily volume for this billing cycle
+                Daily invoice throughput — active billing cycle
               </p>
             </div>
             <div className="flex bg-black/40 rounded-lg p-1 border border-white/5 justify-end">
@@ -231,7 +296,7 @@ export function DashboardPage() {
               </button>
             </div>
           </div>
-          {userData?.usage?.hasConversions ? (
+          {userData?.usage?.hasExecutions ? (
             <UsageGraph />
           ) : (
             <QuickStartPipeline testKeyFull={testKeyHint} hasKeys={hasKeys} />
@@ -251,7 +316,7 @@ export function DashboardPage() {
               </div>
 
               <span className="hidden md:inline text-[10px] text-slate-500 font-medium">
-                Updates automatically as jobs complete
+                Live pipeline feed · Syncs every 30s
               </span>
             </div>
             <div className="flex items-center gap-4">
@@ -274,11 +339,11 @@ export function DashboardPage() {
       <div className="flex flex-col gap-6">
         {isLoading ? (
           <>
-            <div className="grid gap-6 md:grid-cols-3">
-              {Array.from({ length: 3 }).map((_, i) => (
+            <div className="grid gap-6 md:grid-cols-2">
+              {Array.from({ length: 2 }).map((_, i) => (
                 <div
                   key={i}
-                  className="rounded-2xl border border-white/5 bg-slate-900/20 h-[200px] md:h-[320px] p-4 md:p-8 backdrop-blur-sm animate-pulse"
+                  className="rounded-2xl border border-white/5 bg-slate-900/20 h-[200px] md:h-[280px] p-4 md:p-8 backdrop-blur-sm animate-pulse"
                 />
               ))}
             </div>
@@ -286,77 +351,52 @@ export function DashboardPage() {
               {Array.from({ length: 2 }).map((_, i) => (
                 <div
                   key={i}
-                  className="rounded-2xl border border-white/5 bg-slate-900/20 h-[200px] md:h-[320px] p-4 md:p-8 backdrop-blur-sm animate-pulse"
+                  className="rounded-2xl border border-white/5 bg-slate-900/20 h-[200px] md:h-[280px] p-4 md:p-8 backdrop-blur-sm animate-pulse"
                 />
               ))}
             </div>
           </>
         ) : (
           <>
-            <div className="grid gap-6 md:grid-cols-3">
+            <div className="grid gap-6 md:grid-cols-2">
               <GlowCard
-                title="Monthly Requests"
-                sub={`${usageCount} / ${usageLimit}`}
-                icon={<Activity className="h-5 w-5 text-blue-500" />}
-                content={
-                  <div className="mt-4 space-y-3">
-                    <div className="h-2.5 w-full overflow-hidden rounded-full bg-white/5">
-                      <div
-                        className="h-full bg-linear-to-r from-blue-600 to-blue-400 transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(37,99,235,0.5)]"
-                        style={{ width: `${usagePercentage}%` }}
-                      ></div>
-                    </div>
-                    <div className="flex justify-between items-center text-xs">
-                      <span className="text-slate-500 font-medium">
-                        Reset in {daysUntilReset}{" "}
-                        {daysUntilReset === 1 ? "day" : "days"}
-                      </span>
-                      <span className="text-blue-400 font-bold">
-                        {Math.round(usagePercentage)}% utilized
-                      </span>
-                    </div>
-                  </div>
-                }
-              />
-
-              <GlowCard
-                title="Engine Templates"
+                title="Audit Integrity"
                 sub={
-                  aiTemplateLimit > 0
-                    ? `${aiTemplateCount} / ${aiTemplateLimit}`
-                    : "Pro Feature"
+                  workflowsBaseLimit > 10
+                    ? "Reconciliation Active"
+                    : "Startup+ Feature"
                 }
-                icon={<Zap className="h-5 w-5 text-indigo-500" />}
+                icon={<ShieldCheck className="h-5 w-5 text-indigo-500" />}
                 content={
                   <div className="mt-4 space-y-3">
-                    {aiTemplateLimit > 0 ? (
+                    {workflowsBaseLimit > 10 ? (
                       <>
                         <div className="h-2.5 w-full overflow-hidden rounded-full bg-white/5">
                           <div
-                            className="h-full bg-linear-to-r from-indigo-600 to-purple-400 transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(99,102,241,0.5)]"
-                            style={{ width: `${aiTemplatePercentage}%` }}
+                            className="h-full bg-linear-to-r from-indigo-600 to-emerald-400 transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(16,185,129,0.5)]"
+                            style={{ width: `100%` }}
                           ></div>
                         </div>
                         <div className="flex justify-between items-center text-xs">
                           <span className="text-slate-500 font-medium">
-                            AI-generated template layouts
+                            Totals, tax &amp; multi-currency — reconciled to 6 decimal places
                           </span>
-                          <span className="text-indigo-400 font-bold">
-                            {Math.round(aiTemplatePercentage)}%
+                          <span className="text-emerald-400 font-bold">
+                            SECURE
                           </span>
                         </div>
                       </>
                     ) : (
-                      <div className="flex justify-between items-center text-xs bg-indigo-500/10 p-3 rounded-lg border border-indigo-500/20">
-                        <span className="text-slate-400 font-medium">
-                          Generate precise, smart layouts using natural
-                          language.
-                        </span>
+                      <div className="space-y-3">
+                        <p className="text-xs text-slate-400 leading-relaxed">
+                          Zero-error arithmetic across totals, tax, and multi-currency invoices. Every figure is deterministically verified before settlement.
+                        </p>
                         <Link
                           href="/dashboard/billing"
-                          className="text-indigo-400 font-bold hover:underline whitespace-nowrap ml-4"
+                          className="flex items-center justify-between text-xs bg-indigo-500/10 px-3 py-2 rounded-lg border border-indigo-500/20 text-indigo-400 font-bold hover:bg-indigo-500/15 transition-colors"
                         >
-                          Upgrade
+                          <span>Unlock on Startup</span>
+                          <span className="text-indigo-500">$19 / mo →</span>
                         </Link>
                       </div>
                     )}
@@ -365,21 +405,21 @@ export function DashboardPage() {
               />
 
               <GlowCard
-                title="Current Plan"
-                sub={userData?.plan?.name || "Standard Free"}
+                title="Active Plan"
+                sub={userData?.plan?.name || "Builder"}
                 icon={<Zap className="h-5 w-5 text-amber-500" />}
                 content={
                   <div className="mt-4 space-y-4">
                     <div className="flex items-center gap-2 text-xs text-slate-400">
                       <Check className="h-3.5 w-3.5 text-emerald-500" />
-                      {userData?.plan?.limit.toLocaleString()} processed invoices / mo
+                      {workflowsBaseLimit.toLocaleString()} invoice workflows / mo
                     </div>
                     <Link href="/dashboard/billing" className="block">
                       <Button
                         variant="outline"
                         className="w-full text-xs h-9 border-blue-500/20 text-blue-400 hover:bg-blue-500/10"
                       >
-                        View Details & Billing
+                        Manage Plan & Add-ons
                       </Button>
                     </Link>
                   </div>
@@ -393,10 +433,10 @@ export function DashboardPage() {
                   <div>
                     <h3 className="text-xl font-bold text-white flex items-center gap-2">
                       <Key className="h-5 w-5 text-emerald-500" />
-                      Secret Keys
+                      API Keys
                     </h3>
                     <p className="text-sm text-slate-500 mt-1">
-                      Dual Mode (Live & Test)
+                      Live &amp; Test environments
                     </p>
                   </div>
                 </div>
@@ -407,15 +447,14 @@ export function DashboardPage() {
                         <Key className="h-6 w-6 text-emerald-500" />
                       </div>
                       <div className="text-center">
-                        <p className="text-xs text-slate-400 max-w-[200px] mx-auto leading-relaxed">
-                          You haven&apos;t generated any API keys yet. Start
-                          your integration in seconds.
+                        <p className="text-xs text-slate-400 max-w-[220px] mx-auto leading-relaxed">
+                          No credentials provisioned. Generate your key pair to authenticate requests against the live environment.
                         </p>
                       </div>
                       <Link href="/dashboard/api-keys" className="w-full">
                         <Button className="w-full bg-emerald-600 hover:bg-emerald-500 shadow-lg shadow-emerald-600/20 h-10 text-xs font-bold gap-2">
                           <Plus className="h-4 w-4" />
-                          Generate API Key
+                          Provision API Keys
                         </Button>
                       </Link>
                     </div>
@@ -445,7 +484,7 @@ export function DashboardPage() {
                       </div>
                       <div className="flex justify-between items-center text-[10px] mt-2 bg-white/5 p-2 rounded-lg">
                         <p className="text-slate-400">
-                          Keep credentials secure.
+                          Never commit keys to version control or expose them client-side.
                         </p>
                         <Link
                           href="/dashboard/api-keys"
@@ -459,47 +498,38 @@ export function DashboardPage() {
                 </div>
               </div>
               <GlowCard
-                title="Invoice Intelligence"
+                title="Workflow Capacity"
                 sub={
-                  aiExtractionLimit > 0
-                    ? `${aiExtractionCount} / ${aiExtractionLimit}`
-                    : "Pro Feature"
+                  workflowsBonus > 0
+                    ? `+${workflowsBonus} bonus active · ${Math.max(0, workflowsEffectiveLimit - workflowsUsed)} remaining`
+                    : `${Math.max(0, workflowsEffectiveLimit - workflowsUsed).toLocaleString()} of ${workflowsEffectiveLimit} remaining`
                 }
                 icon={<Zap className="h-5 w-5 text-fuchsia-500" />}
                 content={
-                  <div className="mt-4 space-y-3">
-                    {aiExtractionLimit > 0 ? (
-                      <>
-                        <div className="h-2.5 w-full overflow-hidden rounded-full bg-white/5">
-                          <div
-                            className="h-full bg-linear-to-r from-fuchsia-600 to-pink-400 transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(217,70,239,0.5)]"
-                            style={{ width: `${aiExtractionPercentage}%` }}
-                          ></div>
-                        </div>
-                        <div className="flex justify-between items-center text-xs">
-                          <span className="text-slate-500 font-medium">
-                          High-fidelity Engine extractions and institutional-grade invoice
-                          intelligence.
-                          </span>
-                          <span className="text-fuchsia-400 font-bold">
-                            {Math.round(aiExtractionPercentage)}%
-                          </span>
-                        </div>
-                      </>
-                    ) : (
-                      <div className="flex justify-between items-center text-xs bg-fuchsia-500/10 p-3 rounded-lg border border-fuchsia-500/20">
-                        <span className="text-slate-400 font-medium">
-                          Automatically ingest and extract structured JSON data
-                          from your documents.
-                        </span>
-                        <Link
-                          href="/dashboard/billing"
-                          className="text-fuchsia-400 font-bold hover:underline whitespace-nowrap ml-4"
-                        >
-                          Upgrade
-                        </Link>
+                  <div className="mt-4 space-y-4">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="rounded-xl bg-white/5 border border-white/5 p-3 flex flex-col gap-1">
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Used</span>
+                        <span className="text-2xl font-black text-white">{workflowsUsed.toLocaleString()}</span>
+                        <span className="text-[10px] text-slate-600">invoice workflows</span>
                       </div>
-                    )}
+                      <div className="rounded-xl bg-white/5 border border-white/5 p-3 flex flex-col gap-1">
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Limit</span>
+                        <span className="text-2xl font-black text-white">{workflowsEffectiveLimit.toLocaleString()}</span>
+                        <span className="text-[10px] text-slate-600">
+                          {workflowsBonus > 0 ? `${workflowsBaseLimit} plan + ${workflowsBonus} pack` : `resets in ${daysUntilReset}d`}
+                        </span>
+                      </div>
+                    </div>
+                    <button
+                      onClick={handleTopup}
+                      disabled={topupCheckout.isPending}
+                      className="block w-full text-center py-2 rounded-xl text-xs font-bold transition-all active:scale-95 bg-fuchsia-500/10 hover:bg-fuchsia-500/20 text-fuchsia-400 border border-fuchsia-500/20 disabled:opacity-50 cursor-pointer"
+                    >
+                      {topupCheckout.isPending ? "Preparing..." : workflowsUsed >= workflowsEffectiveLimit
+                        ? "Buy 50 More Workflows — $9"
+                        : "Buy More Capacity — $9"}
+                    </button>
                   </div>
                 }
               />

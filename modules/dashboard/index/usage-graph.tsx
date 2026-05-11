@@ -37,8 +37,9 @@ export function UsageGraph() {
   }
 
   // Fill counts from API
-  if (Array.isArray(stats)) {
-    stats.forEach((s: any) => {
+  const dailyArray = Array.isArray(stats) ? stats : (stats?.dailyMetrics || []);
+  if (Array.isArray(dailyArray)) {
+    dailyArray.forEach((s: any) => {
       const sDayStr = new Date(s.day).toISOString().split("T")[0];
       const idx = last7Days.indexOf(sDayStr);
       if (idx !== -1) {

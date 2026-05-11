@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+﻿import { Metadata } from "next";
 import Link from "next/link";
 import { Layers, Zap, PenTool, LayoutTemplate, ArrowRight, Code2, Terminal } from "lucide-react";
 
@@ -110,7 +110,7 @@ export default function NextJsToPdfPage() {
                <Code2 className="text-slate-300" size={24} />
             </div>
             <h3 className="text-xl font-black mb-3">Protected Routes</h3>
-            <p className="text-sm text-slate-400 font-medium leading-relaxed">Pass session cookies or Bearer tokens natively to generate PDFs of dashboards locked behind Better-Auth or NextAuth.</p>
+            <p className="text-sm text-slate-400 font-medium leading-relaxed">Pass Bearer tokens natively through the API to generate PDFs of dashboards locked behind Clerk or NextAuth.</p>
           </div>
         </div>
 
@@ -130,21 +130,17 @@ export default function NextJsToPdfPage() {
 
 export async function POST(req) {
   // Option 1: URL to PDF (Great for static/public Next.js pages)
-  const response = await fetch("https://api.pdfbridge.xyz/api/v1/process", {
+  const response = await fetch("https://api.pdfbridge.xyz/api/v1/compiler/compile-intent", {
     method: "POST",
     headers: {
-      "x-api-key": \`\${process.env.PDFBRIDGE_API_KEY}\`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      url: "https://your-nextjs-app.com/invoices/992",
-      options: {
-        format: "A4",
-        printBackground: true,
-        waitForNetworkIdle: true // Ensures Next.js hydration finishes
-      }
-    })
-  });
+  "x-api-key": "YOUR_API_KEY",
+},
+body: (() => {
+  const form = new FormData();
+  form.append("file", invoiceFile); // PDF/PNG/JPG
+  return form;
+})(),
+});
 
   // Stream the PDF directly back to the client
   return new NextResponse(response.body, {
@@ -178,5 +174,3 @@ export async function POST(req) {
     </div>
   );
 }
-
-

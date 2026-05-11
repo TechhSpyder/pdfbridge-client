@@ -8,8 +8,10 @@ import {
   useCancelSubscription,
   usePlans,
   useVerifyPaddle,
+  useTopupCheckout,
+  useVerifyTopup,
 } from "@/modules/hooks/queries";
-import { Button, SmartContactLink } from "@/modules/app";
+import { Button, SmartContactLink, WorkflowQuota } from "@/modules/app";
 import {
   ShieldCheck,
   ChevronRight,
@@ -41,6 +43,8 @@ export function BillingPage() {
   const checkoutMutation = useCheckout();
   const verifyMutation = useVerifyPayment();
   const verifyPaddle = useVerifyPaddle();
+  const topupCheckout = useTopupCheckout();
+  const verifyTopup = useVerifyTopup();
   const searchParams = useSearchParams();
   const { data: billingInfo } = useBillingInfo();
   const cancelMutation = useCancelSubscription();
@@ -66,7 +70,6 @@ export function BillingPage() {
         window.Paddle.Initialize({
           token: process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN || "",
           eventCallback: async (data: any) => {
-            console.log("[PADDLE] Event Captured:", data.name, data);
             if (data.name === "checkout.completed") {
               const tid = data.data.transaction_id || data.data.id;
               if (tid && !verifyingRef.current) {
@@ -112,7 +115,7 @@ export function BillingPage() {
     if (reference && !verifyingRef.current) {
       verifyingRef.current = true;
       const tId = toast.loading("Verifying your payment...", {
-        description: "Checking status with Paystack...",
+        description: "Checking status...",
       });
 
       verifyMutation.mutate(reference, {
@@ -163,8 +166,7 @@ export function BillingPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
-  const defaultProvider = userData?.region === "NG" ? "paystack" : "paddle";
-  const provider = defaultProvider;
+  const provider = "paddle";
 
   if (plansError) {
     const isRateLimited =
@@ -246,7 +248,7 @@ export function BillingPage() {
               quantity: 1,
             },
           ],
-          customer: {
+          customer: response.email?.endsWith("@solana.pdfbridge.xyz") ? undefined : {
             email: response.email,
           },
 
@@ -323,43 +325,45 @@ export function BillingPage() {
       <div className="max-w-6xl mx-auto space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-1000 pb-20">
         {/* Header */}
         <div className="flex flex-col justify-between gap-8">
-          <div className="space-y-2">
-            <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
-              Infrastructure-Grade <span className="text-blue-500">Scaling</span>
-            </h1>
-            <p className="text-lg text-slate-400 max-w-2xl">
-              Provision globally distributed PDF infrastructure. Seamlessly
-              scale from sandboxes to enterprise-grade clusters.
-            </p>
-          </div>
+          <div className="flex max-md:flex-col justify-between gap-4">
+            <div className="space-y-2">
+              <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
+                Infrastructure-Grade{" "}
+                <span className="text-blue-500">Scaling</span>
+              </h1>
+              <p className="text-lg text-slate-400 max-w-2xl">
+                Provision globally distributed PDF infrastructure. Seamlessly
+                scale from sandboxes to enterprise-grade clusters.
+              </p>
+            </div>
 
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-            <div className="flex flex-col gap-2">
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-                Billing Cycle
-              </span>
-              <div className="flex p-1 rounded-xl bg-slate-900 border border-white/5 gap-1 w-fit">
-                {(["month", "year"] as const).map((item) => (
-                  <button
-                    key={item}
-                    onClick={() => setInterval(item)}
-                    className={cn(
-                      "px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer",
-                      {
-                        "bg-emerald-500 text-white shadow-lg shadow-emerald-500/20":
-                          interval === item,
-                        "text-slate-400 hover:text-white hover:bg-white/5":
-                          interval !== item,
-                      },
-                    )}
-                  >
-                    {item === "month" ? "Monthly" : "Annual"}
-                  </button>
-                ))}
+            <div className="flex items-center justify-end max-md:w-full">
+              <div className="flex flex-col gap-2">
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                  Billing Cycle
+                </span>
+                <div className="flex p-1 rounded-xl bg-slate-900 border border-white/5 gap-1 w-fit">
+                  {(["month", "year"] as const).map((item) => (
+                    <button
+                      key={item}
+                      onClick={() => setInterval(item)}
+                      className={cn(
+                        "px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer",
+                        {
+                          "bg-emerald-500 text-white shadow-lg shadow-emerald-500/20":
+                            interval === item,
+                          "text-slate-400 hover:text-white hover:bg-white/5":
+                            interval !== item,
+                        },
+                      )}
+                    >
+                      {item === "month" ? "Monthly" : "Annual"}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
-
           {/* Active Subscription Management */}
 
           <div className="rounded-3xl border border-blue-500/20 bg-blue-500/5 p-8 backdrop-blur-md">
@@ -414,6 +418,144 @@ export function BillingPage() {
             )}
           </div>
 
+          {/* Monthly Capacity — top-up pack entry point */}
+          {!Loaders &&
+            userData?.plan?.priceUsd > 0 &&
+            provider === "paddle" &&
+            (() => {
+              const used = userData?.usage?.intelligenceCount || 0;
+              const bonus = userData?.usage?.bonusWorkflows || 0;
+              const planLimit =
+                userData?.plan?.intelligenceLimit || userData?.plan?.limit || 0;
+              const effective = planLimit + bonus;
+              const pct =
+                effective > 0 ? Math.min((used / effective) * 100, 100) : 0;
+              const isAtLimit = used >= effective;
+              const isWarning = pct >= 80 && !isAtLimit;
+
+              const handleTopup = async () => {
+                const tId = toast.loading("Preparing capacity purchase...");
+                try {
+                  const response: any = await topupCheckout.mutateAsync(1);
+                  if (!window.Paddle)
+                    throw new Error(
+                      "Paddle.js not loaded. Refresh and try again.",
+                    );
+                  toast.dismiss(tId);
+                  window.Paddle.Checkout.open({
+                    settings: {
+                      displayMode: "overlay",
+                      theme: "dark",
+                      locale: "en",
+                    },
+                    items: [{ priceId: response.priceId, quantity: 1 }],
+                    customer: response.email?.endsWith("@solana.pdfbridge.xyz") ? undefined : { email: response.email },
+                    customData: {
+                      type: "topup",
+                      userId: response.userId,
+                      organizationId: response.organizationId,
+                      quantity: 1,
+                    },
+                    eventCallback: async (data: any) => {
+                      if (data.name === "checkout.completed") {
+                        const tid = data.data.transaction_id;
+                        const t2 = toast.loading(
+                          "Adding workflows to your account...",
+                        );
+                        try {
+                          await verifyTopup.mutateAsync(tid);
+                          toast.success("50 workflows added!", {
+                            id: t2,
+                            description:
+                              "Your capacity has been updated. Happy invoicing.",
+                          });
+                        } catch {
+                          toast.error("Verification failed", {
+                            id: t2,
+                            description:
+                              "Webhook will retry. Contact support if workflows don't appear.",
+                          });
+                        }
+                      }
+                    },
+                  });
+                } catch (err: any) {
+                  toast.error(err.message || "Failed to open checkout", {
+                    id: tId,
+                  });
+                }
+              };
+
+              return (
+                <div
+                  className={cn(
+                    "rounded-3xl border p-8 backdrop-blur-md space-y-5",
+                    isAtLimit
+                      ? "border-red-500/30 bg-red-500/5"
+                      : isWarning
+                        ? "border-amber-500/30 bg-amber-500/5"
+                        : "border-blue-500/20 bg-blue-500/5",
+                  )}
+                >
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                      <h2 className="text-lg font-bold text-white">
+                        Monthly Capacity
+                      </h2>
+                      <p className="text-sm text-slate-400 mt-0.5">
+                        {used.toLocaleString()} / {effective.toLocaleString()}{" "}
+                        workflows used
+                        {bonus > 0 && (
+                          <span className="ml-2 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
+                            +{bonus} BONUS
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                    <button
+                      id="topup-buy-more-btn"
+                      onClick={handleTopup}
+                      disabled={topupCheckout.isPending}
+                      className={cn(
+                        "px-4 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all active:scale-95 disabled:opacity-50",
+                        isAtLimit
+                          ? "bg-red-500 hover:bg-red-400 text-white shadow-lg shadow-red-500/20"
+                          : isWarning
+                            ? "bg-amber-500 hover:bg-amber-400 text-black shadow-lg shadow-amber-500/20"
+                            : "bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/20",
+                      )}
+                    >
+                      {topupCheckout.isPending
+                        ? "Preparing..."
+                        : "Buy 50 More Workflows — $9"}
+                    </button>
+                  </div>
+
+                  {/* Progress bar */}
+                  <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                    <div
+                      className={cn(
+                        "h-full rounded-full transition-all duration-700",
+                        isAtLimit
+                          ? "bg-red-500"
+                          : isWarning
+                            ? "bg-amber-500"
+                            : "bg-emerald-500",
+                      )}
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+
+                  {isAtLimit && (
+                    <p className="text-xs text-red-400">
+                      You&apos;ve reached your monthly limit. Buy a top-up pack
+                      to continue, or upgrade your plan.
+                    </p>
+                  )}
+                </div>
+              );
+            })()}
+
           {/* Pricing Grid */}
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {Loaders
@@ -425,7 +567,6 @@ export function BillingPage() {
                     key={plan.id}
                     plan={plan}
                     userData={userData}
-                    provider={provider}
                     onCheckout={handleCheckout}
                     isCheckoutPending={checkoutMutation.isPending}
                     selectedPlanId={selectedPlanId}
@@ -466,10 +607,8 @@ export function BillingPage() {
                         })}
                       </td>
                       <td className="px-6 py-4 text-white font-medium">
-                        {provider === "paystack" ? "₦" : "$"}
-                        {(provider === "paystack"
-                          ? userData.plan.priceNgn / 100
-                          : userData.plan.priceUsd / 100
+                        ${(
+                          userData.plan.priceUsd / 100
                         ).toLocaleString()}
                       </td>
                       <td className="px-6 py-4">
@@ -509,8 +648,7 @@ export function BillingPage() {
                 <p className="text-sm text-slate-400 leading-relaxed">
                   We partner with industry-leading payment processors to ensure
                   your data is always safe. Paddle handles international tax
-                  compliance, while Paystack provides seamless local
-                  transactions in Nigeria.
+                  compliance to provide seamless global transactions.
                 </p>
               </div>
               <div className="flex gap-4 pt-4 grayscale opacity-50 flex-wrap">

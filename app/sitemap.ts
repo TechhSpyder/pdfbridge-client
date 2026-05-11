@@ -1,17 +1,23 @@
-import { MetadataRoute } from "next";
+﻿import { MetadataRoute } from "next";
 import { getPublishedPosts } from "./insights/actions";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://pdfbridge.xyz";
 
-  // 1. Fetch Dynamic Posts
+  // 1. Fetch Dynamic Posts (best-effort)
+let dynamicRoutes: MetadataRoute.Sitemap = [];
+try {
   const dynamicPosts = await getPublishedPosts();
-  const dynamicRoutes = dynamicPosts.map((post: any) => ({
+  dynamicRoutes = dynamicPosts.map((post: any) => ({
     url: `${baseUrl}/insights/${post.slug}`,
     lastModified: new Date(post.updatedAt || post.createdAt).toISOString(),
     changeFrequency: "weekly" as const,
     priority: 0.7,
   }));
+} catch {
+  // Build environments (or misconfigured DB) should still produce a sitemap.
+  dynamicRoutes = [];
+}
 
   // 2. Static Content Pages
   const staticRoutes = [

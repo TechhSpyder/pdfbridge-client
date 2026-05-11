@@ -139,7 +139,8 @@ export function Navbar() {
   const isHidden =
     pathname.startsWith("/dashboard") ||
     pathname.startsWith("/sign-in") ||
-    pathname.startsWith("/sign-up");
+    pathname.startsWith("/sign-up") ||
+    pathname.startsWith("/compiler");
 
   const activeSection = useActiveSection(
     NAV_ITEMS.filter((i) => i.type === "scroll").map(
