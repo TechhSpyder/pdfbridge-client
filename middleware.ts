@@ -1,6 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-const API_URL = process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:3003";
+const API_URL =
+  process.env.BETTER_AUTH_URL ||
+  process.env.NEXT_PUBLIC_API_URL ||
+  "http://localhost:3003";
 
 async function getSessionFromAPI(request: NextRequest) {
   try {
@@ -12,26 +15,36 @@ async function getSessionFromAPI(request: NextRequest) {
     const headers = new Headers(request.headers);
     headers.set("Content-Type", "application/json");
     headers.set("Cookie", rawCookie);
-    headers.set("X-Forwarded-Host", request.headers.get("x-forwarded-host") || request.headers.get("host") || "localhost:3000");
+    headers.set(
+      "X-Forwarded-Host",
+      request.headers.get("x-forwarded-host") ||
+        request.headers.get("host") ||
+        "localhost:3000",
+    );
 
     // BEARER FALLBACK: Extract naked token from the signed/prefixed cookie string
     // This circumvents strict same-origin cookie validation rules internally in get-session
     const tokenMatch = rawCookie.match(/better-auth\.session_token=([^;]+)/);
     if (tokenMatch) {
       const fullValue = decodeURIComponent(tokenMatch[1]);
-      const rawToken = fullValue.split('.')[0];
+      const rawToken = fullValue.split(".")[0];
       headers.set("Authorization", `Bearer ${rawToken}`);
       // [SECURITY] Removed token override logging
     }
 
+    const hasCookie = rawCookie.includes("better-auth.session_token");
+    console.log(`[MW] rawCookie has session token: ${hasCookie}`);
+
     const response = await fetch(`${API_URL}/api/auth/get-session`, {
       method: "GET",
       headers,
-      cache: "no-store", // CRITICAL: Prevent stale session caching in the bouncer
+      cache: "no-store",
     });
-    
+
     const text = await response.text();
-    console.log(`[MW] get-session status=${response.status} body=${text.slice(0, 300)}`);
+    console.log(
+      `[MW] get-session status=${response.status} body=${text.slice(0, 300)}`,
+    );
     const data = text ? JSON.parse(text) : null;
     return data?.user ? data : null;
   } catch (err: any) {
@@ -69,16 +82,20 @@ export default async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isReturning = request.cookies.has(RETURNING_COOKIE);
   const isHome = pathname === "/";
-  const isAuthPage = pathname.startsWith("/sign-in") || pathname.startsWith("/sign-up");
+  const isAuthPage =
+    pathname.startsWith("/sign-in") || pathname.startsWith("/sign-up");
 
   // 1. If user is logged in and trying to access root or auth, go to dashboard
   if (session && (isHome || isAuthPage)) {
     const returnTo = request.nextUrl.searchParams.get("returnTo");
-    return NextResponse.redirect(new URL(returnTo || "/dashboard", request.url));
+    return NextResponse.redirect(
+      new URL(returnTo || "/dashboard", request.url),
+    );
   }
 
   // 2. Returning User Logic
-  const shouldSkipRedirect = request.nextUrl.searchParams.get("redirect") === "false";
+  const shouldSkipRedirect =
+    request.nextUrl.searchParams.get("redirect") === "false";
   if (!session && isHome && isReturning && !shouldSkipRedirect) {
     return NextResponse.redirect(new URL("/sign-in", request.url));
   }
@@ -93,7 +110,11 @@ export default async function middleware(request: NextRequest) {
   }
 
   // 4. Protect private routes
-  if (!session && !isPublicRoute(pathname) && !pathname.startsWith("/api/auth")) {
+  if (
+    !session &&
+    !isPublicRoute(pathname) &&
+    !pathname.startsWith("/api/auth")
+  ) {
     return NextResponse.redirect(new URL("/sign-in", request.url));
   }
 
