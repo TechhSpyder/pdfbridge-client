@@ -75,9 +75,6 @@ export default async function middleware(request: NextRequest) {
     return NextResponse.redirect(
       new URL(returnTo || "/dashboard", request.url),
     );
-    return NextResponse.redirect(
-      new URL(returnTo || "/dashboard", request.url),
-    );
   }
 
   // 2. Returning User Logic
@@ -102,16 +99,10 @@ export default async function middleware(request: NextRequest) {
     !isPublicRoute(pathname) &&
     !pathname.startsWith("/api/auth")
   ) {
-    if (
-      !session &&
-      !isPublicRoute(pathname) &&
-      !pathname.startsWith("/api/auth")
-    ) {
-      return NextResponse.redirect(new URL("/sign-in", request.url));
-    }
-
-    return response;
+    return NextResponse.redirect(new URL("/sign-in", request.url));
   }
+
+  return response;
 }
 export const config = {
   matcher: [

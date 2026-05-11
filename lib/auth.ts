@@ -48,16 +48,6 @@ export async function getServerSession(): Promise<Session> {
         "localhost:3000",
     );
 
-    // Bearer fallback for environments where cookie-only session validation is strict.
-    const tokenMatch =
-      cookieHeader.match(/better-auth\.session_token=([^;]+)/) ||
-      cookieHeader.match(/__Secure-better-auth\.session_token=([^;]+)/);
-    if (tokenMatch) {
-      const fullValue = decodeURIComponent(tokenMatch[1]);
-      const rawToken = fullValue.split(".")[0];
-      headers.set("Authorization", `Bearer ${rawToken}`);
-    }
-
     const response = await fetch(`${API_URL}/api/auth/get-session`, {
       method: "GET",
       headers,
