@@ -22,19 +22,6 @@ async function getSessionFromAPI(request: NextRequest) {
         "localhost:3000",
     );
 
-    // BEARER FALLBACK: Extract naked token from the signed/prefixed cookie string
-    // This circumvents strict same-origin cookie validation rules internally in get-session
-    const tokenMatch = rawCookie.match(/better-auth\.session_token=([^;]+)/);
-    if (tokenMatch) {
-      const fullValue = decodeURIComponent(tokenMatch[1]);
-      const rawToken = fullValue.split(".")[0];
-      headers.set("Authorization", `Bearer ${rawToken}`);
-      // [SECURITY] Removed token override logging
-    }
-
-    const hasCookie = rawCookie.includes("better-auth.session_token");
-    console.log(`[MW] rawCookie has session token: ${hasCookie}`);
-
     const response = await fetch(`${API_URL}/api/auth/get-session`, {
       method: "GET",
       headers,
@@ -42,9 +29,6 @@ async function getSessionFromAPI(request: NextRequest) {
     });
 
     const text = await response.text();
-    console.log(
-      `[MW] get-session status=${response.status} body=${text.slice(0, 300)}`,
-    );
     const data = text ? JSON.parse(text) : null;
     return data?.user ? data : null;
   } catch (err: any) {
@@ -91,6 +75,9 @@ export default async function middleware(request: NextRequest) {
     return NextResponse.redirect(
       new URL(returnTo || "/dashboard", request.url),
     );
+    return NextResponse.redirect(
+      new URL(returnTo || "/dashboard", request.url),
+    );
   }
 
   // 2. Returning User Logic
@@ -115,12 +102,17 @@ export default async function middleware(request: NextRequest) {
     !isPublicRoute(pathname) &&
     !pathname.startsWith("/api/auth")
   ) {
-    return NextResponse.redirect(new URL("/sign-in", request.url));
+    if (
+      !session &&
+      !isPublicRoute(pathname) &&
+      !pathname.startsWith("/api/auth")
+    ) {
+      return NextResponse.redirect(new URL("/sign-in", request.url));
+    }
+
+    return response;
   }
-
-  return response;
 }
-
 export const config = {
   matcher: [
     "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
