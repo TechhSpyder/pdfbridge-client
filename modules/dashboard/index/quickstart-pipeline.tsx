@@ -65,8 +65,8 @@ export function QuickStartPipeline({
     {
       id: "test-api",
       icon: <Terminal className="h-5 w-5" />,
-      title: "Run your first PDF conversion",
-      description: "Use the interactive Playground below to test our rendering engine.",
+      title: "Execute your first Invoice Workflow",
+      description: "Use the interactive Infrastructure Playground to verify the Execution Layer.",
       isComplete: false, // Could be bound to a global state later
       action: (
         <Button
@@ -112,7 +112,8 @@ export function QuickStartPipeline({
           Quick Start Guide
         </h2>
         <p className="text-sm text-slate-400">
-          Welcome to PDFBridge! Complete these steps to get your integration running in under 5 minutes.
+          Welcome to the Invoice Infrastructure layer. Complete these steps to
+          get your integration running in under 5 minutes.
         </p>
       </div>
 

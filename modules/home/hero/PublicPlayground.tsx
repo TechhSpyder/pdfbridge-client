@@ -18,7 +18,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 
 const PUBLIC_DEMO_KEY =
-  process.env.NEXT_PUBLIC_PUBLIC_DEMO_KEY || "pk_demo_57b12a2ff6c54bac7b45c0f0fcce47b2c1a80c8a4613a2b6";
+  process.env.NEXT_PUBLIC_PUBLIC_DEMO_KEY ||
+  "pk_demo_57b12a2ff6c54bac7b45c0f0fcce47b2c1a80c8a4613a2b6";
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
 export function PublicPlayground() {
@@ -94,7 +95,7 @@ export function PublicPlayground() {
     }
 
     if (file.type !== "application/pdf") {
-      toast.error("Please upload a PDF invoice.");
+      toast.error("Please upload a document.");
       return;
     }
 
@@ -104,7 +105,7 @@ export function PublicPlayground() {
     setAiMetadata(null);
 
     const tId = toast.loading("Uploading & Analyzing document...", {
-      description: "Our AI is mapping financial fields for orchestration.",
+      description: "Our Engine is mapping financial fields for orchestration.",
     });
 
     try {
@@ -171,12 +172,13 @@ export function PublicPlayground() {
                 <FileText className="w-8 h-8 text-blue-400" />
               </div>
               <div className="space-y-2">
-                <h3 className="text-xl font-bold text-white">
-                  Upload a problematic invoice
+                <h3 className="text-xl font-bold text-white uppercase tracking-tight">
+                  Try it instantly
                 </h3>
                 <p className="text-slate-400 text-sm max-w-sm mx-auto">
-                  Experience the AI-to-PDF loop. We extract structured JSON and
-                  regenerate a clean, professional copy.
+                  Upload a messy document → <br />
+                  Get structured JSON and a clean, normalized version in
+                  seconds.
                 </p>
               </div>
 
@@ -185,7 +187,7 @@ export function PublicPlayground() {
                   type="file"
                   ref={fileInputRef}
                   className="hidden"
-                  accept="application/pdf"
+                  accept="application/pdf,image/*"
                   onChange={handleFileChange}
                 />
                 <Button
@@ -193,12 +195,11 @@ export function PublicPlayground() {
                   size="lg"
                   className="rounded-2xl px-12 py-7 bg-blue-600 hover:bg-blue-700 shadow-xl shadow-blue-600/20 group font-bold text-lg"
                 >
-                  Select Invoice PDF
-                  <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  Upload a messy document →
                 </Button>
               </div>
-              <p className="text-[10px] text-slate-600 uppercase font-black tracking-widest">
-                No data persists · Zero retention sandbox
+              <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest px-4 py-1.5 rounded-full border border-white/5 bg-white/5">
+                No signup required · Zero retention
               </p>
             </div>
           )}
@@ -231,7 +232,7 @@ export function PublicPlayground() {
                       <Loader2 className="w-12 h-12 text-emerald-500 animate-spin relative" />
                     </div>
                     <h4 className="text-white font-bold text-lg">
-                      AI Mapping & Normalization
+                      Engine Mapping & Normalization
                     </h4>
                     <p className="text-slate-500 text-sm max-w-xs">
                       Extracting line items and applying high-fidelity layout
@@ -258,7 +259,10 @@ export function PublicPlayground() {
                       Extracted Metadata
                     </span>
                   </div>
-                  <div className="bg-black/60 rounded-2xl border border-white/5 p-4 h-[300px] overflow-y-auto font-mono text-[10px] text-emerald-400">
+                  <div
+                    data-lenis-prevent="true"
+                    className="bg-black/60 rounded-2xl border border-white/5 p-4 h-[300px] overflow-y-auto font-mono text-[10px] text-emerald-400"
+                  >
                     <pre>{JSON.stringify(aiMetadata, null, 2)}</pre>
                   </div>
                 </div>
@@ -287,7 +291,7 @@ export function PublicPlayground() {
                       variant="outline"
                       className="bg-transparent border-white/10 hover:bg-white/5 rounded-xl h-auto py-3 px-6 font-bold"
                     >
-                      Open Normalized PDF
+                      Open Normalized Output
                       <ExternalLink className="ml-2 w-4 h-4" />
                     </Button>
                   </div>
@@ -302,9 +306,9 @@ export function PublicPlayground() {
                       <p className="text-white font-bold text-sm">
                         Deploy this workflow tonight.
                       </p>
-                      <p className="text-blue-300/60 text-xs">
-                        Our SDK handles the polling, extraction, and rendering
-                        for you.
+                      <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tight mt-1">
+                        Our SDK handles the polling, extraction, and
+                        normalization for you.
                       </p>
                     </div>
                   </div>
@@ -344,14 +348,14 @@ export function PublicPlayground() {
           </AnimatePresence>
 
           {/* Fine Print */}
-          <div className="pt-4 flex items-center justify-center gap-6 text-slate-500 border-t border-white/5">
+          <div className="pt-4 flex sm:items-center justify-center max-sm:flex-col gap-6 text-slate-500 border-t border-t-white/10">
             <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> API
               V1.2.0 (Finance-Grade)
             </div>
-            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider">
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-500" /> SOC-2
-              Ready Infra
+            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-500" /> Designed
+              for security and compliance-sensitive workflows
             </div>
           </div>
         </div>

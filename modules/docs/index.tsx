@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -369,10 +369,9 @@ export function Documentation({
             header for all requests.
           </p>
           <CodeBlock
-            code={`curl -X POST https://api.pdfbridge.xyz/api/v1/convert \\
+            code={`curl -X POST https://api.pdfbridge.xyz/api/v1/compiler/compile-intent \\
   -H "x-api-key: pk_live_your_key_here" \\
-  -H "Content-Type: application/json" \\
-  -d '{"url": "https://example.com"}'`}
+  -F "file=@invoice.pdf"`}
             language="bash"
           />
         </section>

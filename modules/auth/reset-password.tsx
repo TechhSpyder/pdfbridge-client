@@ -1,16 +1,15 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useSignIn } from "@clerk/nextjs";
+import { authClient } from "@/lib/auth-client";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/modules/app/button";
 import { Lock, Loader2, Eye, EyeOff, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { PasswordStrengthIndicator } from "@/modules/auth/password-strength";
+import { toast } from "sonner";
 
 export function ResetPasswordPage() {
-  const { isLoaded, signIn, setActive } = useSignIn();
-  const [code, setCode] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
@@ -20,17 +19,19 @@ export function ResetPasswordPage() {
   const [success, setSuccess] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const email = searchParams.get("email") || "";
+  
+  // Better-Auth reset password usually works with a token from the URL
+  const token = searchParams.get("token") || "";
 
   useEffect(() => {
-    if (!email) {
+    if (!token) {
+      toast.error("Invalid or missing reset token.");
       router.push("/forgot-password");
     }
-  }, [email, router]);
+  }, [token, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isLoaded) return;
 
     if (password !== confirmPassword) {
       setError("Passwords do not match");
@@ -46,27 +47,22 @@ export function ResetPasswordPage() {
     setError("");
 
     try {
-      const result = await signIn.attemptFirstFactor({
-        strategy: "reset_password_email_code",
-        code,
-        password,
+      const { error: resetError } = await authClient.resetPassword({
+        newPassword: password,
+        token: token,
       });
 
-      if (result.status === "complete") {
-        await setActive({ session: result.createdSessionId });
-        setSuccess(true);
-        setTimeout(() => {
-          router.push("/dashboard");
-        }, 2000);
-      } else {
-        console.log(result);
-        setError("Something went wrong. Please try again.");
+      if (resetError) {
+        throw new Error(resetError.message || "Failed to reset password");
       }
+
+      setSuccess(true);
+      toast.success("Password reset successfully!");
+      setTimeout(() => {
+        router.push("/sign-in");
+      }, 3000);
     } catch (err: any) {
-      setError(
-        err.errors?.[0]?.message ||
-          "Failed to reset password. Please check your code.",
-      );
+      setError(err.message || "Failed to reset password. The link may have expired.");
     } finally {
       setLoading(false);
     }
@@ -83,8 +79,7 @@ export function ResetPasswordPage() {
             Password Reset!
           </h2>
           <p className="text-slate-400">
-            Your password has been successfully updated. Redirecting you to your
-            dashboard...
+            Your password has been successfully updated. Redirecting you to sign in...
           </p>
           <div className="flex justify-center">
             <Loader2 className="h-6 w-6 text-emerald-500 animate-spin" />
@@ -106,32 +101,12 @@ export function ResetPasswordPage() {
             Create New Password
           </h2>
           <p className="mt-4 text-slate-400">
-            Enter the code sent to{" "}
-            <span className="text-white font-medium">{email}</span> and choose a
-            new password.
+            Enter your new secure password below to regain access.
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-4">
           <div className="space-y-4">
-            <div>
-              <label
-                className="block text-sm font-medium text-slate-300"
-                htmlFor="code"
-              >
-                Reset Code
-              </label>
-              <input
-                id="code"
-                type="text"
-                required
-                className="mt-1 block w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder-slate-600 transition focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 sm:text-sm text-center tracking-[0.5em] font-mono uppercase"
-                placeholder="000000"
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-              />
-            </div>
-
             <div>
               <label
                 className="block text-sm font-medium text-slate-300"
@@ -193,7 +168,7 @@ export function ResetPasswordPage() {
 
             <Button
               type="submit"
-              disabled={loading || !code || !password}
+              disabled={loading || !password}
               className="w-full py-4 text-base font-bold shadow-xl shadow-blue-500/10 flex items-center justify-center"
             >
               {loading ? (
@@ -213,7 +188,7 @@ export function ResetPasswordPage() {
             href="/forgot-password"
             className="text-sm font-medium text-slate-500 hover:text-white transition-colors"
           >
-            Didn't receive a code? Try again
+            Back to forgot password
           </Link>
         </div>
       </div>

@@ -1,58 +1,47 @@
-# PDFBridge Frontend
+# PDFBridge Institutional Dashboard
 
-The premium developer portal and management console for the PDFBridge API. A high-fidelity, high-performance web application built with **Next.js 15**, **React**, and **Tailwind CSS**.
+The premium operative console for **PDFBridge** — Institutional Invoice Infrastructure. High-fidelity financial management built with **Next.js 15**, **React**, and **Tailwind CSS**.
 
 ![Status: Production Ready](https://img.shields.io/badge/Status-Production%20Ready-green)
-![Design: Premium Dark Mode](https://img.shields.io/badge/Design-Premium%20Dark%20Mode-blueviolet)
+![Security: Better--Auth](https://img.shields.io/badge/Security-Better--Auth-blue)
 
-## ✨ Key Features
+## 🏛️ System Features
 
-- **Live Dashboard Analytics**: Real-time business intelligence with conversion trends and volume tracking.
-- **Interactive API Docs**: Hands-on documentation with integrated API key support and interactive snippets.
-- **Dual-Key Management**: Securely manage and rotate `Test` and `Live` API keys.
-- **Premium Aesthetic**: Sophisticated dark-mode design with glassmorphism, glowing accents, and smooth Framer Motion animations.
-- **SEO Hardened**: Optimized for search engines with dynamic sitemaps, robots.txt, and comprehensive OpenGraph metadata.
-- **Tiered Billing**: Integrated Stripe/Lemon Squeezy pricing and usage-based tracking.
+- **Institutional Ledger**: Real-time business intelligence and document reconciliation trends.
+- **Engine Control Center**: Manage extraction rules, line-item precision, and deterministic execution plans.
+- **Dual-Key Management**: Rotate and manage `Test` (Sandbox) and `Live` (Production) cryptographic keys.
+- **Premium Aesthetic**: Sophisticated dark-mode design with glowing accents, glassmorphism, and smooth Framer Motion animations.
+- **Wallet-Integrated Auth**: Built-in support for Solana SIWS and traditional OIDC via **Better-Auth**.
 
-## 🛠️ Tech Stack
+## 🛠️ Infrastructure Stack
 
 - **Core**: [Next.js 15 (App Router)](https://nextjs.org/)
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS / Vanilla CSS
-- **Animations**: Framer Motion
-- **Auth**: Clerk (Custom Integration)
-- **State/Data**: React Query (TanStack Query) & Zustand
-
-## 📂 Project Structure
-
-- `/app`: Next.js App Router pages and layouts.
-- `/modules`: Feature-specific logic (Dashboard, Docs, Auth, Landing).
-- `/assets`: Brand assets and styling tokens.
-- `/public`: Static SEO configuration and OG images.
+- **Auth**: [Better-Auth](https://better-auth.com/) (Web2 + Web3 Wallet Native)
+- **State**: TanStack Query (React Query) & Zustand
+- **Graphics**: Framer Motion & Lucide Icons
+- **Deployment**: Optimized for **Vercel** and **Railway**.
 
 ## 🚀 Getting Started
 
 1.  **Install Dependencies**:
-
     ```bash
     pnpm install
     ```
 
 2.  **Environment Setup**:
-    Create a `.env.local` with:
-    - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
-    - `CLERK_SECRET_KEY`
-    - `NEXT_PUBLIC_API_URL`
+    Create a `.env.local` using the template:
+    - `NEXT_PUBLIC_API_URL`: Backend URL (Railway/Local).
+    - `BETTER_AUTH_SECRET`: Identity encryption secret.
+    - `NEXT_PUBLIC_SOLANA_NETWORK`: devnet/mainnet-beta.
 
 3.  **Run Development Server**:
     ```bash
     pnpm dev
     ```
 
-## 🔍 SEO & Brand Discovery
+## 🔍 Institutional Branding
 
-PDFBridge is configured for maximum discoverability. All metadata is managed dynamically in `app/layout.tsx` and specific page components. Branded assets for social media are located in `public/og-image.png`.
+PDFBridge is configured for maximum institutional perception. All metadata is managed dynamically in `app/layout.tsx`. Branded enterprise assets are located in `public/`.
 
 ---
-
-Built by the [PDFBridge Team](https://pdfbridge.xyz)
+© 2026 TechhSpyder Product Studio Ltd.

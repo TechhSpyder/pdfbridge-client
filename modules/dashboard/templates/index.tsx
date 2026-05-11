@@ -97,12 +97,12 @@ export function TemplatesDashboard() {
             No Templates Yet
           </h3>
           <p className="text-sm text-slate-500 max-w-sm mb-8">
-            Start by generating template layouts in the AI Lab. Once saved,
+            Start by generating template layouts in the Intelligence Lab. Once saved,
             they'll appear here for easy reuse.
           </p>
           <Link href="/dashboard/lab">
             <Button variant="secondary" className="gap-2">
-              Go to AI Lab <ArrowRight className="h-4 w-4" />
+              Go to Intelligence Lab <ArrowRight className="h-4 w-4" />
             </Button>
           </Link>
         </div>

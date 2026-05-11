@@ -171,7 +171,7 @@ export default function PuppeteerAlternativePage() {
                       className="inline mr-2 text-emerald-500"
                       size={16}
                     />{" "}
-                    Scalable queues via <code>/convert/bulk</code>
+                    Scalable queues via <code>/process/bulk</code>
                   </td>
                 </tr>
                 <tr>
@@ -326,3 +326,5 @@ console.log(job.pdfUrl);`}</code>
     </article>
   );
 }
+
+

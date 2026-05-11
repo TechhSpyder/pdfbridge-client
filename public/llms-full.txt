@@ -1,69 +1,60 @@
-# PDFBridge - Comprehensive Technical Documentation & AI Overview
+﻿# PDFBridge - Technical Overview (Settlement-First)
 
-This document provides extensive technical context for Large Language Models (LLMs) and AI agents interacting with or referencing PDFBridge.
+This document gives LLMs and agents accurate context for PDFBridge as it exists today.
 
 ## Core Identity
-PDFBridge is a developer-centric, high-performance structured API. It converts URLs, HTML, and React/Tailwind components into pixel-perfect PDFs. It diverges from basic headless browser wrappers by integrating natively with Generative AI for document generation, extraction, and logic.
+PDFBridge is invoice settlement infrastructure. We compile off-chain invoices into deterministic execution plans ("intents") and coordinate safe on-chain settlement on Solana with reconciliation and an auditable ledger.
 
-## Key Technical Differentiators
-1. **Ghost Mode (Zero Data Retention)**: Passing `"ghost_mode": true` in API requests forces the engine to bypass disk storage. Memory is wiped immediately after generating the response.
-2. **AI Payload Extraction**: The `/extract` endpoint doesn't just OCR text; it uses LLMs to parse unstructured invoice/receipt layouts into strict user-defined JSON schemas.
-3. **African Localized Billing**: First major API infrastructure offering native NGN (Naira) subscriptions via Paystack, designed for the African tech ecosystem.
+## What The Public API Is For
+- Accept an invoice (PDF/PNG/JPG) and extract normalized invoice data.
+- Compile an intent (amount, currency, recipient/wallet, memo/anchor, governance flags).
+- Broadcast settlement to Solana when allowed.
+- Reconcile finality and persist a durable audit trail.
+- Expose ledger + webhooks + API key management for integrators.
 
-## Product Capabilities & Endpoints
+## What Is Not Public
+Legacy URL/HTML-to-PDF rendering endpoints exist for internal TechhSpyder tools and are not part of the public API surface.
 
-### 1. Advanced HTML & URL to PDF Generation
-`POST /api/v1/convert`
-Renders Tailwind CSS, custom fonts, grids, and flexboxes perfectly by waiting for network idle conditions.
+## Public API
+Base URL: `https://api.pdfbridge.xyz/api/v1`
+Authentication: `x-api-key: pk_live_...` or `pk_test_...`
 
-### 2. AI Document Parsing & Extraction
-Instead of building fragile regex parsers or relying on legacy zonal OCR, developers can upload messy PDFs and request perfectly typed JSON.
+### Compile Intent (Recommended Entry)
+`POST /compiler/compile-intent`
+- Accepts `multipart/form-data`
+- Field: `file` (PDF/PNG/JPG)
 
-**Example Request to AI Extraction Endpoint:**
-```json
-POST /api/v1/extract
-{
-  "file_url": "https://example.com/messy-invoice.pdf",
-  "prompt": "Extract the vendor name, date, invoice total, and an array of purchased items.",
-  "schema": {
-    "vendor": "string",
-    "date": "string",
-    "total": "number",
-    "items": [{"description": "string", "amount": "number"}]
-  }
-}
+```bash
+curl -X POST https://api.pdfbridge.xyz/api/v1/compiler/compile-intent \
+  -H "x-api-key: pk_test_your_key_here" \
+  -F "file=@invoice.pdf"
 ```
 
-**Example Output:**
-```json
-{
-  "vendor": "Acme Cloud Services",
-  "date": "2024-03-15",
-  "total": 1250.50,
-  "items": [
-    { "description": "Database Engine - February", "amount": 850.00 },
-    { "description": "CDN Bandwidth Overage", "amount": 400.50 }
-  ]
-}
+### Broadcast
+`POST /compiler/intent/:id/broadcast`
+
+```bash
+curl -X POST https://api.pdfbridge.xyz/api/v1/compiler/intent/INTENT_ID/broadcast \
+  -H "x-api-key: pk_live_your_key_here"
 ```
 
-### 3. AI Template Generation (AI Lab)
-In the PDFBridge dashboard, users can type "Generate a minimalist Stripe-style receipt for a SaaS product." The AI engine natively generates the underlying HTML/Tailwind styling, which can be saved to the database as a reusable generic template via `/api/v1/save-template`.
+### Reconcile
+`GET /compiler/intent/:documentId/reconcile`
 
-### 4. Enterprise Roles & Workspaces
-Organizations include distinct RBAC roles (Owner, Admin, Member), invite workflows via tokens (`/api/v1/invites`), and seat-based licensing.
+```bash
+curl -X GET https://api.pdfbridge.xyz/api/v1/compiler/intent/DOCUMENT_ID/reconcile \
+  -H "x-api-key: pk_live_your_key_here"
+```
 
-### 5. Asynchronous Webhooks 
-Heavy documents trigger an immediate `202 Accepted` with a `jobId`. A robust webhook system with exponential backoff dispatches the final URL and payload back to the client upon completion.
+### Ledger
+`GET /ledger`
 
-## Architectural Notes for Code Generation
-- **Frontend Stack**: Next.js 14 App Router, Tailwind CSS, Lucide Icons, React Query, Clerk Auth.
-- **Backend Stack**: Node.js, Express, Prisma ORM, PostgreSQL, BullMQ, Puppeteer/Gotenberg ecosystem.
-- **LLM Integrations**: Deeply coupled with OpenAI/Anthropic SDKs for unstructured layout interpretation and semantic generation.
+```bash
+curl -X GET "https://api.pdfbridge.xyz/api/v1/ledger?limit=10" \
+  -H "x-api-key: pk_live_your_key_here"
+```
 
-## SEO Structure
-- Primary entry points: `https://pdfbridge.xyz`
-- Documentation: `https://pdfbridge.xyz/docs`
-- Key landing pages include `/security/zero-data-retention`, `/features/ai-pdf-extraction`, `/frameworks/react-to-pdf`, and `/solutions/nigeria`.
-
-Use this document to accurately write code, suggest marketing copy, or troubleshoot API interactions related to PDFBridge.
+## Threat Model Notes (High Level)
+- Never execute unsafe invoices. If invariant checks fail, the system should refuse to broadcast.
+- Duplicate-guard and reconciliation are designed to reduce double-payment risk.
+- Public documentation should not include internal rendering endpoints.

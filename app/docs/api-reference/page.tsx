@@ -47,7 +47,7 @@ export default function ApiReferencePage() {
                     <TocLink href="#ref-auth" title="Authentication" />
                     
                     <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-3 mb-2 mt-8">Endpoints</p>
-                    <TocLink href="#ref-convert" title="POST /convert" method="POST" />
+                    <TocLink href="#ref-convert" title="POST /process" method="POST" />
                     <TocLink href="#ref-extract" title="POST /extract" method="POST" />
                     <TocLink href="#ref-polling" title="GET /jobs/:id" method="GET" />
                 </nav>

@@ -20,15 +20,17 @@ import {
   Info,
   Clock,
 } from "lucide-react";
+import { useSession } from "@/lib/auth-client";
 import Title from "@/modules/app/title";
 import { toast } from "sonner";
 import { ConfirmActionDialog } from "@/modules/app/confirm-action-dialog";
 
 export function ApiKeysPage() {
-  const { data: userData } = useMe();
+  const { data: session } = useSession();
   const { data: apiKeysData } = useApiKeys();
   const createMutation = useCreateKey();
   const deleteMutation = useDeleteKey();
+  
   const [newKeyData, setNewKeyData] = useState<{
     key: string;
     type: string;
@@ -42,6 +44,7 @@ export function ApiKeysPage() {
     name: string;
   } | null>(null);
 
+
   const handleCreate = async () => {
     if (!isCreating || !keyName) return;
     const tId = toast.loading(`Generating ${isCreating} key...`);
@@ -52,9 +55,9 @@ export function ApiKeysPage() {
       });
 
       setNewKeyData({
-        key: response.apiKey,
-        type: response.type,
-        name: response.name,
+        key: response.key.rawKey,
+        type: response.key.type,
+        name: response.key.name,
       });
       setIsCreating(null);
       setKeyName("");
@@ -89,8 +92,8 @@ export function ApiKeysPage() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const liveKeys = apiKeysData?.filter((k: any) => k.type === "live") || [];
-  const testKeys = apiKeysData?.filter((k: any) => k.type === "test") || [];
+  const liveKeys = apiKeysData?.keys?.filter((k: any) => k.type === "live") || [];
+  const testKeys = apiKeysData?.keys?.filter((k: any) => k.type === "test") || [];
 
   return (
     <div className="max-w-4xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">

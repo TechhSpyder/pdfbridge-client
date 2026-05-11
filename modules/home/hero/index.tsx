@@ -69,22 +69,31 @@ export function Hero() {
                 </Link>
               </motion.div>
 
-              <h1 className="text-5xl sm:text-6xl lg:text-6xl font-black tracking-tight leading-[1.1]">
-                Financial Document{" "}
+              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-[1.1] mb-8 uppercase">
+                Financial Intent <br className="hidden lg:block" />
                 <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-300 via-indigo-300 to-cyan-400">
-                  Automation
-                </span>{" "}
-                Infrastructure.
+                  Compiler.
+                </span>
               </h1>
             </div>
 
-            <p className="text-xl text-slate-400 max-w-lg leading-relaxed">
-              Submit a PDF invoice. Receive structured JSON — vendor, line
-              items, totals, currency — every time.
-            </p>
-            <p className="text-sm text-slate-500 max-w-lg">
-              Built for SaaS billing, fintech workflows, and accounting
-              automation — without managing headless browser infrastructure.
+            <div className="space-y-4 mb-10 text-balance">
+              <p className="text-2xl font-bold text-white tracking-tight leading-tight">
+                Decompose any invoice into{" "}
+                <span className="text-blue-400 italic">deterministic execution intents.</span>
+              </p>
+              <p className="text-xl text-slate-300 font-semibold tracking-wide uppercase">
+                Ingest. Synthesize. Verify. Execute.
+              </p>
+              <p className="text-[10px] text-blue-400 font-black uppercase tracking-[0.2em] pt-2">
+                Protocol-Grade Financial Infrastructure
+              </p>
+            </div>
+
+            <p className="text-lg text-slate-400 max-w-lg leading-relaxed mb-8 border-l-2 border-blue-500/20 pl-6">
+              Institutional execution for modern financial systems.
+              <br />
+              Refusal as a standard. Math invariants. Proof-of-Intent.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
@@ -92,9 +101,9 @@ export function Hero() {
                 type="button"
                 size="lg"
                 onClick={() => router.push("/sign-up")}
-                className="bg-blue-600 hover:bg-blue-700 text-sm text-white px-5 h-14 flex items-center justify-center rounded-2xl shadow-xl shadow-blue-500/20 group"
+                className="bg-blue-600 hover:bg-blue-700 text-sm text-white px-8 h-14 flex items-center justify-center rounded-2xl shadow-xl shadow-blue-500/20 group font-bold"
               >
-                Try 50 Free Conversions
+                Get Started
                 <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform duration-200 ease-out" />
               </Button>
               <Link href="/docs" className="block">
@@ -102,13 +111,13 @@ export function Hero() {
                   type="button"
                   size="lg"
                   variant="secondary"
-                  className="h-14 px-8 rounded-2xl border-slate-800 hover:bg-slate-900 cursor-pointer w-full sm:w-auto"
+                  className="h-14 px-8 rounded-2xl border-slate-800 hover:bg-slate-900 cursor-pointer w-full sm:w-auto font-medium"
                 >
                   View API Docs →
                 </Button>
               </Link>
             </div>
-            <p className="text-xs text-slate-600 pt-1">
+            <p className="text-sm text-slate-500 pt-2 font-medium">
               No credit card required.
             </p>
 
@@ -171,13 +180,13 @@ export function Hero() {
                     Status
                   </div>
                   <div className="text-xs text-white font-semibold">
-                    Job #8234 Processed
+                    Intent Synthesis Verified
                   </div>
                 </div>
               </div>
             </motion.div>
 
-            {/* AI Floater */}
+            {/* Engine Floater */}
             <motion.div
               animate={{ y: [0, 8, 0] }}
               transition={{

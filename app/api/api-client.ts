@@ -22,7 +22,11 @@ export const useApiClient = () => {
       sdk.rawRequest(path, { ...options, method: "PATCH", body: JSON.stringify(body) }),
     put: (path: string, body: any, options?: RequestInit) =>
       sdk.rawRequest(path, { ...options, method: "PUT", body: JSON.stringify(body) }),
-    delete: (path: string, options?: RequestInit) =>
-      sdk.rawRequest(path, { ...options, method: "DELETE" }),
+    delete: (path: string, body?: any, options?: RequestInit) =>
+      sdk.rawRequest(path, { 
+        ...options, 
+        method: "DELETE", 
+        body: body ? JSON.stringify(body) : undefined 
+      }),
   };
 };

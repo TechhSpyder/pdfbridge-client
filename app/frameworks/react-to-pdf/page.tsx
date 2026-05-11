@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+﻿import { Metadata } from "next";
 import Link from "next/link";
 import { Layers, Zap, PenTool, LayoutTemplate, ArrowRight, Code2, Terminal } from "lucide-react";
 
@@ -135,14 +135,17 @@ export async function POST(req) {
   const htmlString = renderToStaticMarkup(<InvoiceTemplate data={data} />);
 
   // 2. Fire it to PDFBridge
-  const response = await fetch("https://api.pdfbridge.xyz/api/v1/convert", {
+  const response = await fetch("https://api.pdfbridge.xyz/api/v1/compiler/compile-intent", {
     method: "POST",
     headers: {
-      "x-api-key": \`\${process.env.PDFBRIDGE_API_KEY}\`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ html: htmlString })
-  });
+  "x-api-key": "YOUR_API_KEY",
+},
+body: (() => {
+  const form = new FormData();
+  form.append("file", invoiceFile); // PDF/PNG/JPG
+  return form;
+})(),
+});
 
   return new Response(response.body, {
     headers: { "Content-Type": "application/pdf" }

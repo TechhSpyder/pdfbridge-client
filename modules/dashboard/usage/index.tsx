@@ -1,6 +1,6 @@
 "use client";
 
-import { useConversions, useWebhookLogs } from "@/modules/hooks/queries";
+import { useActivity, useWebhookLogs } from "@/modules/hooks/queries";
 import { cn } from "@/utils";
 import { Button } from "@/modules/app/button";
 import {
@@ -29,7 +29,7 @@ export function UsagePage() {
   >("all");
   const [dateFilter, setDateFilter] = useState<"all" | "7d" | "30d">("all");
   const [pollInterval, setPollInterval] = useState<number | undefined>(30000);
-  const { data, isLoading, error } = useConversions(page, 10, pollInterval);
+  const { data, isLoading, error } = useActivity(page, 10, pollInterval);
 
   const formatDate = (dateString: string) => {
     return new Intl.DateTimeFormat("en-US", {
@@ -49,8 +49,8 @@ export function UsagePage() {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
   };
 
-  const allConversions = data?.conversions || [];
-  const conversions = allConversions.filter((c: any) => {
+  const allDocuments = data?.executions || [];
+  const documents = allDocuments.filter((c: any) => {
     // 1. Status Filter
     const matchesStatus =
       statusFilter === "all" ||
@@ -71,7 +71,7 @@ export function UsagePage() {
   });
   const pagination = data?.pagination;
 
-  const hasPending = (data?.conversions || []).some(
+  const hasPending = (data?.executions || []).some(
     (c: any) => c.status === "PENDING",
   );
 
@@ -84,7 +84,7 @@ export function UsagePage() {
   }, [hasPending]);
 
   const exportToCSV = () => {
-    if (!conversions.length) return;
+    if (!documents.length) return;
     const headers = [
       "ID",
       "URL",
@@ -93,7 +93,7 @@ export function UsagePage() {
       "Duration (ms)",
       "Date",
     ];
-    const rows = conversions.map((c: any) => [
+    const rows = documents.map((c: any) => [
       c.id,
       c.url || "HTML Payload",
       c.isTestMode ? "TEST" : "LIVE",
@@ -108,7 +108,7 @@ export function UsagePage() {
     link.setAttribute("href", url);
     link.setAttribute(
       "download",
-      `pdfbridge-usage-${new Date().toISOString().split("T")[0]}.csv`,
+      `pdfbridge-activity-${new Date().toISOString().split("T")[0]}.csv`,
     );
     link.style.visibility = "hidden";
     document.body.appendChild(link);
@@ -141,7 +141,7 @@ export function UsagePage() {
           </h2>
           <p className="text-slate-400 mb-8 leading-relaxed">
             {error.message ||
-              "We couldn't retrieve your conversion history. Please check your network and try again."}
+              "We couldn't retrieve your processing history. Please check your network and try again."}
           </p>
           <Button
             onClick={() => window.location.reload()}
@@ -163,8 +163,8 @@ export function UsagePage() {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <Title
-          title="Usage & History"
-          description="A complete log of your PDF generation history and API performance."
+          title="Invoice Activity"
+          description="A high-fidelity log of your invoice processing history and infrastructure performance."
           icon={<FileText className="h-8 w-8 text-blue-500" />}
         />
 
@@ -203,7 +203,7 @@ export function UsagePage() {
           <Button
             variant="outline"
             onClick={exportToCSV}
-            disabled={!conversions.length}
+            disabled={!documents.length}
             className="text-[10px] uppercase font-bold h-9 border-white/5 text-slate-400 hover:bg-white/5"
           >
             <Download className="h-3.5 w-3.5 mr-2" />
@@ -250,14 +250,14 @@ export function UsagePage() {
                     <div className="flex flex-col items-center justify-center gap-3 text-slate-500">
                       <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
                       <span className="text-sm animate-pulse">
-                        Loading conversions…
+                        Loading activity…
                       </span>
                     </div>
                   </td>
                 </tr>
-              ) : conversions.length > 0 ? (
+              ) : documents.length > 0 ? (
                 <AnimatePresence mode="wait">
-                  {conversions.map((job: any, index: number) => (
+                  {documents.map((job: any, index: number) => (
                     <motion.tr
                       key={job.id}
                       initial={{ opacity: 0, y: 10 }}
@@ -273,7 +273,7 @@ export function UsagePage() {
                       <td className="px-6 py-4">
                         <div className="flex flex-col max-w-[300px]">
                           <span className="text-sm font-medium text-white truncate">
-                            {job.url || "HTML Content"}
+                            {job._activityType === "COMPILER" ? (job.vendorName || "Financial Document") : (job.url || "HTML Content")}
                           </span>
                           <span className="text-[10px] font-mono text-slate-500 truncate mt-0.5">
                             {job.id}
@@ -292,12 +292,12 @@ export function UsagePage() {
                         </span>
                       </td>
                       <td className="px-6 py-4">
-                        {job.status === "PENDING" ? (
+                        {job.status === "PENDING" || job.status === "SETTLING" ? (
                           <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-[10px] font-bold text-blue-500 animate-pulse">
                             <Loader2 className="h-3 w-3 animate-spin" />
                             PENDING
                           </div>
-                        ) : job.success ? (
+                        ) : job.success || job.status === "SETTLED" ? (
                           <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-bold text-emerald-500">
                             <CheckCircle2 className="h-3 w-3" />
                             SUCCESS
@@ -332,7 +332,7 @@ export function UsagePage() {
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2 text-sm text-slate-400">
                           <Clock className="h-3 w-3 text-slate-600" />
-                          {job.duration}ms
+                          {job.duration || 0}ms
                         </div>
                       </td>
                       <td className="px-6 py-4">
@@ -342,17 +342,15 @@ export function UsagePage() {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          {job.webhookUrl && (
-                            <Button
-                              variant="secondary"
-                              size="sm"
-                              className="h-8 p-0 text-white w-full"
-                              onClick={() => setSelectedJobId(job.id)}
-                              title="Inspect Webhooks"
-                            >
-                              <Search className="h-3.5 w-3.5" />
-                            </Button>
-                          )}
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            className="h-8 p-0 text-white w-full"
+                            onClick={() => setSelectedJobId(job.id)}
+                            title="Inspect Webhooks"
+                          >
+                            <Search className="h-3.5 w-3.5" />
+                          </Button>
                           {job.success && (
                             <Link
                               href={`https://api.pdfbridge.xyz/api/v1/jobs/${job.id}/download`}
@@ -512,7 +510,7 @@ function WebhookInspector({
         animate={{ x: 0 }}
         exit={{ x: "100%" }}
         transition={{ type: "spring", damping: 25, stiffness: 200 }}
-        className="h-full w-full max-w-xl bg-[#09090b] border-l border-white/10 shadow-2xl p-4 sm:p-8 overflow-y-auto"
+        className="h-full w-full max-w-xl bg-[#09090b] border-l border-white/10 shadow-2xl p-4 sm:p-8 overflow-y-auto scrollbar-hide"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-8">
@@ -551,7 +549,7 @@ function WebhookInspector({
               No webhook attempts recorded.
             </p>
             <p className="text-[10px] text-slate-600 mt-2 uppercase">
-              Check if the conversion has a valid webhookUrl
+              Check if your developer webhooks were correctly registered.
             </p>
           </div>
         ) : (
@@ -586,26 +584,17 @@ function WebhookInspector({
                   </span>
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-[10px] uppercase font-bold text-slate-600 tracking-widest">
-                    Response Payload
-                  </label>
-                  <pre className="p-4 bg-black/60 rounded-xl text-[11px] text-slate-400 font-mono overflow-x-auto border border-white/5 shadow-inner">
-                    {(() => {
-                      if (!log.responseBody)
-                        return "Empty response from server.";
-                      try {
-                        // Check if it's already an object or a JSON string
-                        const obj =
-                          typeof log.responseBody === "string"
-                            ? JSON.parse(log.responseBody)
-                            : log.responseBody;
-                        return JSON.stringify(obj, null, 2);
-                      } catch (e) {
-                        return log.responseBody;
-                      }
-                    })()}
-                  </pre>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] uppercase font-bold text-slate-600 tracking-widest flex items-center gap-2">
+                      <div className="h-1 w-1 bg-blue-500 rounded-full" />
+                      Request Payload
+                    </label>
+                    <pre className="p-4 bg-black/60 rounded-xl text-[11px] text-blue-400/80 font-mono overflow-x-auto scrollbar-hide border border-blue-500/10 shadow-inner">
+                      {JSON.stringify(log.payload, null, 2)}
+                    </pre>
+                  </div>
+
                 </div>
               </div>
             ))}
@@ -615,3 +604,5 @@ function WebhookInspector({
     </motion.div>
   );
 }
+
+

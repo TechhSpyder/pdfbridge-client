@@ -1,30 +1,24 @@
 "use server";
 
-import { auth, clerkClient } from "@clerk/nextjs/server";
-import { prisma } from "../../../lib/prisma";
+import { getServerSession } from "@/lib/auth";
+import { blogPrisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 
 async function verifyAdmin() {
   try {
-    const { userId } = await auth();
-    if (!userId) throw new Error("Unauthorized");
+    const session = await getServerSession();
 
-    const client = await clerkClient();
-    const user = await client.users.getUser(userId);
+    if (!session) throw new Error("Unauthorized");
 
-    // For PDFBRIDGE, we'll check for the 'platform-owner' role in publicMetadata
-    // We check both 'role' and 'userRole' keys to be flexible with Clerk metadata entry
-    const userRole =
-      (user.publicMetadata?.role as string) ||
-      (user.publicMetadata?.userRole as string) ||
-      "";
-    const primaryEmail =
-      user.emailAddresses.find((e) => e.id === user.primaryEmailAddressId)
-        ?.emailAddress || "";
+    const user = session.user as { id: string; email: string; role?: string };
+    
+    // Check for "platform-owner" role in our own database
+    const userRole = user.role || "";
+    const primaryEmail = user.email;
 
-    const allowedEmails = process.env.ADMIN_EMAILS?.toLowerCase().split(
-      ",",
-    ) || ["admin@techhspyder.com", "bellofrancis87@gmail.com"];
+    const allowedEmails = process.env.ADMIN_EMAILS?.toLowerCase().split(",") || 
+      ["admin@techhspyder.com", "bellofrancis87@gmail.com"];
+    
     const isAllowed =
       allowedEmails.includes(primaryEmail.toLowerCase()) ||
       userRole === "platform-owner";
@@ -35,7 +29,7 @@ async function verifyAdmin() {
       );
     }
 
-    return { userId, primaryEmail };
+    return { userId: user.id, primaryEmail };
   } catch (error) {
     console.error("[verifyAdmin] Error:", error);
     throw error;
@@ -46,7 +40,7 @@ async function verifyAdmin() {
 
 export async function getPosts() {
   await verifyAdmin();
-  return prisma.post.findMany({
+  return blogPrisma.post.findMany({
     include: {
       category: true,
       author: true,
@@ -60,7 +54,7 @@ export async function getPosts() {
 
 export async function getPostById(id: string) {
   await verifyAdmin();
-  return prisma.post.findUnique({
+  return blogPrisma.post.findUnique({
     where: { id },
     include: {
       category: true,
@@ -101,12 +95,12 @@ export async function upsertPost(data: {
   };
 
   if (data.id) {
-    await prisma.post.update({
+    await blogPrisma.post.update({
       where: { id: data.id },
       data: postData,
     });
   } else {
-    await prisma.post.create({
+    await blogPrisma.post.create({
       data: postData,
     });
   }
@@ -116,14 +110,14 @@ export async function upsertPost(data: {
 
 export async function deletePost(id: string) {
   await verifyAdmin();
-  await prisma.post.delete({ where: { id } });
+  await blogPrisma.post.delete({ where: { id } });
   revalidatePath("/dashboard/blog");
 }
 
 // --- Categories ---
 
 export async function getCategories() {
-  return prisma.category.findMany({
+  return blogPrisma.category.findMany({
     orderBy: { name: "asc" },
   });
 }
@@ -134,7 +128,7 @@ export async function createCategory(name: string) {
     .toLowerCase()
     .replace(/ /g, "-")
     .replace(/[^\w-]+/g, "");
-  return prisma.category.create({
+  return blogPrisma.category.create({
     data: { name, slug },
   });
 }
@@ -142,7 +136,7 @@ export async function createCategory(name: string) {
 // --- Authors ---
 
 export async function getAuthors() {
-  return prisma.author.findMany({
+  return blogPrisma.author.findMany({
     orderBy: { name: "asc" },
   });
 }
@@ -153,7 +147,7 @@ export async function createAuthor(data: {
   bio?: string;
 }) {
   await verifyAdmin();
-  return prisma.author.create({
+  return blogPrisma.author.create({
     data,
   });
 }

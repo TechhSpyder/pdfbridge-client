@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { useUser, useClerk } from "@clerk/nextjs";
+import { useSession } from "@/lib/auth-client";
 import { toast } from "sonner";
 import { Button, GlowCard } from "@/modules/app";
 import {
@@ -15,12 +15,12 @@ import {
 import { useRouter } from "next/navigation";
 
 // Local fetcher since this page needs to handle both unauthenticated and authenticated states.
-// useApiClient assumes auth headers are required.
 const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
 export function InviteClient({ token }: { token: string }) {
-  const { user, isLoaded, isSignedIn } = useUser();
-  const { openSignIn, openSignUp } = useClerk();
+  const { data: session, isPending: sessionLoading } = useSession();
+  const isSignedIn = !!session;
+  const user = session?.user;
   const router = useRouter();
 
   // 1. Verify the token publicly to show the inviter details.
@@ -33,6 +33,7 @@ export function InviteClient({ token }: { token: string }) {
     queryFn: async () => {
       const res = await fetch(
         `${apiBase}/api/v1/invites/verify?token=${token}`,
+        { credentials: "include" }
       );
       if (!res.ok) {
         const err = await res.json();
@@ -46,15 +47,13 @@ export function InviteClient({ token }: { token: string }) {
   // 2. Accept the invite (requires auth)
   const acceptMutation = useMutation({
     mutationFn: async () => {
-      // Must manually pass auth token since this client doesn't use useApiClient wrapper
-      const sessionToken = await (window as any).Clerk?.session?.getToken();
-
+      // Better-Auth uses cookies, so 'credentials: include' ensures the session is sent.
       const res = await fetch(`${apiBase}/api/v1/invites/accept`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${sessionToken}`,
         },
+        credentials: "include",
         body: JSON.stringify({ token }),
       });
 
@@ -84,6 +83,7 @@ export function InviteClient({ token }: { token: string }) {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({ token }),
       });
 
@@ -105,10 +105,7 @@ export function InviteClient({ token }: { token: string }) {
     },
   });
 
-  // Automatically attempt to accept if already logged in and token is valid.
-  // Actually, better to explicitly make them click so they know what org they are joining.
-
-  if (!isLoaded || isVerifying) {
+  if (sessionLoading || isVerifying) {
     return (
       <GlowCard
         className="p-8 text-center"
@@ -156,7 +153,7 @@ export function InviteClient({ token }: { token: string }) {
 
   // If user is signed in with a different email, warn them
   const isEmailMismatch =
-    isSignedIn && user.primaryEmailAddress?.emailAddress !== intendedEmail;
+    isSignedIn && user?.email !== intendedEmail;
 
   return (
     <GlowCard
@@ -201,7 +198,7 @@ export function InviteClient({ token }: { token: string }) {
                 <ShieldAlert className="h-5 w-5 shrink-0" />
                 <p>
                   You are currently signed in as{" "}
-                  <strong>{user.primaryEmailAddress?.emailAddress}</strong>,
+                  <strong>{user?.email}</strong>,
                   which does not match the invited email. You can still accept,
                   but ensure this is intended.
                 </p>
@@ -213,17 +210,13 @@ export function InviteClient({ token }: { token: string }) {
                 <Button
                   variant="outline"
                   className="w-full bg-black/40 border-white/10 text-white hover:bg-white/5 h-12"
-                  onClick={() =>
-                    openSignIn({ fallbackRedirectUrl: `/invite/${token}`, forceRedirectUrl: `/invite/${token}` })
-                  }
+                  onClick={() => router.push(`/sign-in?redirect_url=${encodeURIComponent(`/invite/${token}`)}`)}
                 >
                   Log In
                 </Button>
                 <Button
                   className="w-full bg-blue-600 hover:bg-blue-500 text-white shadow-xl shadow-blue-500/10 h-12"
-                  onClick={() =>
-                    openSignUp({ fallbackRedirectUrl: `/invite/${token}`, forceRedirectUrl: `/invite/${token}` })
-                  }
+                  onClick={() => router.push(`/sign-up?redirect_url=${encodeURIComponent(`/invite/${token}`)}`)}
                 >
                   Create Account
                 </Button>
@@ -257,9 +250,7 @@ export function InviteClient({ token }: { token: string }) {
 
                 <Button
                   variant="outline"
-                  onClick={() =>
-                    openSignUp({ fallbackRedirectUrl: `/invite/${token}`, forceRedirectUrl: `/invite/${token}` })
-                  }
+                  onClick={() => router.push(`/sign-in?redirect_url=${encodeURIComponent(`/invite/${token}`)}`)}
                   className="w-full text-xs text-slate-500 hover:text-white border-transparent bg-transparent"
                 >
                   Use a different account

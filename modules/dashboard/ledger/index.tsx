@@ -1,6 +1,11 @@
 "use client";
 
-import { useLedger, useNormalizeInvoice } from "@/modules/hooks/queries";
+import {
+  useLedger,
+  useIngestDocument,
+  useLedgerDocument,
+  useIntegrations,
+} from "@/modules/hooks/queries";
 import { cn } from "@/utils";
 import { Button } from "@/modules/app/button";
 import {
@@ -14,31 +19,32 @@ import {
   Upload,
   Loader2,
   Search,
-  ExternalLink,
-  ArrowRight,
   Receipt,
-  FileJson,
   Database,
 } from "lucide-react";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Title from "@/modules/app/title";
 import { useDropzone } from "react-dropzone";
-import { toast } from "sonner";
+import type { FinancialDocument } from "@/modules/types";
 
 export function LedgerPage() {
   const [page, setPage] = useState(1);
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
   const { data, isLoading, error } = useLedger(page, 10, 5000);
-  const normalizeMutation = useNormalizeInvoice();
+  const ingestMutation = useIngestDocument();
+  const { data: integrations } = useIntegrations();
+
+  const isQuickBooksConnected = integrations?.some((i: any) => i.integrationId === "quickbooks");
+  const isXeroConnected = integrations?.some((i: any) => i.integrationId === "xero");
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
       if (acceptedFiles.length > 0) {
-        normalizeMutation.mutate({ file: acceptedFiles[0], testMode: true });
+        ingestMutation.mutate({ file: acceptedFiles[0], testMode: true });
       }
     },
-    [normalizeMutation],
+    [ingestMutation],
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -87,11 +93,14 @@ export function LedgerPage() {
   }
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
+    <div
+      data-lenis-prevent
+      className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20"
+    >
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <Title
           title="Financial Ledger"
-          description="Real-time monitor for AI extractions and accounting dispatches."
+          description="Real-time monitor for invoice ingestion and accounting dispatches."
           icon={<Banknote className="h-8 w-8 text-emerald-500" />}
         />
 
@@ -106,14 +115,12 @@ export function LedgerPage() {
             )}
           >
             <input {...getInputProps()} />
-            {normalizeMutation.isPending ? (
+            {ingestMutation.isPending ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
               <Upload className="h-4 w-4" />
             )}
-            {normalizeMutation.isPending
-              ? "Processing..."
-              : "Quick Test Upload"}
+            {ingestMutation.isPending ? "Ingesting..." : "Ingest Document"}
           </div>
         </div>
       </div>
@@ -124,7 +131,7 @@ export function LedgerPage() {
             <thead>
               <tr className="border-b border-white/5 bg-black/20 text-slate-500">
                 <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-wider">
-                  Document / Vendor
+                  Invoice / Vendor
                 </th>
                 <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-wider">
                   Amount
@@ -154,7 +161,7 @@ export function LedgerPage() {
                   </td>
                 </tr>
               ) : documents.length > 0 ? (
-                documents.map((doc: any) => (
+                documents.map((doc: FinancialDocument) => (
                   <tr
                     key={doc.id}
                     className="hover:bg-white/2 transition-colors group"
@@ -179,7 +186,7 @@ export function LedgerPage() {
                     <td className="px-6 py-4">
                       <div className="text-sm text-white font-medium">
                         {doc.totalAmount
-                          ? formatCurrency(doc.totalAmount, doc.currency)
+                          ? formatCurrency(Number(doc.totalAmount), doc.currency)
                           : "—"}
                       </div>
                     </td>
@@ -268,9 +275,11 @@ export function LedgerPage() {
       {/* Document Inspector Slide-over */}
       <AnimatePresence>
         {selectedDocId && (
-          <DocumentInspector
+          <InvoiceInspector
             docId={selectedDocId}
             onClose={() => setSelectedDocId(null)}
+            isQuickBooksConnected={!!isQuickBooksConnected}
+            isXeroConnected={!!isXeroConnected}
           />
         )}
       </AnimatePresence>
@@ -285,7 +294,7 @@ function StatusBadge({
   status: string;
   isTestMode?: boolean;
 }) {
-  const styles: any = {
+  const styles: Record<string, string> = {
     PENDING: "bg-amber-500/10 text-amber-400 border-amber-500/20 animate-pulse",
     CAPTURED: "bg-blue-500/10 text-blue-400 border-blue-500/20",
     DISPATCHED: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
@@ -319,17 +328,17 @@ function IntegrationIcon({
   return (
     <div
       className={cn(
-        "h-6 w-6 rounded-md flex items-center justify-center border transition-all grayscale opacity-40",
+        "h-6 w-6 rounded-md flex items-center justify-center border border-white/40 transition-all opacity-100",
         active &&
-          "grayscale-0 opacity-100 border-white/20 bg-white/5 shadow-lg shadow-white/5",
+          "grayscale-0 opacity-100 border-white/10 bg-white/5 shadow-lg shadow-white/5",
       )}
       title={provider}
     >
       <img
         src={
           provider === "quickbooks"
-            ? "https://upload.wikimedia.org/wikipedia/commons/6/6c/Intuit_QuickBooks_logo.svg"
-            : "https://developer.xero.com/_next/static/media/developer-logo-light.80bcbef8.svg"
+            ? "data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 36 36'%3e%3cpath fill='%232CA01C' d='M18 36c9.9411 0 18-8.0589 18-18 0-9.94114-8.0589-18-18-18C8.05886 0 0 8.05886 0 18c0 9.9411 8.05886 18 18 18Z'/%3e%3cpath fill='white' d='M12.0002 11c-3.86797 0-6.99996 3.136-6.99996 7 0 3.868 3.13199 7 6.99996 7h1.0001v-2.6h-1.0001c-2.42798 0-4.39995-1.972-4.39995-4.4 0-2.428 1.97197-4.4 4.39995-4.4h2.4041v13.6c0 1.436 1.1639 2.6 2.5999 2.6V11h-5.004ZM24.0038 25c3.868 0 6.9999-3.1361 6.9999-7 0-3.868-3.1319-7-6.9999-7h-1.0001v2.5999h1.0001c2.428 0 4.3999 1.9721 4.3999 4.4001s-1.9719 4.3999-4.3999 4.3999h-2.4041V8.79997c0-1.43602-1.1639-2.60002-2.5999-2.60002V25h5.004Z'/%3e%3c/svg%3e"
+            : "/xero-svgrepo-com.svg"
         }
         alt={provider}
         className="h-4 w-4 object-contain"
@@ -338,14 +347,16 @@ function IntegrationIcon({
   );
 }
 
-import { useLedgerDocument } from "@/modules/hooks/queries";
-
-function DocumentInspector({
+function InvoiceInspector({
   docId,
   onClose,
+  isQuickBooksConnected,
+  isXeroConnected,
 }: {
   docId: string;
   onClose: () => void;
+  isQuickBooksConnected: boolean;
+  isXeroConnected: boolean;
 }) {
   const { data: doc, isLoading } = useLedgerDocument(docId);
   const [tab, setTab] = useState<"metadata" | "line-items" | "sync">(
@@ -354,6 +365,7 @@ function DocumentInspector({
 
   return (
     <motion.div
+      data-lenis-prevent
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -375,7 +387,7 @@ function DocumentInspector({
             </div>
             <div>
               <h2 className="text-xl font-bold text-white leading-tight">
-                Document Inspector
+                Invoice Inspector
               </h2>
               <div className="flex items-center gap-2 mt-1">
                 <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">
@@ -437,27 +449,27 @@ function DocumentInspector({
                       <MetaField
                         label="Vendor"
                         value={doc.vendorName}
-                        icon={<Database />}
+                        icon={<Database className="w-4 h-4" />}
                       />
                       <MetaField
                         label="Invoice #"
                         value={doc.invoiceNumber}
-                        icon={<FileText />}
+                        icon={<FileText className="w-4 h-4" />}
                       />
                       <MetaField
                         label="Total Amount"
                         value={doc.totalAmount?.toString()}
-                        icon={<Banknote />}
+                        icon={<Banknote className="w-4 h-4" />}
                       />
                       <MetaField
                         label="Currency"
                         value={doc.currency}
-                        icon={<Database />}
+                        icon={<Database className="w-4 h-4" />}
                       />
                       <MetaField
                         label="Due Date"
                         value={doc.dueDate}
-                        icon={<Clock />}
+                        icon={<Clock className="w-4 h-4" />}
                       />
                       <MetaField
                         label="Confidence"
@@ -466,7 +478,7 @@ function DocumentInspector({
                             ? `${doc.confidenceScore}%`
                             : "100%"
                         }
-                        icon={<CheckCircle2 />}
+                        icon={<CheckCircle2 className="w-4 h-4" />}
                       />
                     </div>
                   )}
@@ -488,17 +500,28 @@ function DocumentInspector({
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-white/5">
-                          {doc.lineItems?.map((item: any, i: number) => (
-                            <tr key={i} className="text-xs text-slate-300">
-                              <td className="px-4 py-3">{item.description}</td>
-                              <td className="px-4 py-3 text-right">
-                                {item.quantity}
-                              </td>
-                              <td className="px-4 py-3 text-right">
-                                {item.unitPrice}
-                              </td>
-                            </tr>
-                          ))}
+                          {doc.lineItems?.map(
+                            (
+                              item: {
+                                description: string;
+                                quantity: number;
+                                unitPrice: number;
+                              },
+                              i: number,
+                            ) => (
+                              <tr key={i} className="text-xs text-slate-300">
+                                <td className="px-4 py-3">
+                                  {item.description}
+                                </td>
+                                <td className="px-4 py-3 text-right">
+                                  {item.quantity}
+                                </td>
+                                <td className="px-4 py-3 text-right">
+                                  {item.unitPrice}
+                                </td>
+                              </tr>
+                            ),
+                          )}
                         </tbody>
                       </table>
                     </div>
@@ -514,14 +537,22 @@ function DocumentInspector({
                             ? "SUCCESS"
                             : doc.status === "DISPATCH_FAILED"
                               ? "FAILED"
-                              : "PENDING"
+                              : isQuickBooksConnected
+                                ? "PENDING"
+                                : "NOT_CONNECTED"
                         }
                         isTestMode={doc.isTestMode}
                       />
                       <SyncLog
                         provider="Xero"
                         externalId={doc.xeroId}
-                        status={doc.xeroId ? "SUCCESS" : "PENDING"}
+                        status={
+                          doc.xeroId
+                            ? "SUCCESS"
+                            : isXeroConnected
+                              ? "PENDING"
+                              : "NOT_CONNECTED"
+                        }
                         isTestMode={doc.isTestMode}
                       />
                     </div>
@@ -531,7 +562,7 @@ function DocumentInspector({
 
               <div className="pt-8 border-t border-white/5">
                 <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-4">
-                  Raw AI JSON Payload
+                  Extracted Intelligence (JSON)
                 </label>
                 <div className="p-4 bg-black rounded-2xl border border-white/10 font-mono text-[11px] text-slate-400 overflow-x-auto shadow-inner">
                   <pre>{JSON.stringify(doc.metadata || {}, null, 2)}</pre>
@@ -552,13 +583,13 @@ function MetaField({
 }: {
   label: string;
   value?: string;
-  icon: any;
+  icon: React.ReactNode;
 }) {
   return (
     <div className="p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-white/10 transition-colors">
       <div className="flex items-center gap-2 text-slate-500 mb-2">
         {icon && <div className="h-3 w-3">{icon}</div>}
-        <span className="text-[9px] font-bold uppercase tracking-widest">
+        <span className="text-xs font-bold uppercase tracking-widest">
           {label}
         </span>
       </div>
@@ -592,15 +623,23 @@ function SyncLog({
           <p className="text-[10px] font-mono text-slate-500 mt-0.5">
             {externalId
               ? `ID: ${externalId}`
-              : status === "FAILED"
-                ? "Dispatch failed during worker execution"
-                : isTestMode
-                  ? "Sandbox: Dispatch Disabled"
-                  : "Awaiting transmission..."}
+              : status === "NOT_CONNECTED"
+                ? "No integration configured."
+                : status === "FAILED"
+                  ? "Dispatch failed during worker execution"
+                  : isTestMode
+                    ? "Sandbox: Dispatch Disabled"
+                    : "Awaiting transmission..."}
           </p>
         </div>
       </div>
-      <StatusBadge status={status} />
+      {status === "NOT_CONNECTED" ? (
+        <a href="/settings" className="px-3 py-1.5 bg-white/5 hover:bg-white/10 rounded-lg text-[10px] font-bold text-white transition-colors border border-white/10 shadow-sm cursor-pointer">
+          Connect
+        </a>
+      ) : (
+        <StatusBadge status={status} />
+      )}
     </div>
   );
 }

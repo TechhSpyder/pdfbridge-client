@@ -56,7 +56,7 @@ export function SocialProof() {
           }`}
         >
           <h2 className="text-3xl font-semibold tracking-tight">
-            Production-ready PDF rendering for modern web stacks.
+            Document processing for modern systems.
           </h2>
           <div className="mt-4 flex flex-wrap justify-center gap-2">
             {["React", "Next.js", "Vue", "Tailwind", "Node"].map((tech) => (
@@ -69,8 +69,7 @@ export function SocialProof() {
             ))}
           </div>
           <p className="mt-4 text-muted-foreground">
-            Designed to support high-volume, automated PDF generation across
-            modern workflows.
+            Designed for high-volume, automated document workflows.
           </p>
         </div>
 
@@ -103,15 +102,29 @@ export function SocialProof() {
           ))}
         </div>
 
+        {/* Institutional Trust: Connectivity Map */}
+        <div className="mt-20 border-t border-border/50 pt-16">
+          <p className="text-center text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 mb-10">
+            Native Connectivity & Execution
+          </p>
+          <div className="flex flex-wrap justify-center items-center gap-12 opacity-40 grayscale hover:grayscale-0 transition-all duration-500">
+            {/* Logic for logos (using text for now as placeholders for actual SVG paths/images) */}
+            {["Stripe", "Paystack", "QuickBooks", "Xero"].map((logo) => (
+              <span key={logo} className="text-xl font-bold font-mono tracking-tighter text-foreground">
+                {logo.toUpperCase()}
+              </span>
+            ))}
+          </div>
+        </div>
+
         {/* Micro trust line */}
         <p
-          className={`mt-10 text-center text-sm text-muted-foreground transition-all duration-700 ease-out ${
+          className={`mt-16 text-center text-sm text-muted-foreground transition-all duration-700 ease-out ${
             isVisible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
           }`}
           style={{ transitionDelay: "400ms" }}
         >
-          Built for production-grade reliability, scalability, and consistent
-          HTML-to-PDF rendering.
+          Institutional-grade document infrastructure. Verified at scale.
         </p>
       </div>
     </section>

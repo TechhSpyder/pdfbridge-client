@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useSignIn, useSignUp } from "@clerk/nextjs";
+import { signIn, signUp } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { Button } from "@/modules/app/button";
 import { Github } from "lucide-react";
@@ -9,27 +9,20 @@ import { Mail } from "lucide-react";
 import { Eye } from "lucide-react";
 import { EyeOff } from "lucide-react";
 import { Loader2 } from "lucide-react";
-import { Lock } from "lucide-react";
 import Link from "next/link";
 import { Turnstile } from "@marsidev/react-turnstile";
 import { PasswordStrengthIndicator } from "./password-strength";
 import { toast } from "sonner";
+import { VerifyOtpForm } from "./verify-otp-form";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { useWalletModal } from "@solana/wallet-adapter-react-ui";
+import { Wallet } from "lucide-react";
 
 interface AuthCardProps {
   type: "sign-in" | "sign-up";
 }
 
 export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
-  const {
-    isLoaded: signInLoaded,
-    signIn,
-    setActive: setSignInActive,
-  } = useSignIn();
-  const {
-    isLoaded: signUpLoaded,
-    signUp,
-    setActive: setSignUpActive,
-  } = useSignUp();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -41,17 +34,26 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [pendingVerification, setPendingVerification] = useState(false);
-  const [code, setCode] = useState("");
-  const [countdown, setCountdown] = useState(60);
-  const [canResend, setCanResend] = useState(false);
-  const [resending, setResending] = useState(false);
   const [isPasswordValid, setIsPasswordValid] = useState(false);
   const [isRouting, setIsRouting] = useState(false);
+  const { connected, publicKey, signMessage, connect } = useWallet();
+  const { setVisible } = useWalletModal();
+  const [loadingWallet, setLoadingWallet] = useState(false);
+  const [walletCollision, setWalletCollision] = useState<{
+    maskedEmail: string | null;
+    message: string;
+  } | null>(null);
   const router = useRouter();
+
+  // Preserve the user entrypoint (ex: judges coming from /compiler).
+  const returnTo =
+    typeof window !== "undefined"
+      ? (new URLSearchParams(window.location.search).get("returnTo") ??
+        "/dashboard")
+      : "/dashboard";
   const [showTurnstile, setShowTurnstile] = useState(false);
-  const [show2FA, setShow2FA] = useState(false);
-  const [activeStrategy, setActiveStrategy] = useState<string | null>(null);
   const isSignIn = type === "sign-in";
+
   useEffect(() => {
     if (!isSignIn) {
       setShowTurnstile(true);
@@ -66,112 +68,92 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
         "[TURNSTILE] Using LOCAL TEST site key. This WILL fail on production domains.",
       );
     } else {
-      console.log(`[TURNSTILE] Loaded site key: ${key.substring(0, 6)}...`);
     }
   }, []);
 
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (pendingVerification && countdown > 0) {
-      timer = setInterval(() => {
-        setCountdown((prev) => prev - 1);
-      }, 1000);
-    } else if (countdown === 0) {
-      setCanResend(true);
-    }
-    return () => clearInterval(timer);
-  }, [pendingVerification, countdown]);
-
-  const handleResend = async () => {
-    if (!signUpLoaded || !canResend) return;
-    setResending(true);
-    setError("");
-    try {
-      await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
-      setCountdown(60);
-      setCanResend(false);
-    } catch (err: any) {
-      setError(err.errors?.[0]?.message || "Failed to resend code");
-    } finally {
-      setResending(false);
-    }
-  };
-
-  const handleSocialSignIn = async (
-    strategy: "oauth_google" | "oauth_github",
-  ) => {
-    if (isSignIn && !signInLoaded) return;
-    if (!isSignIn && !signUpLoaded) return;
-
-    const auth = isSignIn ? signIn : signUp;
-    if (strategy === "oauth_google") setLoadingGoogle(true);
-    if (strategy === "oauth_github") setLoadingGithub(true);
+  const handleSocialSignIn = async (provider: "google" | "github") => {
+    if (provider === "google") setLoadingGoogle(true);
+    if (provider === "github") setLoadingGithub(true);
 
     try {
-      await auth?.authenticateWithRedirect({
-        strategy,
-        redirectUrl: `/oauth-callback?intent=${isSignIn ? "sign-in" : "sign-up"}`,
-        redirectUrlComplete: "/dashboard",
+      await signIn.social({
+        provider,
+        callbackURL: `${window.location.origin}${returnTo}`,
       });
     } catch (err: any) {
-      setError(err.errors?.[0]?.message || "An error occurred");
+      setError(err.message || "An error occurred during social sign-in");
       setLoadingGoogle(false);
       setLoadingGithub(false);
     }
   };
 
-  const onVerify = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!signUpLoaded) return;
-    setLoading(true);
-    setError("");
-
-    try {
-      const result = await signUp.attemptEmailAddressVerification({
-        code,
-      });
-
-      if (result.status === "complete") {
-        toast.success("Account verified successfully! Welcome to PDFBridge.");
-        setIsRouting(true);
-        await setSignUpActive({ session: result.createdSessionId });
-        router.push("/dashboard");
-      } else {
-        setError("Invalid verification code. Please check your email.");
-      }
-    } catch (err: any) {
-      setError(
-        err.errors?.[0]?.message || "An error occurred during verification",
-      );
-    } finally {
-      setLoading(false);
+  const handleWalletSignIn = async () => {
+    if (!connected || !publicKey) {
+      toast.info("Connecting to Wallet...");
+      setVisible(true);
+      return;
     }
-  };
 
-  const onVerify2FA = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!signInLoaded) return;
-    setLoading(true);
+    setLoadingWallet(true);
     setError("");
 
     try {
-      const result = await signIn.attemptSecondFactor({
-        strategy: (activeStrategy as any) || "totp",
-        code,
+      // 1. Get Nonce from server (Using Unified Proxy Shield)
+      const challengeRes = await fetch(`/api/auth/solana/challenge`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ walletAddress: publicKey.toBase58() }),
       });
 
-      if (result.status === "complete") {
-        toast.success("Verification successful! Welcome back.");
-        setIsRouting(true);
-        await setSignInActive({ session: result.createdSessionId });
-        router.push("/dashboard");
-      } else {
-        setError("Invalid 2FA code. Please try again.");
+      if (!challengeRes.ok) throw new Error("Could not fetch auth challenge.");
+      const { nonce } = await challengeRes.json();
+
+      // 2. Sign the message
+      if (!signMessage)
+        throw new Error("Wallet does not support message signing!");
+
+      const message = new TextEncoder().encode(
+        `Sign this message to verify your identity with PDFBridge: ${nonce}`,
+      );
+      const signature = await signMessage(message);
+
+      // 3. Verify and Start Session (Using Unified Proxy Shield)
+      const verifyRes = await fetch(`/api/auth/solana/verify`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include", // Required to receive and send back session cookies
+        body: JSON.stringify({
+          walletAddress: publicKey.toBase58(),
+          // Use native hex conversion instead of Buffer to avoid polyfill issues
+          signature: Array.from(signature)
+            .map((b) => b.toString(16).padStart(2, "0"))
+            .join(""),
+          nonce,
+        }),
+      });
+
+      if (!verifyRes.ok) throw new Error("Wallet authentication failed.");
+
+      const verifyData = await verifyRes.json();
+
+      // Detect identity collision — wallet belongs to a different existing account
+      if (verifyData.status === "WALLET_COLLISION") {
+        setWalletCollision({
+          maskedEmail: verifyData.maskedEmail,
+          message: verifyData.message,
+        });
+        setLoadingWallet(false);
+        return;
       }
+
+      toast.success("Identity Verified. Welcome back!");
+      setIsRouting(true);
+      window.location.href = returnTo;
     } catch (err: any) {
-      setError(err.errors?.[0]?.message || "Invalid 2FA code.");
+      console.error("[WALLET AUTH ERROR]", err);
+      setError(err.message || "Failed to authenticate with wallet.");
     } finally {
-      setLoading(false);
+      setLoadingWallet(false);
     }
   };
 
@@ -215,315 +197,48 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
           return;
         }
       }
+
       if (isSignIn) {
-        if (!signInLoaded) return;
-        const result = await signIn.create({
-          identifier: email,
+        const { data, error } = await signIn.email({
+          email,
           password,
+          callbackURL: returnTo,
         });
 
-        if (result.status === "complete") {
+        if (error) {
+          setError(error.message || "Invalid email or password");
+        } else {
           toast.success("Welcome back to PDFBridge!");
           setIsRouting(true);
-          await setSignInActive({ session: result.createdSessionId });
-          router.push("/dashboard");
-        } else {
-          // Handle other statuses more gracefully instead of a vague hardcoded string
-          console.log("Authentication status:", result.status);
-          if (result.status === "needs_first_factor") {
-            setError(
-              "Authentication incomplete. Please check your credentials.",
-            );
-          } else if (result.status === "needs_second_factor") {
-            setShow2FA(true);
-            setCode("");
-            setError("");
-
-            // Automatically prepare the first available factor that needs it
-            const factor = result.supportedSecondFactors?.find(
-              (f) => f.strategy === "phone_code" || f.strategy === "email_code",
-            );
-            if (factor) {
-              setActiveStrategy(factor.strategy);
-              await signIn.prepareSecondFactor({ strategy: factor.strategy });
-            } else {
-              // Default to TOTP if no sendable factors
-              setActiveStrategy("totp");
-            }
-          } else {
-            setError(
-              `Sign-in status: ${result.status}. Please contact support.`,
-            );
-          }
+          router.push(returnTo);
         }
       } else {
-        if (!signUpLoaded) return;
-        const result = await signUp.create({
-          emailAddress: email,
+        const { data, error } = await signUp.email({
+          email,
           password,
+          name: email.split("@")[0], // Fallback name
+          callbackURL: returnTo,
         });
 
-        // For simplicity, we assume no verification is needed or we use common flows.
-        // If verification is needed, a custom verification portal is provided.
-        // but for a "bespoke" look we can redirect to a verification page.
-        if (result.status === "complete") {
-          toast.success("Account created! Welcome to PDFBridge.");
-          setIsRouting(true);
-          await setSignUpActive({ session: result.createdSessionId });
-          router.push("/dashboard");
-        } else if (result.status === "missing_requirements") {
-          await signUp.prepareEmailAddressVerification({
-            strategy: "email_code",
-          });
+        if (error) {
+          setError(error.message || "Failed to create account");
+        } else {
+          // Success! Show the OTP verification screen
+          toast.success(
+            "Account created! Please check your email for the verification code.",
+          );
           setPendingVerification(true);
         }
       }
     } catch (err: any) {
-      setError(err.errors?.[0]?.message || "An error occurred");
+      setError(err.message || "An unexpected error occurred");
     } finally {
       setLoading(false);
     }
   };
 
   if (pendingVerification) {
-    return (
-      <div className="w-full max-w-md space-y-8 animate-in fade-in zoom-in duration-500">
-        <div className="text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-500/10 mb-6 group transition-transform hover:scale-110">
-            <Mail className="h-8 w-8 text-blue-500 group-hover:animate-bounce" />
-          </div>
-          <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
-            Verify Your Email
-          </h2>
-          <p className="mt-4 text-slate-400">
-            Enter the 6-digit code we sent to <br />
-            <span className="text-white font-semibold">{email}</span>
-          </p>
-        </div>
-
-        <form onSubmit={onVerify} className="mt-8 space-y-8">
-          <div className="space-y-6">
-            <div className="relative group">
-              <label
-                className="block text-sm font-medium text-slate-400 mb-2 transition-colors group-focus-within:text-blue-500"
-                htmlFor="code"
-              >
-                Verification Code
-              </label>
-              <input
-                id="code"
-                type="text"
-                required
-                maxLength={6}
-                className="block w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-5 text-white placeholder-slate-600 transition-all duration-300 focus:border-blue-500/50 focus:bg-white/[0.07] focus:outline-none focus:ring-4 focus:ring-blue-500/10 text-center tracking-[0.75em] font-mono text-3xl uppercase"
-                placeholder="••••••"
-                value={code}
-                autoComplete="one-time-code"
-                onChange={(e) =>
-                  setCode(e.target.value.replace(/[^a-zA-Z0-9]/g, ""))
-                }
-              />
-              <div className="absolute inset-x-0 bottom-0 h-px bg-linear-to-r from-transparent via-blue-500/50 to-transparent scale-x-0 group-focus-within:scale-x-100 transition-transform duration-500" />
-            </div>
-
-            {error && (
-              <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 animate-shake">
-                <p className="text-sm text-red-500 text-center">{error}</p>
-              </div>
-            )}
-
-            <Button
-              type="submit"
-              disabled={loading || code.length < 6}
-              className="w-full py-5 text-lg font-bold shadow-2xl shadow-blue-500/20 flex items-center justify-center group relative overflow-hidden active:scale-[0.98] transition-transform"
-            >
-              <div className="absolute inset-0 bg-linear-to-r from-blue-600 to-indigo-600 opacity-0 group-hover:opacity-10 transition-opacity" />
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Verifying...
-                </>
-              ) : (
-                "Verify & Continue"
-              )}
-            </Button>
-
-            <div className="flex flex-col items-center gap-4 pt-2">
-              <button
-                type="button"
-                onClick={handleResend}
-                disabled={!canResend || resending}
-                className="group flex items-center gap-2 text-sm transition-all duration-300 disabled:opacity-50"
-              >
-                {resending ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <span
-                    className={`${canResend ? "text-blue-500 hover:text-blue-400 font-semibold" : "text-slate-500"}`}
-                  >
-                    {canResend ? "Resend code" : `Resend code in ${countdown}s`}
-                  </span>
-                )}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setPendingVerification(false);
-                  setCode("");
-                  setCountdown(60);
-                  setCanResend(false);
-                }}
-                className="text-sm text-slate-500 hover:text-white transition-colors flex items-center gap-1"
-              >
-                <span>Wrong email address?</span>
-              </button>
-            </div>
-          </div>
-        </form>
-
-        {/* Post-Auth Routing Loader for Verification */}
-        {isRouting && (
-          <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#020617]/80 backdrop-blur-md animate-in fade-in duration-500">
-            <div className="relative">
-              <div className="h-24 w-24 rounded-full border-t-2 border-b-2 border-blue-500 animate-spin" />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Loader2 className="h-10 w-10 text-blue-500 animate-pulse" />
-              </div>
-            </div>
-            <p className="mt-8 text-lg font-medium text-white animate-pulse">
-              Configuring your workspace...
-            </p>
-            <p className="mt-2 text-sm text-slate-400">
-              Redirecting to dashboard
-            </p>
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  if (show2FA) {
-    return (
-      <div className="w-full max-w-md space-y-8 animate-in fade-in zoom-in duration-500">
-        <div className="text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-500/10 mb-6 group transition-transform hover:scale-110">
-            <Lock className="h-8 w-8 text-blue-500 group-hover:animate-bounce" />
-          </div>
-          <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
-            Security Check
-          </h2>
-          <p className="mt-4 text-slate-400">
-            Enter the 2FA code from your <br />
-            <span className="text-white font-semibold capitalize">
-              {activeStrategy?.replace("_", " ") || "Authenticator app"}
-            </span>
-          </p>
-        </div>
-
-        <form onSubmit={onVerify2FA} className="mt-8 space-y-8">
-          <div className="space-y-6">
-            <div className="relative group">
-              <label
-                className="block text-sm font-medium text-slate-400 mb-2 transition-colors group-focus-within:text-blue-500"
-                htmlFor="2fa-code"
-              >
-                Verification Code
-              </label>
-              <input
-                id="2fa-code"
-                type="text"
-                required
-                maxLength={6}
-                className="block w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-5 text-white placeholder-slate-600 transition-all duration-300 focus:border-blue-500/50 focus:bg-white/[0.07] focus:outline-none focus:ring-4 focus:ring-blue-500/10 text-center tracking-[0.75em] font-mono text-3xl uppercase"
-                placeholder="000000"
-                value={code}
-                autoFocus
-                autoComplete="one-time-code"
-                onChange={(e) => setCode(e.target.value.replace(/[^0-9]/g, ""))}
-              />
-              <div className="absolute inset-x-0 bottom-0 h-px bg-linear-to-r from-transparent via-blue-500/50 to-transparent scale-x-0 group-focus-within:scale-x-100 transition-transform duration-500" />
-            </div>
-
-            {error && (
-              <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 animate-shake">
-                <p className="text-sm text-red-500 text-center">{error}</p>
-              </div>
-            )}
-
-            <Button
-              type="submit"
-              disabled={loading || code.length < 6}
-              className="w-full py-5 text-lg font-bold shadow-2xl shadow-blue-500/20 flex items-center justify-center group relative overflow-hidden active:scale-[0.98] transition-transform"
-            >
-              <div className="absolute inset-0 bg-linear-to-r from-blue-600 to-indigo-600 opacity-0 group-hover:opacity-10 transition-opacity" />
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Verifying...
-                </>
-              ) : (
-                "Verify & Sign In"
-              )}
-            </Button>
-
-            <div className="flex flex-col items-center gap-4 pt-2">
-              {(activeStrategy === "phone_code" ||
-                activeStrategy === "email_code") && (
-                <button
-                  type="button"
-                  onClick={async () => {
-                    if (!signInLoaded || !activeStrategy) return;
-                    setLoading(true);
-                    try {
-                      await signIn.prepareSecondFactor({
-                        strategy: activeStrategy as any,
-                      });
-                      setError(""); // Clear any old errors on success
-                    } catch (err: any) {
-                      setError(err.errors?.[0]?.message || "Failed to resend.");
-                    } finally {
-                      setLoading(false);
-                    }
-                  }}
-                  className="text-xs text-blue-500 hover:text-blue-400 transition-colors"
-                >
-                  Didn't get a code? Resend
-                </button>
-              )}
-              <button
-                type="button"
-                onClick={() => {
-                  setShow2FA(false);
-                  setCode("");
-                  setError("");
-                }}
-                className="text-sm text-slate-500 hover:text-white transition-colors flex items-center gap-1"
-              >
-                <span>Use a different account?</span>
-              </button>
-            </div>
-          </div>
-        </form>
-
-        {isRouting && (
-          <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#020617]/80 backdrop-blur-md animate-in fade-in duration-500">
-            <div className="relative">
-              <div className="h-24 w-24 rounded-full border-t-2 border-b-2 border-blue-500 animate-spin" />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Loader2 className="h-10 w-10 text-blue-500 animate-pulse" />
-              </div>
-            </div>
-            <p className="mt-8 text-lg font-medium text-white animate-pulse">
-              Configuring your workspace...
-            </p>
-            <p className="mt-2 text-sm text-slate-400">
-              Redirecting to dashboard
-            </p>
-          </div>
-        )}
-      </div>
-    );
+    return <VerifyOtpForm email={email} />;
   }
 
   return (
@@ -556,8 +271,8 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
         </h2>
         <p className="mt-4 text-slate-400">
           {isSignIn
-            ? "Sign in to manage your PDF conversion bridge."
-            : "Start building with the world's fastest PDF API."}
+            ? "Sign in to manage your institutional ingestion bridge."
+            : "Industrial-grade invoice processing at scale."}
         </p>
       </div>
 
@@ -578,18 +293,57 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
         </div>
       )}
 
+      {/* Wallet Identity Collision Banner */}
+      {walletCollision && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4">
+          <div className="bg-[#0f172a] border border-amber-500/30 rounded-2xl p-8 max-w-md w-full space-y-4 shadow-2xl animate-in zoom-in-95">
+            <div className="w-14 h-14 rounded-full bg-amber-500/10 flex items-center justify-center mx-auto">
+              <Wallet className="h-7 w-7 text-amber-400" />
+            </div>
+            <div className="text-center">
+              <h3 className="text-white font-black text-lg mb-1">
+                Wallet Already Linked
+              </h3>
+              <p className="text-slate-400 text-sm leading-relaxed">
+                {walletCollision.message}
+              </p>
+            </div>
+            {walletCollision.maskedEmail && (
+              <div className="bg-white/5 border border-white/10 rounded-xl p-4 text-center">
+                <p className="text-[10px] text-slate-500 uppercase font-bold mb-1">
+                  Account Email
+                </p>
+                <p className="text-white font-mono text-sm">
+                  {walletCollision.maskedEmail}
+                </p>
+              </div>
+            )}
+            <p className="text-[11px] text-slate-500 text-center">
+              Sign in with Google or your email above to access your settlement
+              history.
+            </p>
+            <button
+              onClick={() => setWalletCollision(null)}
+              className="w-full py-3 rounded-xl border border-white/10 text-slate-300 text-sm hover:bg-white/5 transition"
+            >
+              Back to Sign In
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="mt-8 space-y-6">
         {/* Social Buttons */}
-        <div className="grid grid-cols-1 gap-4">
-          {/* <button
-            onClick={() => handleSocialSignIn("oauth_google")}
-            disabled={loadingGoogle || loadingGithub}
-            className="flex w-full items-center justify-center gap-3 cursor-pointer rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
+        <div className="space-y-4">
+          <button
+            onClick={() => handleSocialSignIn("google")}
+            disabled={loadingGoogle || loadingGithub || loadingWallet}
+            className="flex w-full items-center justify-center cursor-pointer gap-3 rounded-xl bg-white px-4 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-100 disabled:opacity-70 disabled:cursor-not-allowed"
           >
             {loadingGoogle ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
+              <Loader2 className="h-5 w-5 animate-spin text-slate-900" />
             ) : (
-              <svg className="h-5 w-5" viewBox="0 0 24 24">
+              <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path
                   d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
                   fill="#4285F4"
@@ -599,7 +353,7 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
                   fill="#34A853"
                 />
                 <path
-                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"
+                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
                   fill="#FBBC05"
                 />
                 <path
@@ -608,20 +362,36 @@ export const AuthCard: React.FC<AuthCardProps> = ({ type }) => {
                 />
               </svg>
             )}
-            <span>Google</span>
-          </button> */}
-          <button
-            onClick={() => handleSocialSignIn("oauth_github")}
-            disabled={loadingGoogle || loadingGithub}
-            className="flex w-full items-center justify-center cursor-pointer gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10 disabled:opacity-70 disabled:cursor-not-allowed"
-          >
-            {loadingGithub ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
-            ) : (
-              <Github className="h-5 w-5" />
-            )}
-            <span>GitHub</span>
+            <span>Continue with Google</span>
           </button>
+
+          <div className="grid grid-cols-2 gap-4">
+            <button
+              onClick={() => handleSocialSignIn("github")}
+              disabled={loadingGoogle || loadingGithub || loadingWallet}
+              className="flex w-full items-center justify-center cursor-pointer gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10 disabled:opacity-70 disabled:cursor-not-allowed"
+            >
+              {loadingGithub ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <Github className="h-5 w-5" />
+              )}
+              <span>GitHub</span>
+            </button>
+
+            <button
+              onClick={handleWalletSignIn}
+              disabled={loadingGoogle || loadingGithub || loadingWallet}
+              className="flex w-full items-center justify-center cursor-pointer gap-3 rounded-xl border border-blue-500/20 bg-blue-500/5 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-500/10 disabled:opacity-70 disabled:cursor-not-allowed group"
+            >
+              {loadingWallet ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <Wallet className="h-5 w-5 text-blue-400 group-hover:text-blue-300 transition-colors" />
+              )}
+              <span>Solana</span>
+            </button>
+          </div>
         </div>
 
         {/* <div className="relative flex items-center py-4">

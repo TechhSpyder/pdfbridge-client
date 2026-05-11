@@ -1,9 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useUser, UserProfile, useAuth } from "@clerk/nextjs";
-import { useMe } from "@/modules/hooks/queries";
-import { Button, GlowCard, SmartContactLink } from "@/modules/app";
+import {
+  useMe,
+  useApprovalPolicy,
+  useUpdateApprovalPolicy,
+} from "@/modules/hooks/queries";
+import {
+  Button,
+  GlowCard,
+  SmartContactLink,
+  UserAvatar,
+  Dialog,
+} from "@/modules/app";
 import {
   Settings,
   CreditCard,
@@ -14,8 +22,11 @@ import {
   Bell,
   Mail,
   Network,
+  Webhook,
   Unplug,
   Loader2,
+  AlertTriangle,
+  ShieldCheck,
 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -23,14 +34,36 @@ import {
   useUpdateSettings,
   useIntegrations,
   useDisconnectIntegration,
+  usePDFBridge,
+  useDeactivateAccount,
 } from "@/modules/hooks/queries";
 import { toast } from "sonner";
 import Title from "@/modules/app/title";
-import { usePDFBridge } from "@/modules/hooks/use-pdfbridge";
+import { authClient, useSession } from "@/lib/auth-client";
+import { useState, useEffect } from "react";
+import { IntegrationsTab } from "./index/integrations-tab";
+import { WebhooksTab } from "./index/webhooks-tab";
+import { DeactivateAccountDialog } from "./index/deactivation-dialog";
+import { ProfileForm, WorkspaceForm } from "./index/forms";
+import { Governance } from "./index/governance";
 
 export function SettingsPage() {
   const { data: userData, isLoading: userLoading } = useMe();
+  const userRole = (userData as any)?.role as string | undefined;
+  const orgId = (userData as any)?.organizationId as string | undefined;
+  const isOwner = userRole === "OWNER";
+  const { data: policyData } = useApprovalPolicy(orgId);
+  const policy = (policyData as any)?.data;
+  const updatePolicy = useUpdateApprovalPolicy(orgId);
+  const [policySignificant, setPolicySignificant] = useState<string>(
+    String(policy?.significant ?? policy?.planDefaults?.significant ?? 1000),
+  );
+  const [policyMaterial, setPolicyMaterial] = useState<string>(
+    String(policy?.material ?? policy?.planDefaults?.material ?? 10000),
+  );
+  const { data: session } = useSession();
   const updateSettingsMutation = useUpdateSettings();
+  const [isDeactivateDialogOpen, setIsDeactivateDialogOpen] = useState(false);
 
   const handleToggle = async (key: string, value: boolean) => {
     try {
@@ -97,6 +130,31 @@ export function SettingsPage() {
           <Network className="w-4 h-4" />
           Integrations
         </button>
+        <button
+          onClick={() => router.push("/dashboard/settings?tab=webhooks")}
+          className={`flex items-center gap-2 px-4 py-3 text-sm font-bold transition-all border-b-2 ${
+            currentTab === "webhooks"
+              ? "border-purple-500 text-purple-400"
+              : "border-transparent text-slate-400 hover:text-slate-300"
+          }`}
+        >
+          <Webhook className="w-4 h-4" />
+          Developer Webhooks
+        </button>
+        {/* Governance tab: OWNER + ADMIN can see, OWNER can edit */}
+        {(userRole === "OWNER" || userRole === "ADMIN") && (
+          <button
+            onClick={() => router.push("/dashboard/settings?tab=governance")}
+            className={`flex items-center gap-2 px-4 py-3 text-sm font-bold transition-all border-b-2 ${
+              currentTab === "governance"
+                ? "border-violet-500 text-violet-400"
+                : "border-transparent text-slate-400 hover:text-slate-300"
+            }`}
+          >
+            <ShieldCheck className="w-4 h-4" />
+            Governance Policy
+          </button>
+        )}
       </div>
 
       {currentTab === "general" ? (
@@ -127,8 +185,8 @@ export function SettingsPage() {
                               {userData?.plan?.name || "Standard Free"}
                             </h4>
                             <p className="text-xs text-slate-400">
-                              Up to {userData?.plan?.limit || 5} conversions /
-                              month
+                              Up to {userData?.plan?.limit || 5} processed
+                              documents / month
                             </p>
                           </div>
                         )}
@@ -206,19 +264,26 @@ export function SettingsPage() {
                     Danger Zone
                   </h4>
                   <p className="text-xs text-red-500/50 leading-relaxed">
-                    Deactivating your account will immediately stop all PDF
-                    conversions and delete all your API keys permanently.
+                    Deactivating your account will immediately stop all active
+                    document executions and delete all your API keys
+                    permanently.
                   </p>
-                  <SmartContactLink
-                    email="support@techhspyder.com"
-                    isButton
-                    className="w-full text-xs h-9 border-red-500/20 text-red-500 hover:bg-red-500/10 hover:border-red-500/40 transition-colors cursor-pointer border rounded-md flex items-center justify-center font-bold"
+                  <Button
+                    variant="destructive"
+                    onClick={() => setIsDeactivateDialogOpen(true)}
+                    className="w-full text-xs h-9 border-red-500/20 text-red-500 hover:bg-red-500/10 hover:border-red-500/40 transition-colors cursor-pointer border rounded-md flex items-center justify-center font-bold bg-transparent"
                   >
                     Deactivate Account
-                  </SmartContactLink>
+                  </Button>
                 </div>
               </div>
             </div>
+
+            <DeactivateAccountDialog
+              isOpen={isDeactivateDialogOpen}
+              onClose={() => setIsDeactivateDialogOpen(false)}
+              userEmail={userData?.email}
+            />
 
             {/* Communication Preferences */}
             <div className="space-y-6">
@@ -308,309 +373,37 @@ export function SettingsPage() {
                 icon={<UserIcon className="h-5 w-5 text-blue-400" />}
                 content={<ProfileForm />}
               />
+
+              <GlowCard
+                title="Workspace Settings"
+                sub="Customize your team environment."
+                icon={<Settings className="h-5 w-5 text-purple-400" />}
+                content={<WorkspaceForm />}
+              />
             </div>
           </div>
         </div>
-      ) : userLoading ? (
-        <div className="flex items-center justify-center p-20 text-slate-400">
-          <Loader2 className="w-6 h-6 animate-spin mr-3" />
-          Loading user profile...
-        </div>
-      ) : (
-        <IntegrationsTab organizationId={userData?.organizationId} />
-      )}
-    </div>
-  );
-}
-
-function ProfileForm() {
-  const { user } = useUser();
-  const [firstName, setFirstName] = useState(user?.firstName || "");
-  const [lastName, setLastName] = useState(user?.lastName || "");
-  const [isSaving, setIsSaving] = useState(false);
-
-  useEffect(() => {
-    if (user) {
-      setFirstName(user.firstName || "");
-      setLastName(user.lastName || "");
-    }
-  }, [user]);
-
-  const handleSave = async () => {
-    if (!user) return;
-    setIsSaving(true);
-    try {
-      await user.update({
-        firstName,
-        lastName,
-      });
-      toast.success("Profile updated successfully!");
-    } catch (e: any) {
-      toast.error("Failed to update profile", {
-        description: e.errors?.[0]?.longMessage || e.message,
-      });
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  return (
-    <div className="mt-6 space-y-6 pt-2 border-t border-white/5">
-      <div className="flex items-center gap-6">
-        <img
-          src={user?.imageUrl}
-          alt="Avatar"
-          className="h-16 w-16 rounded-full border border-white/10"
+      ) : currentTab === "governance" ? (
+        <Governance
+          isOwner={isOwner}
+          policy={policy}
+          updatePolicy={updatePolicy}
+          policySignificant={policySignificant}
+          policyMaterial={policyMaterial}
+          setPolicySignificant={setPolicySignificant}
+          setPolicyMaterial={setPolicyMaterial}
         />
-        <div>
-          <h4 className="text-lg font-bold text-white flex items-center gap-2">
-            {user?.fullName}
-          </h4>
-          <p className="text-sm text-slate-400">
-            {user?.primaryEmailAddress?.emailAddress}
-          </p>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <label className="text-[10px] font-bold text-slate-500 uppercase">
-            First Name
-          </label>
-          <input
-            type="text"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-            className="w-full bg-black/40 border border-white/5 text-slate-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500/50 transition-colors"
-          />
-        </div>
-        <div className="space-y-2">
-          <label className="text-[10px] font-bold text-slate-500 uppercase">
-            Last Name
-          </label>
-          <input
-            type="text"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-            className="w-full bg-black/40 border border-white/5 text-slate-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500/50 transition-colors"
-          />
-        </div>
-      </div>
-
-      <div className="pt-4 flex justify-end border-t border-white/5">
-        <Button
-          onClick={handleSave}
-          disabled={
-            isSaving ||
-            (firstName === user?.firstName && lastName === user?.lastName)
-          }
-          className="bg-blue-600 hover:bg-blue-500 text-white font-bold h-10 px-6 shadow-xl shadow-blue-500/10 transition-all disabled:opacity-50"
-        >
-          {isSaving ? "Saving..." : "Save Changes"}
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-function IntegrationsTab({ organizationId }: { organizationId?: string }) {
-  const { data: connections, isLoading } = useIntegrations(organizationId);
-  const disconnectMutation = useDisconnectIntegration(organizationId);
-  const [connecting, setConnecting] = useState<string | null>(null);
-  const sdk = usePDFBridge(organizationId);
-
-  const handleConnect = async (provider: string) => {
-    setConnecting(provider);
-    try {
-      const data = await sdk.getConnectUrl(provider);
-      if (data.url) {
-        // Redirect to platform oauth page
-        window.location.href = data.url;
-      } else {
-        throw new Error("Failed to initiate handshake.");
-      }
-    } catch (e: any) {
-      toast.error("Connection Failed", { description: e.message });
-      setConnecting(null);
-    }
-  };
-
-  const handleDisconnect = async (provider: string) => {
-    if (confirm(`Are you sure you want to disconnect ${provider}?`)) {
-      await disconnectMutation.mutateAsync(provider);
-    }
-  };
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center p-20 text-slate-400">
-        <Loader2 className="w-6 h-6 animate-spin mr-3" />
-        Loading your integrations...
-      </div>
-    );
-  }
-
-  // Find connections
-  const xeroConnection = connections?.find(
-    (c: any) => c.integrationId === "xero",
-  );
-  const quickbooksConnection = connections?.find(
-    (c: any) => c.integrationId === "quickbooks",
-  );
-
-  return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="prose prose-invert max-w-none mb-8">
-        <p className="text-slate-400 text-sm">
-          Connect PDFBridge directly to your accounting software. When we
-          extract data from an uploaded invoice or receipt, we will seamlessly
-          push it as a "Draft Bill" into your ledger.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Xero Card */}
-        <div className="group relative overflow-hidden rounded-2xl border border-white/15 bg-slate-900/50 p-6 shadow-xl transition-all hover:border-blue-500/20">
-          <div className="absolute inset-0 bg-linear-to-br from-blue-500/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-
-          <div className="relative z-10 flex items-start justify-between">
-            <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white p-2 shadow-inner">
-                {/* Simple Xero Logo Placeholder svg */}
-                <svg viewBox="0 0 24 24" fill="#00B7E2" className="h-8 w-8">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.5 14h-2.5l-2-2.5-2 2.5H7.5l3.5-4.5-3.5-4.5h2.5l2 2.5 2-2.5h2.5l-3.5 4.5 3.5 4.5z" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="font-bold text-white text-lg">Xero</h3>
-                <p className="text-xs text-slate-400">
-                  Global Accounting Ledger
-                </p>
-              </div>
-            </div>
-
-            {xeroConnection ? (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-400 border border-emerald-500/20">
-                <div className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                Connected
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-800 px-2.5 py-1 text-xs font-medium text-slate-400 border border-slate-700">
-                Not Connected
-              </span>
-            )}
-          </div>
-
-          <div className="relative z-10 mt-6 pt-6 border-t border-white/5 flex items-center justify-between">
-            {xeroConnection ? (
-              <>
-                <div className="text-xs text-slate-400 flex flex-col gap-1">
-                  <span>Syncing to tenant:</span>
-                  <strong className="text-white">
-                    {xeroConnection.tenantName || "Unknown Company"}
-                  </strong>
-                </div>
-                <Button
-                  onClick={() => handleDisconnect("xero")}
-                  variant="outline"
-                  disabled={disconnectMutation.isPending}
-                  className="text-red-400 border-red-500/10 hover:text-red-300 hover:bg-red-400/10 h-8 text-xs px-3"
-                >
-                  <Unplug className="w-3 h-3 mr-2" />
-                  Disconnect
-                </Button>
-              </>
-            ) : (
-              <div className="w-full flex justify-end">
-                <Button
-                  onClick={() => handleConnect("xero")}
-                  disabled={connecting === "xero"}
-                  className="bg-[#00B7E2] hover:bg-[#00A0C6] text-white font-bold h-9 px-6 text-sm shadow-xl shadow-[#00B7E2]/20 transition-all active:scale-95 w-full sm:w-auto"
-                >
-                  {connecting === "xero" ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />{" "}
-                      Handshake...
-                    </>
-                  ) : (
-                    "Connect with Xero"
-                  )}
-                </Button>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* QuickBooks Card */}
-        <div className="group relative overflow-hidden rounded-2xl border border-white/15 bg-slate-900/50 p-6 shadow-xl transition-all hover:border-green-500/20">
-          <div className="absolute inset-0 bg-linear-to-br from-green-500/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-
-          <div className="relative z-10 flex items-start justify-between">
-            <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white p-2 shadow-inner">
-                {/* QuickBooks Logo (Green Circle/Block) */}
-                <div className="w-8 h-8 bg-[#2CA01C] rounded-lg flex items-center justify-center font-bold text-white text-[10px]">
-                  QB
-                </div>
-              </div>
-              <div>
-                <h3 className="font-bold text-white text-lg">QuickBooks</h3>
-                <p className="text-xs text-slate-400">Intuit Ledger</p>
-              </div>
-            </div>
-
-            {quickbooksConnection ? (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-400 border border-emerald-500/20">
-                <div className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                Connected
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-800 px-2.5 py-1 text-xs font-medium text-slate-400 border border-slate-700">
-                Not Connected
-              </span>
-            )}
-          </div>
-
-          <div className="relative z-10 mt-6 pt-6 border-t border-white/5 flex items-center justify-between">
-            {quickbooksConnection ? (
-              <>
-                <div className="text-xs text-slate-400 flex flex-col gap-1">
-                  <span>Syncing to company:</span>
-                  <strong className="text-white">
-                    {quickbooksConnection.tenantName || "QuickBooks Company"}
-                  </strong>
-                </div>
-                <Button
-                  onClick={() => handleDisconnect("quickbooks")}
-                  variant="outline"
-                  disabled={disconnectMutation.isPending}
-                  className="text-red-400 border-red-500/10 hover:text-red-300 hover:bg-red-400/10 h-8 text-xs px-3"
-                >
-                  <Unplug className="w-3 h-3 mr-2" />
-                  Disconnect
-                </Button>
-              </>
-            ) : (
-              <div className="w-full flex justify-end">
-                <Button
-                  onClick={() => handleConnect("quickbooks")}
-                  disabled={connecting === "quickbooks"}
-                  className="bg-[#2CA01C] hover:bg-[#258a18] text-white font-bold h-9 px-6 text-sm shadow-xl shadow-[#2CA01C]/20 transition-all active:scale-95 w-full sm:w-auto"
-                >
-                  {connecting === "quickbooks" ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />{" "}
-                      Handshake...
-                    </>
-                  ) : (
-                    "Connect QuickBooks"
-                  )}
-                </Button>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+      ) : currentTab === "webhooks" ? (
+        <WebhooksTab
+          organizationId={userData?.organizationId}
+          planName={userData?.plan?.name}
+        />
+      ) : (
+        <IntegrationsTab
+          organizationId={userData?.organizationId}
+          planName={userData?.plan?.name}
+        />
+      )}
     </div>
   );
 }

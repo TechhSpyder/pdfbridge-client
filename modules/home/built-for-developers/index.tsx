@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 
@@ -13,37 +13,38 @@ type CodeSnippet = {
 
 const snippets: CodeSnippet[] = [
   {
-    label: "Node.js SDK",
+    label: "Node.js",
     lang: "typescript",
-    code: `import { PDFBridge } from "@techhspyder/pdfbridge-node";
+    code: `import fs from "node:fs";
+import FormData from "form-data";
 
-// Automatically loads PDFBRIDGE_API_KEY from process.env
-const pdf = new PDFBridge();
+const form = new FormData();
+form.append("file", fs.createReadStream("./invoice.pdf"));
 
-const result = await pdf.generateAndWait({
-  url: "https://yourapp.com/invoice/inv_123",
-  options: { format: "A4", printBackground: true },
-  extractMetadata: true, // Extract structured JSON from the invoice
+const res = await fetch("https://api.pdfbridge.xyz/api/v1/compiler/compile-intent", {
+  method: "POST",
+  headers: {
+    "x-api-key": process.env.PDFBRIDGE_API_KEY!,
+  },
+  body: form as any,
 });
 
-console.log(result.aiMetadata);
-// { documentType: "invoice", totalAmount: 450.00,
-//   currency: "USD", vendorName: "Acme Corp", lineItems: [...] }`,
+const intent = await res.json();
+console.log(intent);`,
   },
   {
-    label: "Python SDK",
+    label: "Python",
     lang: "python",
-    code: `from pdfbridge import PDFBridge
+    code: `import requests
 
-# Automatically loads PDFBRIDGE_API_KEY from environment
-client = PDFBridge()
+with open("invoice.pdf", "rb") as f:
+  r = requests.post(
+    "https://api.pdfbridge.xyz/api/v1/compiler/compile-intent",
+    headers={"x-api-key": "pk_test_your_key_here"},
+    files={"file": f},
+  )
 
-status = client.generate_and_wait(
-    url="https://yourapp.com/invoice/123",
-    options={"format": "A4", "printBackground": True},
-)
-
-print(status.pdfUrl)  # https://cdn.pdfbridge.xyz/...`,
+print(r.json())`,
   },
   {
     label: "Go",
@@ -52,48 +53,46 @@ print(status.pdfUrl)  # https://cdn.pdfbridge.xyz/...`,
 
 import (
   "bytes"
-  "encoding/json"
+  "mime/multipart"
   "net/http"
-  "io/ioutil"
-  "log"
+  "os"
 )
 
 func main() {
-  payload := map[string]interface{}{
-    "url": "https://yourapp.com/invoice/123",
-    "options": map[string]interface{}{"format": "A4", 
-    "printBackground": true},
-  }
-  body, _ := json.Marshal(payload)
-  req, _ := http.NewRequest("POST", "https://api.pdfbridge.xyz/api/v1/convert", 
-  bytes.NewBuffer(body))
-  req.Header.Set("x-api-key", "pk_live_your_key")
-  req.Header.Set("Content-Type", "application/json")
-  client := &http.Client{}
-  res, _ := client.Do(req)
-  defer res.Body.Close()
-  content, _ := ioutil.ReadAll(res.Body)
-  log.Println(string(content))
+  f, _ := os.Open("invoice.pdf")
+  defer f.Close()
+
+  var buf bytes.Buffer
+  w := multipart.NewWriter(&buf)
+  fw, _ := w.CreateFormFile("file", "invoice.pdf")
+  _, _ = fw.ReadFrom(f)
+  w.Close()
+
+  req, _ := http.NewRequest("POST", "https://api.pdfbridge.xyz/api/v1/compiler/compile-intent", &buf)
+  req.Header.Set("x-api-key", "pk_test_your_key_here")
+  req.Header.Set("Content-Type", w.FormDataContentType())
+
+  http.DefaultClient.Do(req)
 }`,
   },
   {
     label: "PHP",
     lang: "php",
     code: `<?php
-$ch = curl_init('https://api.pdfbridge.xyz/api/v1/convert');
+$ch = curl_init('https://api.pdfbridge.xyz/api/v1/compiler/compile-intent');
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
-  'x-api-key: pk_live_your_key',
-  'Content-Type: application/json'
+  'x-api-key: pk_test_your_key_here',
 ]);
-curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
-  'url' => 'https://yourapp.com/invoice/123',
-  'options' => ['format' => 'A4', 'printBackground' => true]
-]));
+
+curl_setopt($ch, CURLOPT_POSTFIELDS, [
+  'file' => new CURLFile('invoice.pdf', 'application/pdf', 'invoice.pdf'),
+]);
+
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 $response = curl_exec($ch);
 curl_close($ch);
-$data = json_decode($response, true);
-$pdfUrl = $data['pdfUrl'];`,
+
+echo $response;`,
   },
 ];
 
@@ -114,11 +113,12 @@ export function BuiltForDevelopers() {
           }`}
         >
           <h2 className="text-3xl font-semibold tracking-tight">
-            Parse Your First Invoice in 30 Seconds
+            Stripe-grade invoice settlement infrastructure
           </h2>
           <p className="mt-4 text-muted-foreground">
-            No OCR setup. No schema wrangling. One request to extract structured
-            JSON from any invoice PDF.
+            Compile invoices into deterministic execution plans. Verify math and
+            counterparty signals, then broadcast and reconcile settlement on
+            Solana.
           </p>
         </div>
 

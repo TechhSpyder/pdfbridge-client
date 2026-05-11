@@ -7,6 +7,8 @@ import { cancelFrame, frame } from "framer-motion";
 import "lenis/dist/lenis.css";
 import { Toaster } from "sonner";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { SolanaProvider } from "@/modules/compiler/SolanaProvider";
+
 // Create a client
 const queryClient = new QueryClient();
 
@@ -24,12 +26,14 @@ export function Providers({ children }: { children: React.ReactNode }) {
     return () => cancelFrame(update);
   }, []);
   return (
-    <QueryClientProvider client={queryClient}>
-      <ReactLenis root options={{ autoRaf: false }} ref={lenisRef}>
-        {children}
-      </ReactLenis>
-      <Toaster richColors position="top-center" />
-      <ReactQueryDevtools initialIsOpen={false} />
-    </QueryClientProvider>
+    <SolanaProvider>
+      <QueryClientProvider client={queryClient}>
+        <ReactLenis root options={{ autoRaf: false }} ref={lenisRef}>
+          {children}
+        </ReactLenis>
+        <Toaster richColors position="top-center" />
+        <ReactQueryDevtools initialIsOpen={false} />
+      </QueryClientProvider>
+    </SolanaProvider>
   );
 }

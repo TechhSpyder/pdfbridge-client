@@ -22,7 +22,7 @@ export function CTA() {
             isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
           }`}
         >
-          Stop Building Invoice Parsing From Scratch.
+          Turn financial documents into structured, usable data.
         </h2>
 
         <p
@@ -30,7 +30,7 @@ export function CTA() {
             isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
           }`}
         >
-          One API call. Structured JSON back. Every time.
+          Start building your pipeline in minutes.
         </p>
 
         {/* CTA Buttons */}
@@ -43,7 +43,7 @@ export function CTA() {
             href="/sign-up"
             className="relative inline-flex items-center justify-center rounded-xl bg-blue-600 px-10 py-4 text-lg font-medium text-white shadow-lg transition-all hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-background"
           >
-            Try PDFBridge Free →
+            Start Processing →
           </Link>
           <Link
             href="/docs"

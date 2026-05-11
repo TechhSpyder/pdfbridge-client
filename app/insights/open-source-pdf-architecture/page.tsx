@@ -123,7 +123,7 @@ export default function OpenSourceArchitecturePage() {
         <section className="prose prose-invert prose-blue prose-lg max-w-none prose-headings:font-black prose-p:text-slate-300">
           <h2>The PDFBridge Value Proposition</h2>
           <p>We built PDFBridge because we spent too many weekends debugging OOM kills in our own Gotenberg clusters. By shifting to PDFBridge, your engineering team deletes thousands of lines of infrastructure config.</p>
-          <p>Our cluster maintains a massive, pre-warmed pool of Headless Chrome instances. When you hit our <code>/convert/bulk</code> endpoint with 500 URLs, our queuing system instantly distributes those jobs across dozens of nodes, handling retries, timeouts, and memory isolation automatically.</p>
+          <p>Our cluster maintains a massive, pre-warmed pool of Headless Chrome instances. When you hit our <code>/process/bulk</code> endpoint with 500 URLs, our queuing system instantly distributes those jobs across dozens of nodes, handling retries, timeouts, and memory isolation automatically.</p>
         </section>
 
         {/* CTA */}
@@ -145,3 +145,5 @@ export default function OpenSourceArchitecturePage() {
     </article>
   );
 }
+
+

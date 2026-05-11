@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+﻿import { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { ChevronLeft, Share2, CheckCircle2, XCircle, ArrowRight, Activity, Terminal, ExternalLink } from "lucide-react";
@@ -132,20 +132,16 @@ export default function Api2PdfAlternativePage() {
            <p className="text-sm text-slate-400 mb-6">Switching the API endpoint takes under 60 seconds.</p>
            <pre className="p-4 bg-slate-950 rounded-xl overflow-x-auto text-sm text-blue-200 border border-white/5">
              <code>{`// 1. Swap your API keys and endpoint URI
-const response = await fetch("https://api.pdfbridge.xyz/api/v1/convert", {
+const response = await fetch("https://api.pdfbridge.xyz/api/v1/compiler/compile-intent", {
   method: "POST",
   headers: {
-    "x-api-key": "pk_live_...",
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({
-    url: "https://your-invoice-app.com/view/992",
-    options: {
-      format: "A4",
-      scale: 0.95,
-      printBackground: true
-    }
-  })
+  "x-api-key": "YOUR_API_KEY",
+},
+body: (() => {
+  const form = new FormData();
+  form.append("file", invoiceFile); // PDF/PNG/JPG
+  return form;
+})(),
 });
 
 // 2. Beautiful PDFs instantly returned.`}</code>

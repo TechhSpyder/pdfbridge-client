@@ -1,22 +1,20 @@
 "use client";
 
-import { useAuth } from "@clerk/nextjs";
-
 export const useApiClient = () => {
-  const { getToken } = useAuth();
   const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
   const request = async (path: string, options: RequestInit = {}) => {
-    const token = await getToken();
+    // Better-Auth uses cookies for session management.
+    // We must pass 'include' to ensure cross-origin cookies are sent (if API is on different port/domain)
     const headers = {
       ...options.headers,
-      Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     } as any;
 
     const response = await fetch(`${baseUrl}${path}`, {
       ...options,
       headers,
+      credentials: "include", // Essential for Better-Auth cookies
     });
 
     if (!response.ok) {
@@ -25,8 +23,11 @@ export const useApiClient = () => {
         .catch(() => ({ error: "Unknown error" }));
 
       // Handle Session Expired
-      if (error.error === "Session Expired") {
-        window.location.href = `/sign-in?redirect_url=${encodeURIComponent(window.location.pathname)}`;
+      if (error.error === "Session Expired" || response.status === 401) {
+        // Redirect to sign-in if session is invalid
+        if (typeof window !== "undefined") {
+          window.location.href = `/sign-in?redirect_url=${encodeURIComponent(window.location.pathname)}`;
+        }
         return;
       }
 
