@@ -1,4 +1,4 @@
-﻿import { NextResponse, type NextRequest } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 
 const API_URL = process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:3003";
 
@@ -30,7 +30,9 @@ async function getSessionFromAPI(request: NextRequest) {
       cache: "no-store", // CRITICAL: Prevent stale session caching in the bouncer
     });
     
-    const data = await response.json();
+    const text = await response.text();
+    console.log(`[MW] get-session status=${response.status} body=${text.slice(0, 300)}`);
+    const data = text ? JSON.parse(text) : null;
     return data?.user ? data : null;
   } catch (err: any) {
     console.log(`[MW] getSession: Fetch Failed Exception: ${err.message}`);
