@@ -12,7 +12,11 @@ const getBlogPrisma = () => {
 
   // Node.js runtime
   const url = process.env.BLOG_DATABASE_URL;
-  if (!url) return new BlogPrismaClient({} as any);
+  // No DB URL configured (e.g. in CI or Vercel preview without blog env vars).
+  // Return a no-op proxy so imports don't crash. Queries will return undefined.
+  if (!url) {
+    return new Proxy({} as any, { get: () => () => Promise.resolve(null) });
+  }
 
   const { Pool } = require("pg");
   const { PrismaPg } = require("@prisma/adapter-pg");
