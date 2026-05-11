@@ -38,6 +38,8 @@ async function handler(request: NextRequest) {
       headers: response.headers,
     });
 
+    res.headers.delete("Content-Encoding");
+
     /**
      * ULTRA-ROBUST MULTI-HEADER RELAY
      * We attempt getSetCookie first, but if missing (Older Node/Next), we 
