@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useDropzone } from "react-dropzone";
@@ -110,7 +110,7 @@ export function CompilerStage() {
   // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   useEffect(() => {
-    fetch("https://price.jup.ag/v6/price?ids=SOL,USDC,USDT,PYUSD,EURC")
+    fetch("https://api.jup.ag/price/v2?ids=SOL,USDC,USDT,PYUSD,EURC")
       .then((res) => res.json())
       .then((d) => {
         if (d?.data) {
