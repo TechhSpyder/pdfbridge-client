@@ -23,7 +23,7 @@ export default function ForgotPasswordPage() {
 
     try {
       // Better-Auth 1.5.x standard method for initiating reset
-      const { error: resetError } = await (authClient as any).forgetPassword({
+      const { error: resetError } = await authClient.requestPasswordReset({
         email,
         redirectTo: "/reset-password",
       });
@@ -36,7 +36,10 @@ export default function ForgotPasswordPage() {
       setSuccess(true);
       toast.success("Reset link sent!");
     } catch (err: any) {
-      setError(err.message || "Failed to send reset instructions. Please check your email.");
+      setError(
+        err.message ||
+          "Failed to send reset instructions. Please check your email.",
+      );
     } finally {
       setLoading(false);
     }
@@ -49,10 +52,13 @@ export default function ForgotPasswordPage() {
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-emerald-500/10 mb-4">
             <CheckCircle2 className="h-10 w-10 text-emerald-500" />
           </div>
-          <h2 className="text-3xl font-extrabold text-white">Check your email</h2>
+          <h2 className="text-3xl font-extrabold text-white">
+            Check your email
+          </h2>
           <p className="text-slate-400">
-            We've sent a password reset link to <span className="text-white font-medium">{email}</span>. 
-            Please check your inbox and follow the instructions.
+            We've sent a password reset link to{" "}
+            <span className="text-white font-medium">{email}</span>. Please
+            check your inbox and follow the instructions.
           </p>
           <div className="pt-4">
             <Link href="/sign-in">
