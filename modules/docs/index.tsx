@@ -1,6 +1,6 @@
-﻿"use client";
+"use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { GlowCard } from "../app/glow-card";
 import {
@@ -20,9 +20,9 @@ import {
 } from "lucide-react";
 import { Highlight, themes } from "prism-react-renderer";
 import { useActiveSection } from "../hooks/use-active-section";
-import { useEffect } from "react";
+import { useSession } from "@/lib/auth-client";
 
-const DOCUMENTATION_GROUPS = [
+const LEGACY_DOCUMENTATION_GROUPS = [
   {
     title: "Getting Started",
     items: [
@@ -136,7 +136,44 @@ const DOCUMENTATION_GROUPS = [
   },
 ];
 
-const SECTIONS = DOCUMENTATION_GROUPS.flatMap((g) => g.items);
+const PUBLIC_DOCUMENTATION_GROUPS = [
+  {
+    title: "Getting Started",
+    items: [
+      { id: "intro", title: "Introduction", icon: <Book className="h-4 w-4" /> },
+      { id: "auth", title: "Authentication", icon: <Key className="h-4 w-4" /> },
+    ],
+  },
+  {
+    title: "Settlement Core",
+    items: [
+      { id: "ledger", title: "Ledger", icon: <FileCode className="h-4 w-4" /> },
+      { id: "compiler", title: "Compiler", icon: <Cpu className="h-4 w-4" /> },
+      { id: "approvals", title: "Approvals", icon: <Users className="h-4 w-4" /> },
+    ],
+  },
+  {
+    title: "Governance",
+    items: [
+      { id: "keys", title: "API Keys", icon: <Key className="h-4 w-4" /> },
+      { id: "organizations", title: "Organizations", icon: <Users className="h-4 w-4" /> },
+    ],
+  },
+  {
+    title: "Webhooks",
+    items: [
+      { id: "webhook-endpoints", title: "Endpoints", icon: <Webhook className="h-4 w-4" /> },
+      { id: "webhook-logs", title: "Logs", icon: <Terminal className="h-4 w-4" /> },
+    ],
+  },
+  {
+    title: "SDKs",
+    items: [
+      { id: "node-sdk", title: "Node.js SDK", icon: <Terminal className="h-4 w-4" /> },
+      { id: "python-sdk", title: "Python SDK", icon: <Terminal className="h-4 w-4" /> },
+    ],
+  },
+];
 
 function SidebarGroup({
   group,
@@ -204,30 +241,52 @@ function SidebarGroup({
   );
 }
 
-export function Documentation({
+  export function Documentation({
   noContainer = false,
 }: {
   noContainer?: boolean;
 }) {
-  const [activeSection, setActiveSection] = useState("intro");
-  const [expandedGroupId, setExpandedGroupId] = useState<string | null>(
-    DOCUMENTATION_GROUPS[0].title,
+  const { data: session } = useSession();
+  const isPlatformOwner = session?.user?.role === "platform-owner";
+
+  const [docMode, setDocMode] = useState<"public" | "legacy">("public");
+
+  const documentationGroups = useMemo(
+    () => (docMode === "legacy" ? LEGACY_DOCUMENTATION_GROUPS : PUBLIC_DOCUMENTATION_GROUPS),
+    [docMode],
   );
+  const sections = useMemo(
+    () => documentationGroups.flatMap((g) => g.items),
+    [documentationGroups],
+  );
+  const sectionIds = useMemo(() => sections.map((s) => s.id), [sections]);
+
+  const [activeSection, setActiveSection] = useState(sectionIds[0] || "intro");
+  const [expandedGroupId, setExpandedGroupId] = useState<string | null>(documentationGroups[0]?.title ?? null);
   const [copiedBaseUrl, setCopiedBaseUrl] = useState(false);
 
-  const sectionIds = SECTIONS.map((s) => s.id);
   const activeId = useActiveSection(sectionIds);
+
+  useEffect(() => {
+    if (!isPlatformOwner && docMode === "legacy") setDocMode("public");
+  }, [docMode, isPlatformOwner]);
 
   useEffect(() => {
     if (activeId) {
       setActiveSection(activeId);
       // Auto-expand group that contains activeId
-      const group = DOCUMENTATION_GROUPS.find((g) =>
+      const group = documentationGroups.find((g) =>
         g.items.some((i) => i.id === activeId),
       );
       if (group) setExpandedGroupId(group.title);
     }
-  }, [activeId]);
+  }, [activeId, documentationGroups]);
+
+  useEffect(() => {
+    // Reset sidebar state when switching modes
+    setActiveSection(sectionIds[0] || "intro");
+    setExpandedGroupId(documentationGroups[0]?.title ?? null);
+  }, [docMode, documentationGroups, sectionIds]);
 
   const copyBaseUrl = () => {
     navigator.clipboard.writeText("https://api.pdfbridge.xyz/api/v1");
@@ -239,8 +298,24 @@ export function Documentation({
     <div className="flex flex-col lg:flex-row gap-12 items-start w-full max-lg:overflow-x-hidden">
       {/* Sidebar Navigation */}
       <aside className="w-full lg:w-64 shrink-0 lg:sticky lg:top-24 z-30">
+        {isPlatformOwner && (
+          <div className="mb-4 p-1 rounded-xl bg-white/5 border border-white/10 flex">
+            <button
+              onClick={() => setDocMode("public")}
+              className={`flex-1 px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-colors ${docMode === "public" ? "bg-blue-600/20 text-blue-300" : "text-slate-400 hover:text-white"}`}
+            >
+              Public
+            </button>
+            <button
+              onClick={() => setDocMode("legacy")}
+              className={`flex-1 px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-colors ${docMode === "legacy" ? "bg-amber-500/20 text-amber-300" : "text-slate-400 hover:text-white"}`}
+            >
+              Legacy
+            </button>
+          </div>
+        )}
         <nav className="flex lg:flex-col overflow-x-auto lg:overflow-x-visible pb-4 lg:pb-0 scrollbar-hide lg:space-y-1 -mx-4 px-4 lg:mx-0 lg:px-0">
-          {DOCUMENTATION_GROUPS.map((group) => (
+          {documentationGroups.map((group) => (
             <SidebarGroup
               key={group.title}
               group={group}
@@ -279,6 +354,147 @@ export function Documentation({
 
       {/* Main Content Area */}
       <main className="flex-1 space-y-20 min-w-0 max-w-full overflow-hidden">
+        {docMode === "public" && (
+          <>
+            <section id="intro" className="scroll-mt-24 space-y-6 text-slate-300 leading-relaxed">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold uppercase tracking-widest mb-2">
+                <Book className="h-3 w-3" /> Public SDK v1
+              </div>
+              <h1 className="text-4xl font-extrabold text-white tracking-tight">Settlement API</h1>
+              <p className="text-slate-400">
+                PDFBridge&apos;s public API is settlement-first: ledger, deterministic intent compilation,
+                governance approvals, and settlement orchestration. Internal/legacy PDF conversion endpoints are not part of the public surface.
+              </p>
+              <GlowCard
+                title="Base URL"
+                sub="Production: v1 (Stable)"
+                icon={<Info className="h-5 w-5 text-blue-400" />}
+                content={
+                  <div className="space-y-4 mt-4">
+                    <div className="relative group">
+                      <div className="p-4 rounded-xl bg-black/40 border border-white/5 font-mono text-sm text-blue-400 pr-12 break-all">
+                        https://api.pdfbridge.xyz/api/v1
+                      </div>
+                      <button
+                        onClick={copyBaseUrl}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-lg bg-white/5 border border-white/10 opacity-0 group-hover:opacity-100 transition-all text-slate-400 hover:text-white hover:bg-white/10 cursor-pointer"
+                        title="Copy to clipboard"
+                      >
+                        {copiedBaseUrl ? (
+                          <span className="text-[10px] font-bold text-emerald-400 px-1">Copied!</span>
+                        ) : (
+                          <Terminal className="h-4 w-4" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                }
+              />
+            </section>
+
+            <section id="auth" className="scroll-mt-24 space-y-6">
+              <h2 className="text-3xl font-bold text-white flex items-center gap-4">
+                <Key className="text-blue-500" /> Authentication
+              </h2>
+              <p className="text-slate-400 leading-relaxed">
+                Authenticate using your API key in the{" "}
+                <code className="text-blue-400 font-mono bg-blue-400/5 px-1.5 py-0.5 rounded break-all">
+                  x-api-key
+                </code>{" "}
+                header.
+              </p>
+              <CodeBlock
+                code={`curl -H \"x-api-key: pk_live_...\" https://api.pdfbridge.xyz/api/v1/ledger`}
+                language="bash"
+              />
+            </section>
+
+            <section id="ledger" className="scroll-mt-24 space-y-6">
+              <h2 className="text-3xl font-bold text-white flex items-center gap-4">
+                <FileCode className="text-emerald-500" /> Ledger
+              </h2>
+              <p className="text-slate-400">Read your organization&apos;s financial document ledger.</p>
+              <CodeBlock
+                code={`GET /ledger\\nGET /ledger/:id`}
+                language="bash"
+              />
+            </section>
+
+            <section id="compiler" className="scroll-mt-24 space-y-6">
+              <h2 className="text-3xl font-bold text-white flex items-center gap-4">
+                <Cpu className="text-indigo-400" /> Compiler
+              </h2>
+              <CodeBlock
+                code={`POST /compiler/compile-intent\\nGET /compiler/intent/:documentId\\nPOST /compiler/intent/:id/broadcast\\nGET /compiler/intent/:documentId/reconcile\\nPOST /compiler/verify-recipient\\nPATCH /compiler/intent/:id/category`}
+                language="bash"
+              />
+            </section>
+
+            <section id="approvals" className="scroll-mt-24 space-y-6">
+              <h2 className="text-3xl font-bold text-white flex items-center gap-4">
+                <Users className="text-violet-400" /> Approvals
+              </h2>
+              <CodeBlock
+                code={`GET /approvals\\nGET /approvals/:intentId/status\\nPOST /approvals/:id/authorize\\nPOST /approvals/:id/reject`}
+                language="bash"
+              />
+            </section>
+
+            <section id="keys" className="scroll-mt-24 space-y-6">
+              <h2 className="text-3xl font-bold text-white flex items-center gap-4">
+                <Key className="text-blue-500" /> API Keys
+              </h2>
+              <CodeBlock code={`GET /keys\\nPOST /keys\\nDELETE /keys/:id`} language="bash" />
+            </section>
+
+            <section id="organizations" className="scroll-mt-24 space-y-6">
+              <h2 className="text-3xl font-bold text-white flex items-center gap-4">
+                <Users className="text-slate-300" /> Organizations
+              </h2>
+              <CodeBlock
+                code={`GET /organizations/:id/members\\nPOST /organizations/:id/invites\\nDELETE /organizations/:id/members/:targetId\\nPATCH /organizations/:id/whitelist\\nPATCH /organizations/:id\\nPATCH /organizations/:id/members/:userId/spend-limit\\nGET /organizations/:id/approval-policy\\nPATCH /organizations/:id/approval-policy`}
+                language="bash"
+              />
+            </section>
+
+            <section id="webhook-endpoints" className="scroll-mt-24 space-y-6">
+              <h2 className="text-3xl font-bold text-white flex items-center gap-4">
+                <Webhook className="text-amber-400" /> Webhook Endpoints
+              </h2>
+              <CodeBlock
+                code={`GET /webhook-endpoints\\nGET /webhook-endpoints/:id\\nPOST /webhook-endpoints\\nPATCH /webhook-endpoints/:id\\nDELETE /webhook-endpoints/:id`}
+                language="bash"
+              />
+            </section>
+
+            <section id="webhook-logs" className="scroll-mt-24 space-y-6">
+              <h2 className="text-3xl font-bold text-white flex items-center gap-4">
+                <Terminal className="text-slate-300" /> Webhook Logs
+              </h2>
+              <CodeBlock
+                code={`GET /webhook-logs?executionId=...\\nGET /webhook-logs/:id\\nPOST /webhook-logs/:id/retry`}
+                language="bash"
+              />
+            </section>
+
+            <section id="node-sdk" className="scroll-mt-24 space-y-6">
+              <h2 className="text-3xl font-bold text-white flex items-center gap-4">
+                <Terminal className="text-blue-400" /> Node.js SDK
+              </h2>
+              <p className="text-slate-400">Install: <code className="text-blue-400 font-mono">npm i @techhspyder/pdfbridge-node</code></p>
+            </section>
+
+            <section id="python-sdk" className="scroll-mt-24 space-y-6">
+              <h2 className="text-3xl font-bold text-white flex items-center gap-4">
+                <Terminal className="text-blue-400" /> Python SDK
+              </h2>
+              <p className="text-slate-400">Install: <code className="text-blue-400 font-mono">pip install pdfbridge-python</code></p>
+            </section>
+          </>
+        )}
+
+        {docMode === "legacy" && (
+          <>
         {/* Introduction */}
         <section
           id="intro"
@@ -1097,6 +1313,8 @@ print(f"PDF ready: {status.pdfUrl}")`}
             />
           </div>
         </section>
+          </>
+        )}
       </main>
     </div>
   );

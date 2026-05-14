@@ -47,9 +47,13 @@ export default function ApiReferencePage() {
                     <TocLink href="#ref-auth" title="Authentication" />
                     
                     <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-3 mb-2 mt-8">Endpoints</p>
-                    <TocLink href="#ref-convert" title="POST /process" method="POST" />
-                    <TocLink href="#ref-extract" title="POST /extract" method="POST" />
-                    <TocLink href="#ref-polling" title="GET /jobs/:id" method="GET" />
+                    <TocLink href="#ref-ledger" title="GET /ledger" method="GET" />
+                    <TocLink href="#ref-compile" title="POST /compiler/compile-intent" method="POST" />
+                    <TocLink href="#ref-approvals" title="GET /approvals" method="GET" />
+                    <TocLink href="#ref-keys" title="GET /keys" method="GET" />
+                    <TocLink href="#ref-orgs" title="GET /organizations/:id/members" method="GET" />
+                    <TocLink href="#ref-webhook-endpoints" title="GET /webhook-endpoints" method="GET" />
+                    <TocLink href="#ref-webhook-logs" title="GET /webhook-logs" method="GET" />
                 </nav>
             </aside>
 
